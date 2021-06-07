@@ -3,9 +3,14 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"lib/controller"
+	"net/http"
 )
 
 func main() {
+	//connect frontend to backend
+	fs := http.FileServer(http.Dir("./frontend/dist"))
+	http.Handle("/", fs)
+	//start echo
 	e := echo.New()
 	//website
 	e.GET("/", controller.Home)
