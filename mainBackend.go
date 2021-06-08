@@ -3,14 +3,9 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"lib/controller"
+	"lib/model"
 	"net/http"
 )
-
-type Test struct {
-	abc string
-	xxx string
-	zzz int
-}
 
 func main() {
 	//start echo
@@ -25,10 +20,16 @@ func main() {
 	e.GET("/api", controller.ApiWeb)
 
 	e.GET("/test", func(context echo.Context) error {
-		return context.JSON(http.StatusOK, Test{
-			abc: "",
-			xxx: "",
-			zzz: 1233,
+		return context.JSON(http.StatusOK, []model.Question{
+			{
+				Content: "abc1",
+			},
+			{
+				Content: "abc2",
+			},
+			{
+				Content: "abc3",
+			},
 		})
 	})
 	//api
