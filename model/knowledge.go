@@ -1,9 +1,10 @@
 package model
 
-import "time"
+
 
 type Knowledge struct {
+	ID int
 	Name string
-	Date time.Time
+	Date string
 	User User
 }
