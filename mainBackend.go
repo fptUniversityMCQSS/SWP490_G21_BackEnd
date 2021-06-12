@@ -11,26 +11,12 @@ import (
 )
 
 func init() {
-	orm.RegisterModel(new(model.Knowledge),new(model.Option),new(model.Question),new(model.User))
+	orm.RegisterModel(new(model.Knowledge), new(model.Option), new(model.Question), new(model.User))
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 
 	err1 := orm.RegisterDataBase("default", "mysql", "root:abc@/question_answer_db?charset=utf8")
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
-	}
-	// Database alias.
-	name := "default"
-
-	// Drop table and re-create.
-	force := false
-
-	// Print log.
-	verbose := true
-
-	// Error.
-	err := orm.RunSyncdb(name, force, verbose)
-	if err != nil {
-		fmt.Println(err)
 	}
 }
 func main() {
@@ -46,9 +32,7 @@ func main() {
 	e.GET("/api", controller.ApiWeb)
 
 	e.GET("/test", func(context echo.Context) error {
-		return context.JSON(http.StatusOK, []model.Question{
-
-		})
+		return context.JSON(http.StatusOK, []model.Question{})
 	})
 	//api
 	e.Logger.Fatal(e.Start(":1323"))
