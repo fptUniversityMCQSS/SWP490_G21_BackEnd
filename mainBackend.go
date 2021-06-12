@@ -21,15 +21,7 @@ func main() {
 
 	e.GET("/test", func(context echo.Context) error {
 		return context.JSON(http.StatusOK, []model.Question{
-			{
-				Content: "abc1",
-			},
-			{
-				Content: "abc2",
-			},
-			{
-				Content: "abc3",
-			},
+
 		})
 	})
 	//api
