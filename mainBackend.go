@@ -18,6 +18,7 @@ func init() {
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
 	}
+
 }
 func main() {
 	//start echo
@@ -30,11 +31,13 @@ func main() {
 	e.GET("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)
-	e.POST("/login", controller.Login)
+	e.GET("/login", controller.Login)
+	e.POST("/login", controller.LoginResponse)
 
 	e.GET("/test", func(context echo.Context) error {
 		return context.JSON(http.StatusOK, []model.Question{})
 	})
 	//api
+
 	e.Logger.Fatal(e.Start(":1323"))
 }

@@ -1,9 +1,18 @@
 package controller
 
-import "github.com/labstack/echo/v4"
+import (
+	"github.com/astaxie/beego/orm"
+	"github.com/labstack/echo/v4"
+	"lib/model"
+	"net/http"
+)
 
 func Knowledge(c echo.Context) error {
-	return c.File("views/knowledge.html")
+	o := orm.NewOrm()
+	var posts []*model.Knowledge
+	o.QueryTable("knowledge").Filter("user_id", 1).RelatedSel().All(&posts)
+
+	return c.JSON(http.StatusOK, posts)
 }
 
 func KnowledgeUpload(c echo.Context) error {
