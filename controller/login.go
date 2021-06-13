@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
@@ -9,11 +8,6 @@ import (
 	"net/http"
 	"time"
 )
-
-func Login(c echo.Context) error {
-
-	return c.File("views/login.html")
-}
 
 func LoginResponse(c echo.Context) error {
 	Username := c.FormValue("username")
@@ -29,7 +23,6 @@ func LoginResponse(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "InvalidUser")
 	}
-	fmt.Println(user.Role)
 
 	token := jwt.New(jwt.SigningMethodHS256) //header
 
@@ -42,13 +35,14 @@ func LoginResponse(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		return c.JSON(http.StatusOK, t)
+		return c.JSON(http.StatusOK, &model.LoginResponse{Token: t})
 	} else if user.Role == "admin" {
 		t, err := token.SignedString([]byte("justAdmin"))
 		if err != nil {
 			return err
 		}
-		return c.JSON(http.StatusOK, t)
+		return c.JSON(http.StatusOK, &model.LoginResponse{Token: t})
+
 	}
 	//signature
 

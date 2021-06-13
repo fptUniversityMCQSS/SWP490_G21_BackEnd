@@ -31,7 +31,6 @@ func main() {
 	e.GET("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)
-	e.GET("/login", controller.Login)
 	e.POST("/login", controller.LoginResponse)
 
 	e.GET("/test", func(context echo.Context) error {
