@@ -7,14 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 	"lib/controller"
 	"lib/model"
+	"lib/ultity"
 	"net/http"
 )
 
 func init() {
+	svConfig := ultity.ReadDBConfig()
+	stringConfig := svConfig.DbUser + ":" + svConfig.DbPassword + "@/" + svConfig.Database + "?charset=utf8"
 	orm.RegisterModel(new(model.Knowledge), new(model.Option), new(model.Question), new(model.User))
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 
-	err1 := orm.RegisterDataBase("default", "mysql", "root:abc@/question_answer_db?charset=utf8")
+	err1 := orm.RegisterDataBase("default", "mysql", stringConfig)
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
 	}
