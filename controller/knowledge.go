@@ -10,7 +10,7 @@ import (
 func Knowledge(c echo.Context) error {
 	o := orm.NewOrm()
 	var posts []*model.Knowledge
-	o.QueryTable("knowledge").Filter("user_id", 1).RelatedSel().All(&posts)
+	o.QueryTable("knowledge").Filter("user_id", "%").RelatedSel().All(&posts)
 
 	return c.JSON(http.StatusOK, posts)
 }
