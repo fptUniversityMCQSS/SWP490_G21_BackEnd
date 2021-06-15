@@ -5,7 +5,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"lib/controller"
 	"lib/model"
 	"lib/ultity"
@@ -35,7 +34,6 @@ func main() {
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
 	e.GET("/qa", controller.Qa)
-	e.POST("/qa", controller.QaResponse)
 	e.GET("/knowledge", controller.Knowledge)
 	e.GET("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
