@@ -16,9 +16,11 @@
     "axios": "^0.21.1",
     "bootstrap": "^5.0.1",
     "bootstrap-vue": "^2.21.2",
+    "form-data": "^4.0.0",
     "vue": "^2.6.14",
     "vue-axios": "^3.2.4",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "yarn": "^1.22.10"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

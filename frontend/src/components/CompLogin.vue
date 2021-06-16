@@ -38,14 +38,12 @@
               <h3>Log in to enter</h3>
 
 
-              <form class="row login_form" @submit="loginData" method="post">
+              <form class="row login_form" @submit.prevent="loginData" method="post">
                 <div class="col-md-12 form-group">
-                  <input type="text" class="form-control" name="username" placeholder="Username"
-                         v-model="posts.username">
+                  <input type="text" class="form-control" name="username" placeholder="Username" v-model="username">
                 </div>
                 <div class="col-md-12 form-group">
-                  <input type="text" class="form-control" name="password" placeholder="Password"
-                         v-model="posts.password">
+                  <input type="text" class="form-control" name="password" placeholder="Password" v-model="password">
                 </div>
                 <div class="col-md-12 form-group">
                   <div class="creat_account">
@@ -119,56 +117,25 @@ export default {
   components: {CompFooter, CompHeader},
   data() {
     return {
-      posts: {
-        username: null,
-        password: null
-      }
+      username: '',
+      password: ''
     }
   },
-
   methods: {
-    loginData(e) {
-      // axios({
-      //   method: 'post',
-      //   url: 'http://localhost:1323/login',
-      //   data: {
-      //     username: 'binh',
-      //     password: '123'
-      //   }
-      // })
-      //   .then((result) => {
-      //     console.warn(result)
-      //   })
-      //   .catch((er) => {
-      //     console.log(er)
-      //   })
-
-      var axios = require('axios');
-      var FormData = require('form-data');
-      var data = new FormData();
-      data.append('username', 'binh');
-      data.append('password', '123');
-
-      var config = {
-        method: 'post',
-        url: 'http://localhost:1323/login',
-        headers: {
-          ...data.getHeaders()
-        },
-        data : data
-      };
-
-      axios(config)
-        .then(function (response) {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      e.preventDefault();
+    loginData() {
+      const axios = require('axios');
+      const FormData = require('form-data');
+      const form = new FormData();
+      form.append('username', this.username);
+      form.append('password', this.password);
+      axios.post('http://localhost:1323/login', form).then(result => {
+        // Handle result…
+        console.log(result.data);
+      });
     }
   }
 }
+
 </script>
 
 <style scoped>

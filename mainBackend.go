@@ -22,7 +22,6 @@ func init() {
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
 	}
-
 }
 func main() {
 	//start echo
@@ -34,7 +33,7 @@ func main() {
 	//website
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
-	e.GET("/qa", controller.Qa)
+	e.GET("/qa", controller.Qa, middleware.JWT([]byte("justAdmin")))
 	e.GET("/knowledge", controller.Knowledge)
 	e.GET("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
