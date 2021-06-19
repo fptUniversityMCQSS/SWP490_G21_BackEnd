@@ -15,6 +15,7 @@ func main() {
 	e.GET("/qa", controller.Qa)
 	e.GET("/knowledge", controller.Knowledge)
 	e.GET("/knowledge/upload", controller.KnowledgeUpload)
+	e.POST("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)
 

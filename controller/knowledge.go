@@ -2,7 +2,12 @@ package controller
 
 import (
 	"database/sql"
+	"io"
+	"io/ioutil"
+	"lib/model"
 	"lib/model/response"
+	"os"
+	"strconv"
 
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -46,6 +51,57 @@ func Knowledge(c echo.Context) error {
 }
 
 func KnowledgeUpload(c echo.Context) error {
-	return c.File("views/knowledgeUpload.html")
+	// Read form fields
+
+	date, _ := strconv.Atoi(c.Param("date"))
+	user_id, _ := strconv.Atoi(c.Param("user_id"))
+
+	//-----------
+	// Read file
+	//-----------
+
+	// Source
+	file, err := c.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	data, err := ioutil.ReadAll(src)
+	if err != nil {
+		fmt.Println("File reading error", err)
+		return err
+	}
+	fmt.Println("Contents of file:", string(data))
+
+	// Destination
+	dst, err := os.Create(file.Filename)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	// add knowledge to database
+	k := &model.Knowledge{}
+	if err := c.Bind(k); err != nil {
+		return err
+	}
+	insertDB, err := db.Prepare("INSERT INTO knowledge(name, date, user_id) values (?,?,?);")
+	if err != nil {
+		panic(err.Error())
+	}
+	insertDB.Exec(file.Filename,date,user_id)
+
+
+
+	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
 }
 
