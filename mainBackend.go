@@ -39,6 +39,7 @@ func main() {
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
+	e.POST("/qa", controller.QaResponse)
 
 	e.GET("/test", func(context echo.Context) error {
 		return context.JSON(http.StatusOK, []model.Question{})
