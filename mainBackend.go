@@ -5,7 +5,6 @@ import (
 	"lib/controller"
 )
 
-
 func main() {
 	//start echo
 	e := echo.New()
@@ -14,7 +13,7 @@ func main() {
 	e.GET("/home", controller.Home)
 	e.GET("/qa", controller.Qa)
 	e.GET("/knowledge", controller.Knowledge)
-	e.GET("/knowledge/upload", controller.KnowledgeUpload)
+	e.PUT("/knowledge/upload", controller.KnowledgeUpload)
 	e.POST("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)

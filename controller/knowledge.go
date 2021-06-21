@@ -2,22 +2,20 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/labstack/echo/v4"
 	"io"
 	"io/ioutil"
 	"lib/model"
 	"lib/model/response"
-	"os"
-	"strconv"
-
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo/v4"
 	"net/http"
+	"os"
 )
 
-var(
+var (
 	db, err = sql.Open("mysql", "root:abcd@tcp(127.0.0.1:3306)/testdb")
 )
+
 func Knowledge(c echo.Context) error {
 
 	if err != nil {
@@ -32,20 +30,18 @@ func Knowledge(c echo.Context) error {
 		fmt.Println(err.Error())
 	}
 
-
-
 	var sliceUsers []response.KnowledgeRes
 	result, _ := db.Query("select k.name , k.date , u.username \nfrom knowledge as k , user as u \nwhere k.user_id = u.id")
 	for result.Next() {
 		var s response.KnowledgeRes
 
-		_ = result.Scan(&s.Name, &s.Date , &s.Username)
+		_ = result.Scan(&s.Name, &s.Date, &s.Username)
 
 		sliceUsers = append(sliceUsers, s)
 
 	}
 
-	return c.JSON(http.StatusOK, sliceUsers )
+	return c.JSON(http.StatusOK, sliceUsers)
 	//return c.Response(sliceUsers,"knowledge.html"
 	//return c.File("knowledge.html")
 }
@@ -53,8 +49,8 @@ func Knowledge(c echo.Context) error {
 func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
 
-	date, _ := strconv.Atoi(c.Param("date"))
-	user_id, _ := strconv.Atoi(c.Param("user_id"))
+	date := c.FormValue("date")
+	userId := c.FormValue("userId")
 
 	//-----------
 	// Read file
@@ -78,7 +74,7 @@ func KnowledgeUpload(c echo.Context) error {
 	fmt.Println("Contents of file:", string(data))
 
 	// Destination
-	dst, err := os.Create(file.Filename)
+	dst, err := os.Create("testdoc/" + file.Filename)
 	if err != nil {
 		return err
 	}
@@ -94,14 +90,15 @@ func KnowledgeUpload(c echo.Context) error {
 	if err := c.Bind(k); err != nil {
 		return err
 	}
-	insertDB, err := db.Prepare("INSERT INTO knowledge(name, date, user_id) values (?,?,?);")
+	insertDB, err := db.Prepare("INSERT INTO knowledge(name, date,userId) values (?,?,?);")
 	if err != nil {
 		panic(err.Error())
 	}
-	insertDB.Exec(file.Filename,date,user_id)
-
-
+	exec, err := insertDB.Exec(file.Filename, date, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(exec)
 
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
 }
-

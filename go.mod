@@ -3,8 +3,12 @@ module lib
 go 1.16
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/BurntSushi/toml v0.3.1
+	github.com/astaxie/beego v1.12.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/jinzhu/gorm v1.9.16 // indirect
 	github.com/labstack/echo/v4 v4.3.0
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	github.com/labstack/gommon v0.3.0
+	golang.org/x/time v0.0.0-20210611083556-38a9dc6acbc6 // indirect
 )
