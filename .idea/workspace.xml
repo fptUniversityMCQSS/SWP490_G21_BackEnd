@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Test backend">
-      <change beforePath="$PROJECT_DIR$/ultity/property.go" beforeDir="false" afterPath="$PROJECT_DIR$/ultity/property.go" afterDir="false" />
+    <list default="true" id="20c03818-6a78-4048-8bcd-6b1008054f31" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/knowledge.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/knowledge.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/uploadKnowledge.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mainBackend.go" beforeDir="false" afterPath="$PROJECT_DIR$/mainBackend.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/user.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.16.4" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../../User/khucx/Go" />
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="khailq_backend_test" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitToolBoxStore">
@@ -52,7 +51,6 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -102,10 +100,6 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="Test backend" />
-    <option name="LAST_COMMIT_MESSAGE" value="Test backend" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
