@@ -34,7 +34,7 @@ func main() {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
-		AllowMethods: []string{"GET", "POST", "PUT"},
+		AllowMethods: []string{"*"},
 	}))
 	//website
 	e.GET("/", controller.Home)
