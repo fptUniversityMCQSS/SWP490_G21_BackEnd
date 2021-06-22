@@ -8,6 +8,7 @@ import (
 
 type DBConfig struct {
 	DbServer   string
+	Abc        string
 	DbPort     string
 	DbUser     string
 	DbPassword string
