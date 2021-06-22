@@ -1,47 +1,49 @@
 package controller
 
 import (
-
+	"database/sql"
 	"fmt"
-	"github.com/astaxie/beego/orm"
 	"github.com/labstack/echo/v4"
 	"io"
 	"io/ioutil"
-	"lib/model/response"
-	"os"
-
 	"lib/model"
-
+	"lib/model/response"
 	"net/http"
-
+	"os"
 )
 
+var (
+	db, err = sql.Open("mysql", "root:lqkpro1999@tcp(127.0.0.1:3307)/question_answer_db")
+)
 
+func Knowledge(c echo.Context) error {
 
-func ListKnowledge(c echo.Context) error {
-
-	o := orm.NewOrm()
-	var knows []*model.Knowledge
-	var knowRs []*response.KnowledgResponse
-	// Get a QuerySeter object. User is table name
-	qs , err := o.QueryTable("knowledge").RelatedSel().All(&knows)
-
-	//if has problem in connection
 	if err != nil {
-		fmt.Println("File reading error", err)
-		return err
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("db is connected")
 	}
-	//add selected data to knowledge_Res list
-	for _, k := range knows {
-		var knowR = new(response.KnowledgResponse)
-		knowR.Name = k.Name
-		knowR.Date = k .Date
-		knowR.Username = k.User.Username
-		knowRs = append(knowRs, knowR)
+	defer db.Close()
+	// make sure connection is available
+	err = db.Ping()
+	if err != nil {
+		fmt.Println(err.Error())
 	}
-	fmt.Printf("%d knowledges read \n",qs)
-	return c.JSON(http.StatusOK, knowRs)
 
+	var sliceUsers []response.KnowledgeRes
+	result, _ := db.Query("select k.name , k.date , u.username \nfrom knowledge as k , user as u \nwhere k.user_id = u.id")
+	for result.Next() {
+		var s response.KnowledgeRes
+
+		_ = result.Scan(&s.Name, &s.Date, &s.Username)
+
+		sliceUsers = append(sliceUsers, s)
+
+	}
+
+	return c.JSON(http.StatusOK, sliceUsers)
+	//return c.Response(sliceUsers,"knowledge.html"
+	//return c.File("knowledge.html")
 }
 
 func KnowledgeUpload(c echo.Context) error {
@@ -83,10 +85,20 @@ func KnowledgeUpload(c echo.Context) error {
 		return err
 	}
 
-
-
-
+	// add knowledge to database
+	k := &model.Knowledge{}
+	if err := c.Bind(k); err != nil {
+		return err
+	}
+	insertDB, err := db.Prepare("INSERT INTO knowledge(id, name, date, user_id) values (12,?,?,?);")
+	if err != nil {
+		panic(err.Error())
+	}
+	exec, err := insertDB.Exec(file.Filename, date, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(exec)
 
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
-
 }
