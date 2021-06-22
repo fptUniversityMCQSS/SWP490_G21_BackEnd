@@ -46,7 +46,6 @@ func main() {
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
-
 	e.GET("/test", func(context echo.Context) error {
 		return context.JSON(http.StatusOK, []model.Question{})
 	})
