@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	db, err = sql.Open("mysql", "root:abcd@tcp(127.0.0.1:3306)/testdb")
+	db, err = sql.Open("mysql", "root:lqkpro1999@tcp(127.0.0.1:3307)/question_answer_db")
 )
 
 func Knowledge(c echo.Context) error {
@@ -90,7 +90,7 @@ func KnowledgeUpload(c echo.Context) error {
 	if err := c.Bind(k); err != nil {
 		return err
 	}
-	insertDB, err := db.Prepare("INSERT INTO knowledge(name, date,userId) values (?,?,?);")
+	insertDB, err := db.Prepare("INSERT INTO knowledge(id, name, date, user_id) values (12,?,?,?);")
 	if err != nil {
 		panic(err.Error())
 	}

@@ -13,8 +13,12 @@ import (
 )
 
 func init() {
-	svConfig := ultity.ReadDBConfig()
-	stringConfig := svConfig.DbUser + ":" + svConfig.DbPassword + "@/" + svConfig.Database + "?charset=utf8"
+	dbConfig := ultity.ReadDBConfig()
+	stringConfig := dbConfig.DbUser + ":" +
+		dbConfig.DbPassword + "@tcp(" +
+		dbConfig.DbServer + ":" +
+		dbConfig.DbPort + ")/" +
+		dbConfig.Database + "?charset=utf8"
 	orm.RegisterModel(new(model.Knowledge), new(model.Option), new(model.Question), new(model.User))
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 
@@ -24,27 +28,29 @@ func init() {
 	}
 }
 func main() {
+	svConfig := ultity.ReadServerConfig()
 	//start echo
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
+		AllowMethods: []string{"GET", "POST", "PUT"},
 	}))
 	//website
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
 	e.GET("/qa", controller.Qa)
 	e.GET("/knowledge", controller.Knowledge)
-	e.GET("/knowledge/upload", controller.KnowledgeUpload)
+	e.PUT("/knowledge", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
-	e.POST("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
+	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 
 	e.GET("/test", func(context echo.Context) error {
 		return context.JSON(http.StatusOK, []model.Question{})
 	})
 	//api
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":" + svConfig.PortBackend))
 }
