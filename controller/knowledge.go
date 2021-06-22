@@ -3,22 +3,21 @@ package controller
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
+	"io"
+	"io/ioutil"
 	"lib/model"
+	"lib/model/response"
 	"net/http"
-
+	"os"
 )
 
-//func init(){
-//	orm.RegisterDriver("mysql",orm.DRMySQL)
-//	err := orm.RegisterDataBase("default","mysql","root:abcd@/testdb?charset=utf8")
-//	if err != nil{
-//		glog.Fatal("Failed to register database %v",err)
-//	}
-//}
+var (
+	db, err = sql.Open("mysql", "root:lqkpro1999@tcp(127.0.0.1:3307)/question_answer_db")
+)
+
 func Knowledge(c echo.Context) error {
-	db, err := sql.Open("mysql", "root:abcd@tcp(127.0.0.1:3306)/testdb")
+
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
@@ -31,20 +30,75 @@ func Knowledge(c echo.Context) error {
 		fmt.Println(err.Error())
 	}
 
-
-	var sliceUsers []model.Knowledge
-	result, _ := db.Query("SELECT id , name , date FROM testdb.knowledge")
+	var sliceUsers []response.KnowledgeRes
+	result, _ := db.Query("select k.name , k.date , u.username \nfrom knowledge as k , user as u \nwhere k.user_id = u.id")
 	for result.Next() {
-		var s model.Knowledge
-		_ = result.Scan(&s.ID,&s.Name, &s.Date)
+		var s response.KnowledgeRes
+
+		_ = result.Scan(&s.Name, &s.Date, &s.Username)
+
 		sliceUsers = append(sliceUsers, s)
+
 	}
 
 	return c.JSON(http.StatusOK, sliceUsers)
-	//return c.File("views/knowledge.html",response)
+	//return c.Response(sliceUsers,"knowledge.html"
+	//return c.File("knowledge.html")
 }
 
 func KnowledgeUpload(c echo.Context) error {
-	return c.File("views/knowledgeUpload.html")
-}
+	// Read form fields
 
+	date := c.FormValue("date")
+	userId := c.FormValue("userId")
+
+	//-----------
+	// Read file
+	//-----------
+
+	// Source
+	file, err := c.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	data, err := ioutil.ReadAll(src)
+	if err != nil {
+		fmt.Println("File reading error", err)
+		return err
+	}
+	fmt.Println("Contents of file:", string(data))
+
+	// Destination
+	dst, err := os.Create("testdoc/" + file.Filename)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	// add knowledge to database
+	k := &model.Knowledge{}
+	if err := c.Bind(k); err != nil {
+		return err
+	}
+	insertDB, err := db.Prepare("INSERT INTO knowledge(id, name, date, user_id) values (12,?,?,?);")
+	if err != nil {
+		panic(err.Error())
+	}
+	exec, err := insertDB.Exec(file.Filename, date, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(exec)
+
+	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
+}

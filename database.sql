@@ -1,4 +1,5 @@
-USE `testdb`;
+CREATE DATABASE  IF NOT EXISTS `question_answer_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `question_answer_db`;
 -- MySQL dump 10.13  Distrib 8.0.25, for Win64 (x86_64)
 --
 -- Host: localhost    Database: question_answer_db
@@ -24,14 +25,14 @@ DROP TABLE IF EXISTS `knowledge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `knowledge` (
-  `id` bigint NOT NULL,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `date` datetime NOT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_UserId` (`user_id`),
-  CONSTRAINT `FK_UserId` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                             `id` bigint NOT NULL,
+                             `name` varchar(255) NOT NULL DEFAULT '',
+                             `date` datetime DEFAULT NULL,
+                             `user_id` bigint NOT NULL,
+                             PRIMARY KEY (`id`),
+                             KEY `FK_UserId` (`user_id`),
+                             CONSTRAINT `FK_UserId` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,6 +41,7 @@ CREATE TABLE `knowledge` (
 
 LOCK TABLES `knowledge` WRITE;
 /*!40000 ALTER TABLE `knowledge` DISABLE KEYS */;
+INSERT INTO `knowledge` VALUES (1,'knowledge1',NULL,1),(2,'knowledge2',NULL,1),(3,'knowledge3',NULL,1),(4,'knowledge4',NULL,2),(5,'knowledge5',NULL,3),(6,'knowledge6',NULL,3),(7,'knowledge7',NULL,4),(8,'knowledge8',NULL,4),(9,'knowledge9',NULL,5),(10,'knowledge10',NULL,5);
 /*!40000 ALTER TABLE `knowledge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -51,15 +53,16 @@ DROP TABLE IF EXISTS `option`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `option` (
-  `question_id` bigint NOT NULL,
-  `id` bigint NOT NULL,
-  `key` varchar(10) NOT NULL DEFAULT '',
-  `content` nvarchar(255) NOT NULL DEFAULT '',
-  `paragraph` nvarchar(1000) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
-  KEY `fk_QuestionId_idx` (`question_id`),
-  CONSTRAINT `fk_QuestionId` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                          `question_id` bigint NOT NULL,
+                          `id` bigint NOT NULL,
+                          `key` varchar(10) NOT NULL DEFAULT '',
+                          `content` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                          `paragraph` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                          `question_id_id` bigint NOT NULL,
+                          PRIMARY KEY (`id`),
+                          KEY `fk_QuestionId_idx` (`question_id`),
+                          CONSTRAINT `fk_QuestionId` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,17 +82,18 @@ DROP TABLE IF EXISTS `question`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `question` (
-  `id` bigint NOT NULL,
-  `content` nvarchar(1000) NOT NULL DEFAULT '',
-  `date` datetime NOT NULL,
-  `answer_id` bigint DEFAULT NULL unique,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_UserIdQuestion` (`user_id`),
-  KEY `FK_AnswerId_idx` (`answer_id`),
-  CONSTRAINT `FK_AnswerId` FOREIGN KEY (`answer_id`) REFERENCES `option` (`id`),
-  CONSTRAINT `FK_UserIdQuestion` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                            `id` bigint NOT NULL,
+                            `content` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                            `date` datetime NOT NULL,
+                            `answer_id` bigint DEFAULT NULL,
+                            `user_id` bigint NOT NULL,
+                            PRIMARY KEY (`id`),
+                            UNIQUE KEY `answer_id` (`answer_id`),
+                            KEY `FK_UserIdQuestion` (`user_id`),
+                            KEY `FK_AnswerId_idx` (`answer_id`),
+                            CONSTRAINT `FK_AnswerId` FOREIGN KEY (`answer_id`) REFERENCES `option` (`id`),
+                            CONSTRAINT `FK_UserIdQuestion` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -109,12 +113,12 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
-  `id` bigint NOT NULL,
-  `username` varchar(255) NOT NULL DEFAULT '',
-  `password` varchar(255) NOT NULL DEFAULT '',
-  `role` varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                        `id` bigint NOT NULL,
+                        `username` varchar(255) NOT NULL DEFAULT '',
+                        `password` varchar(255) NOT NULL DEFAULT '',
+                        `role` varchar(255) NOT NULL DEFAULT '',
+                        PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,6 +127,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'thienlh','1234','user'),(2,'khailq','1234','admin'),(3,'haokx','1234','user'),(4,'binhtb','1234','user'),(5,'minhpa','1234','user');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -139,4 +144,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-06-09 17:25:48
+-- Dump completed on 2021-06-15 22:20:01
