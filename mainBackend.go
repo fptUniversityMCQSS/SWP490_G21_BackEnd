@@ -28,18 +28,18 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowHeaders: []string{"*"},
 	}))
 	//website
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
-	e.GET("/qa", controller.Qa, middleware.JWT([]byte("justAdmin")))
+	e.GET("/qa", controller.Qa)
 	e.GET("/knowledge", controller.Knowledge)
 	e.GET("/knowledge/upload", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
-	e.POST("/qa", controller.QaResponse)
+	e.POST("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 
 	e.GET("/test", func(context echo.Context) error {
 		return context.JSON(http.StatusOK, []model.Question{})

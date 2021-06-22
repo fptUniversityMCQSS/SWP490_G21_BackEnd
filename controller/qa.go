@@ -24,6 +24,7 @@ func QaResponse(c echo.Context) error {
 	// Multipart form
 	file, err := c.FormFile("file")
 	if err != nil {
+
 		return err
 	}
 	src, err := file.Open()
