@@ -1,14 +1,14 @@
 package main
 
 import (
+	"SWP490_G21_Backend/controller"
+	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/ultity"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"lib/controller"
-	"lib/model"
-	"lib/ultity"
 	"net/http"
 )
 
@@ -40,7 +40,7 @@ func main() {
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
 	e.GET("/qa", controller.Qa)
-	e.GET("/knowledge", controller.Knowledge)
+	e.GET("/knowledge", controller.ListKnowledge)
 	e.PUT("/knowledge", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
 	e.GET("/api", controller.ApiWeb)

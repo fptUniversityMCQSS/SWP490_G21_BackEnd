@@ -1,15 +1,15 @@
 package controller
 
 import (
+	"SWP490_G21_Backend/model/response"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/labstack/echo/v4"
 	"io"
 	"io/ioutil"
-	"lib/model/response"
 	"os"
 
-	"lib/model"
+	"SWP490_G21_Backend/model"
 
 	"net/http"
 )
@@ -45,6 +45,9 @@ func KnowledgeUpload(c echo.Context) error {
 
 	date := c.FormValue("date")
 	userId := c.FormValue("userId")
+
+	fmt.Println("date: ", date)
+	fmt.Println("userId: ", userId)
 
 	//-----------
 	// Read file

@@ -1,10 +1,10 @@
 package controller
 
 import (
+	"SWP490_G21_Backend/model"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
-	"lib/model"
 	"net/http"
 	"time"
 )

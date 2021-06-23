@@ -1,6 +1,6 @@
-module lib
+module SWP490_G21_Backend
 
-go 1.16
+go 1.15
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
