@@ -1,4 +1,4 @@
-/testdoc/*
+testdoc/*
 
 # Editor directories and files
 .idea
@@ -7,3 +7,5 @@
 *.ntvs*
 *.njsproj
 *.sln
+
+!testdoc/.gitkeep
