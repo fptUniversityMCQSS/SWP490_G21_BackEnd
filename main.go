@@ -7,9 +7,12 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
+	"time"
 )
 
 func init() {
@@ -19,7 +22,13 @@ func init() {
 		dbConfig.DbServer + ":" +
 		dbConfig.DbPort + ")/" +
 		dbConfig.Database + "?charset=utf8"
-	orm.RegisterModel(new(model.Knowledge), new(model.Option), new(model.Question), new(model.User))
+	orm.RegisterModel(
+		new(model.Knowledge),
+		new(model.Option),
+		new(model.Question),
+		new(model.User),
+		new(model.ExamTest),
+	)
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 
 	err1 := orm.RegisterDataBase("default", "mysql", stringConfig)
@@ -36,6 +45,7 @@ func main() {
 		AllowHeaders: []string{"*"},
 		AllowMethods: []string{"*"},
 	}))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 	//website
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
@@ -47,7 +57,15 @@ func main() {
 	e.POST("/login", controller.LoginResponse)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 	e.GET("/test", func(context echo.Context) error {
-		return context.JSON(http.StatusOK, []model.Question{})
+		sess, _ := session.Get("session", context)
+		sess.Options = &sessions.Options{
+			Path:   "/",
+			MaxAge: 86400 * 7, // in seconds
+		}
+		dt := time.Now()
+		sess.Values["username"] = dt.String()
+		sess.Save(context.Request(), context.Response())
+		return context.HTML(http.StatusOK, "ok")
 	})
 	//api
 
