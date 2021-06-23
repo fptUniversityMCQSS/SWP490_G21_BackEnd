@@ -9,7 +9,7 @@ USE `question_answer_db`;
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -56,8 +56,8 @@ CREATE TABLE `option` (
                           `question_id` bigint NOT NULL,
                           `id` bigint NOT NULL AUTO_INCREMENT,
                           `key` varchar(10) NOT NULL DEFAULT '',
-                          `content` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
-                          `paragraph` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                          `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                          `paragraph` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                           PRIMARY KEY (`id`),
                           KEY `FK_QuestionId_idx` (`question_id`),
                           CONSTRAINT `FK_QuestionId` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`)
@@ -82,7 +82,7 @@ DROP TABLE IF EXISTS `question`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `question` (
                             `id` bigint NOT NULL AUTO_INCREMENT,
-                            `content` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+                            `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                             `date` datetime NOT NULL,
                             `answer_id` bigint DEFAULT NULL,
                             `user_id` bigint NOT NULL,
