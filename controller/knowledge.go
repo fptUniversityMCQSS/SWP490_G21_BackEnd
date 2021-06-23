@@ -7,7 +7,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"os"
+	"strconv"
+	"time"
 
 	"SWP490_G21_Backend/model"
 
@@ -39,13 +42,30 @@ func ListKnowledge(c echo.Context) error {
 	return c.JSON(http.StatusOK, knowRs)
 
 }
-
+func findMaxId() int64 {
+	o := orm.NewOrm()
+	var knows []*model.Knowledge
+	qs, err := o.QueryTable("knowledge").RelatedSel().All(&knows)
+	if err != nil {
+		fmt.Println("File reading error", err)
+		return 0
+	}
+	tempMaxId := knows[0].Id
+	for _, k := range knows {
+		if k.Id > tempMaxId {
+			tempMaxId = k.Id
+		}
+	}
+	fmt.Printf("%d knowledges read \n", qs)
+	return int64(tempMaxId)
+}
 func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
+	o := orm.NewOrm()
 
 	date := c.FormValue("date")
 	userId := c.FormValue("userId")
-
+	intUserId, err := strconv.ParseInt(userId, 0, 64)
 	fmt.Println("date: ", date)
 	fmt.Println("userId: ", userId)
 
@@ -62,7 +82,12 @@ func KnowledgeUpload(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer src.Close()
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
+
+		}
+	}(src)
 	data, err := ioutil.ReadAll(src)
 	if err != nil {
 		fmt.Println("File reading error", err)
@@ -80,6 +105,36 @@ func KnowledgeUpload(c echo.Context) error {
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
+	}
+
+	//qs := o.QueryTable("knowledge")
+
+	dateParsed, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		fmt.Println(err)
+	}
+	user := &model.User{
+		Id: intUserId,
+	}
+
+	know := &model.Knowledge{
+		Id:   11,
+		Name: file.Filename,
+		Date: dateParsed,
+	}
+	i, err := o.QueryTable("knowledge").Filter("user_id", user.Id).PrepareInsert()
+	if err != nil {
+		return err
+	}
+	fmt.Println(i)
+	insert, err := i.Insert(know)
+	if err != nil {
+		return err
+	}
+	fmt.Println(insert)
+	err1 := i.Close()
+	if err1 != nil {
+		return err1
 	}
 
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
