@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="new model ExamTest&#10;fix model Question&#10;session testing">
+    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="fix database">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/knowledge.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/knowledge.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/properties.ini" beforeDir="false" afterPath="$PROJECT_DIR$/properties.ini" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,7 +19,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.16.4" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../Go-WorkSpace3/go1.16.4" />
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -89,16 +90,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Go Build.go build SWP490_G21_Backend">
-    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="SWP490_G21" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="PACKAGE" />
-      <package value="SWP490_G21_Backend" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
     <configuration name="go build SWP490_G21_Backend" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="SWP490_G21" />
       <working_directory value="$PROJECT_DIR$" />
@@ -114,17 +105,6 @@
       <package value="lib" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/mainBackend.go" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
-      <module name="SWP490_G21" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="DIRECTORY" />
-      <package value="SWP490_G21_Backend" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <recent_temporary>

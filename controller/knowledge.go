@@ -109,7 +109,7 @@ func KnowledgeUpload(c echo.Context) error {
 
 	//qs := o.QueryTable("knowledge")
 
-	dateParsed, err := time.Parse("2006-01-02", date)
+	dateParsed, err := time.Parse("2006-01-02", time.Now().String())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -118,11 +118,11 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 
 	know := &model.Knowledge{
-		Id:   11,
 		Name: file.Filename,
 		Date: dateParsed,
+		User: user,
 	}
-	i, err := o.QueryTable("knowledge").Filter("user_id", user.Id).PrepareInsert()
+	i, err := o.QueryTable("knowledge").PrepareInsert()
 	if err != nil {
 		return err
 	}
