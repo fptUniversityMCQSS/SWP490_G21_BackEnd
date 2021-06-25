@@ -42,23 +42,7 @@ func ListKnowledge(c echo.Context) error {
 	return c.JSON(http.StatusOK, knowRs)
 
 }
-func findMaxId() int64 {
-	o := orm.NewOrm()
-	var knows []*model.Knowledge
-	qs, err := o.QueryTable("knowledge").RelatedSel().All(&knows)
-	if err != nil {
-		fmt.Println("File reading error", err)
-		return 0
-	}
-	tempMaxId := knows[0].Id
-	for _, k := range knows {
-		if k.Id > tempMaxId {
-			tempMaxId = k.Id
-		}
-	}
-	fmt.Printf("%d knowledges read \n", qs)
-	return int64(tempMaxId)
-}
+
 func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
 	o := orm.NewOrm()

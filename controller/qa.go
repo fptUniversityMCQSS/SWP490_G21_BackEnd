@@ -2,14 +2,17 @@ package controller
 
 import (
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	_ "github.com/labstack/gommon/log"
 	"io"
 	"io/ioutil"
 	_ "io/ioutil"
+	"log"
 	"net/http"
 	_ "net/http"
 	"os"
+	"strings"
 )
 
 func Qa(c echo.Context) error {
@@ -17,6 +20,11 @@ func Qa(c echo.Context) error {
 }
 
 func QaResponse(c echo.Context) error {
+	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
+	values, _ := jwt.Parse(token, nil)
+	claims := values.Claims.(jwt.MapClaims)
+	username := claims["username"]
+	log.Println("test: " + username.(string))
 
 	//------------
 	// Read files
