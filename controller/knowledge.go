@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
 	"fmt"
 	"github.com/astaxie/beego/orm"
@@ -10,9 +11,6 @@ import (
 	"mime/multipart"
 	"os"
 	"strconv"
-	"time"
-
-	"SWP490_G21_Backend/model"
 
 	"net/http"
 )
@@ -47,10 +45,10 @@ func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
 	o := orm.NewOrm()
 
-	date := c.FormValue("date")
+	//date := c.FormValue("date")
 	userId := c.FormValue("userId")
 	intUserId, err := strconv.ParseInt(userId, 0, 64)
-	fmt.Println("date: ", date)
+	//fmt.Println("date: ", date)
 	fmt.Println("userId: ", userId)
 
 	//-----------
@@ -93,7 +91,7 @@ func KnowledgeUpload(c echo.Context) error {
 
 	//qs := o.QueryTable("knowledge")
 
-	dateParsed, err := time.Parse("2006-01-02", time.Now().String())
+	//dateParsed, err := time.Parse("2006-01-02", time.Now().String())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -103,7 +101,7 @@ func KnowledgeUpload(c echo.Context) error {
 
 	know := &model.Knowledge{
 		Name: file.Filename,
-		Date: dateParsed,
+		//Date: dateParsed,
 		User: user,
 	}
 	i, err := o.QueryTable("knowledge").PrepareInsert()
