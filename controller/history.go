@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/response"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
@@ -28,10 +29,32 @@ func GetExamById(c echo.Context) error {
 	if examTest.User.Id == IntUserId {
 		o.QueryTable("question").Filter("exam_test_id", id).RelatedSel().All(&questionAll)
 		examTest.Questions = questionAll
+
+		var questionsResponse []response.QuestionResponse
+
 		for _, question := range questionAll {
+			questionsResponse = append(questionsResponse,
+				response.QuestionResponse{
+					Number: question.Number,
+					Content: question.
+				}
+			)
+
 			o.QueryTable("option").Filter("question_id_id", question.Id).All(&answerAll)
 			question.Options = answerAll
 		}
+
+		var customExamTestResponse = response.ExamTestResponse{
+			Id: examTest.Id,
+			Date: examTest.Date,
+			Name: examTest.Name,
+			Questions: []response.QuestionResponse{
+				response.QuestionResponse{
+
+				},
+			},
+		}
+
 		return c.JSON(http.StatusOK, examTest)
 	} else {
 		return c.JSON(http.StatusUnauthorized, "You dont have permission to access this")
