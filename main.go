@@ -64,7 +64,7 @@ func main() {
 	e.GET("/knowledge", controller.ListKnowledge)
 	e.PUT("/knowledge", controller.KnowledgeUpload)
 	e.GET("/history", controller.History)
-	e.GET("/history/exam", controller.GetExamById)
+	e.GET("/history/:id", controller.GetExamById)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
