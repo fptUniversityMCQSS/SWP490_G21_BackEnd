@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="fix database">
+    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="apihistory chuan ko can chinh">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/history.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/history.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/examTest.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/examTest.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/question.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/properties.ini" beforeDir="false" afterPath="$PROJECT_DIR$/properties.ini" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +21,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="dev" />
+        <entry key="$PROJECT_DIR$" value="thienlh_fixdatabase+apihistory" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -78,13 +74,12 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../awesomeProject2" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/controller" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="go.vgo" />
-    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -114,8 +109,9 @@
       <list>
         <item itemvalue="Go Build.go build SWP490_G21_Backend" />
         <item itemvalue="Go Build.go build mainBackend.go" />
+        <item itemvalue="Go Build.go build SWP490_G21_Backend" />
         <item itemvalue="Go Build.go build mainBackend.go" />
-        <item itemvalue="Go Build.go build mainBackend.go" />
+        <item itemvalue="Go Build.go build SWP490_G21_Backend" />
       </list>
     </recent_temporary>
   </component>
@@ -139,9 +135,21 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Test backend" />
     <MESSAGE value="new model ExamTest&#10;fix model Question&#10;session testing" />
-    <option name="LAST_COMMIT_MESSAGE" value="new model ExamTest&#10;fix model Question&#10;session testing" />
+    <MESSAGE value="apihistory chuan ko can chinh" />
+    <option name="LAST_COMMIT_MESSAGE" value="apihistory chuan ko can chinh" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/controller/qa.go</url>
+          <line>155</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
