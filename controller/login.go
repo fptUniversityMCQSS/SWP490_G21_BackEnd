@@ -19,7 +19,7 @@ func LoginResponse(c echo.Context) error {
 	o := orm.NewOrm()
 
 	// Get a QuerySeter object. User is table name
-	err := o.Read(user, "username")
+	err := o.Read(user, "username", "password")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "InvalidUser")
 	}

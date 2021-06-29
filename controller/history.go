@@ -3,13 +3,13 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 func History(c echo.Context) error {
