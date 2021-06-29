@@ -35,6 +35,17 @@ func init() {
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
 	}
+	//// Database alias.
+	//name := "default"
+	//
+	//// Drop table and re-create.
+	//force := false
+	//
+	//// Print log.
+	//verbose := true
+	//
+	//// Error.
+	//orm.RunSyncdb(name, force, verbose)
 }
 func main() {
 	svConfig := ultity.ReadServerConfig()
@@ -53,6 +64,7 @@ func main() {
 	e.GET("/knowledge", controller.ListKnowledge)
 	e.PUT("/knowledge", controller.KnowledgeUpload)
 	e.GET("/history", controller.History, middleware.JWT([]byte("justAdmin")))
+	e.GET("/history/:id", controller.GetExamById)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
