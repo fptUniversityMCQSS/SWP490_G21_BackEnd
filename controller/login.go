@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/response"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
@@ -36,13 +37,13 @@ func LoginResponse(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		return c.JSON(http.StatusOK, &model.LoginResponse{Token: t})
+		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Token: t})
 	} else if user.Role == "admin" {
 		t, err := token.SignedString([]byte("justAdmin"))
 		if err != nil {
 			return err
 		}
-		return c.JSON(http.StatusOK, &model.LoginResponse{Token: t})
+		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Token: t})
 
 	}
 	//signature
