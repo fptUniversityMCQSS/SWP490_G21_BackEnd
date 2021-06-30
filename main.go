@@ -55,6 +55,7 @@ func main() {
 	e.GET("/history", controller.History, middleware.JWT([]byte("justAdmin")))
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
+	e.POST("/register", controller.Register)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 	e.GET("/test", func(context echo.Context) error {
 		sess, _ := session.Get("session", context)

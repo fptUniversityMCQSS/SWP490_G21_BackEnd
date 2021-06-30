@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Test backend">
-      <change afterPath="$PROJECT_DIR$/model/response/history_Response.go" afterDir="false" />
+    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="History api">
+      <change afterPath="$PROJECT_DIR$/controller/register.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/history.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/history.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/login.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/properties.ini" beforeDir="false" afterPath="$PROJECT_DIR$/properties.ini" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +84,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/controller" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../SWP490_G21_FrontEnd" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -156,7 +155,8 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Test backend" />
     <MESSAGE value="new model ExamTest&#10;fix model Question&#10;session testing" />
-    <option name="LAST_COMMIT_MESSAGE" value="new model ExamTest&#10;fix model Question&#10;session testing" />
+    <MESSAGE value="History api" />
+    <option name="LAST_COMMIT_MESSAGE" value="History api" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
