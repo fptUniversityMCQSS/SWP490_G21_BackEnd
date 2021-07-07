@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Thêm response model của api history/exam">
+    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Register api">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controller/history.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/history.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/login.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/properties.ini" beforeDir="false" afterPath="$PROJECT_DIR$/properties.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/response/history_Response.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/response/history_Response.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,11 +18,11 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.16.4" />
+  <component name="GOROOT" url="file://$USER_HOME$/go/go1.16.5" />
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="dev" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -98,7 +97,7 @@
       <recent name="C:\Users\khucx\OneDrive\Documents\GitHub\SWP490_G21\model\response" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build SWP490_G21_Backend">
+  <component name="RunManager" selected="Go Build.go build main.go">
     <configuration name="go build SWP490_G21_Backend" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="SWP490_G21" />
       <working_directory value="$PROJECT_DIR$" />
@@ -127,10 +126,10 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build SWP490_G21_Backend" />
-        <item itemvalue="Go Build.go build mainBackend.go" />
         <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build SWP490_G21_Backend" />
+        <item itemvalue="Go Build.go build mainBackend.go" />
+        <item itemvalue="Go Build.go build mainBackend.go" />
         <item itemvalue="Go Build.go build mainBackend.go" />
       </list>
     </recent_temporary>
@@ -155,8 +154,9 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Test backend" />
     <MESSAGE value="new model ExamTest&#10;fix model Question&#10;session testing" />
-    <MESSAGE value="Thêm response model của api history/exam" />
-    <option name="LAST_COMMIT_MESSAGE" value="Thêm response model của api history/exam" />
+    <MESSAGE value="History api" />
+    <MESSAGE value="Register api" />
+    <option name="LAST_COMMIT_MESSAGE" value="Register api" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

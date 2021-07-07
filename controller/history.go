@@ -35,6 +35,7 @@ func History(c echo.Context) error {
 	for _, h := range history {
 		var his = new(response.HistoryResponse)
 		his.Id = h.Id
+		his.Name = h.Name
 		his.Date = h.Date
 		hist = append(hist, his)
 	}
