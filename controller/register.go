@@ -11,7 +11,6 @@ import (
 func Register(c echo.Context) error {
 	Username := c.FormValue("username")
 	Password := c.FormValue("password")
-	RePassword := c.FormValue("re-password")
 
 	user := &model.User{
 		Username: Username,
@@ -21,9 +20,6 @@ func Register(c echo.Context) error {
 	// Get a QuerySeter object. User is table name
 	err := o.Read(user, "username")
 	user.Role = "user"
-	if Password != RePassword {
-		return c.JSON(http.StatusBadRequest, "re enter password")
-	}
 	if err == nil {
 		return c.JSON(http.StatusBadRequest, "user exist")
 	}

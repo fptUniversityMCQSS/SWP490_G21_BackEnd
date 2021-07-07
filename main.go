@@ -57,7 +57,7 @@ func main() {
 		AllowMethods: []string{"*"},
 	}))
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
-	//website
+	//api
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
 	e.GET("/qa", controller.Qa)
@@ -69,6 +69,28 @@ func main() {
 	e.POST("/login", controller.LoginResponse)
 	e.POST("/register", controller.Register)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
+	//admin group
+	admin := e.Group("/admin", middleware.JWT([]byte("justAdmin")))
+	admin.GET("/user", controller.Register)
+	/*
+		request: adminToken
+		response: list of user{id, username, role}
+	*/
+	admin.POST("/user", controller.Register)
+	/*
+		request: adminToken, username, password, role
+		response: id, username, role
+	*/
+	admin.DELETE("/user/:id", controller.Register)
+	/*
+		request: adminToken
+		response: {"message":"delete user successfully"} or {"message":"delete user fail"}
+	*/
+	admin.PATCH("/user/:id", controller.Register)
+	/*
+		request: adminToken, role, change_password (true/...), password
+		response: {"message":"edit user successfully"} or {"message":"edit user fail"}
+	*/
 	e.GET("/test", func(context echo.Context) error {
 		sess, _ := session.Get("session", context)
 		sess.Options = &sessions.Options{
@@ -80,7 +102,6 @@ func main() {
 		sess.Save(context.Request(), context.Response())
 		return context.HTML(http.StatusOK, "ok")
 	})
-	//api
 
 	e.Logger.Fatal(e.Start(":" + svConfig.PortBackend))
 }
