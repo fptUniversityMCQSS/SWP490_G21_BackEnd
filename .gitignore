@@ -7,5 +7,7 @@ testdoc/
 *.ntvs*
 *.njsproj
 *.sln
+workspace.xml
+properties.ini
 
 !testdoc/.gitkeep
