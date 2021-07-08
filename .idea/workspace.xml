@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Thêm Name trong history api">
-      <change afterPath="$PROJECT_DIR$/controller/admin.go" afterDir="false" />
+    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Admin api - get list user">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/history.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/history.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/admin.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/response/UserResponse.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/response/UserResponse.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,7 +157,8 @@
     <MESSAGE value="History api" />
     <MESSAGE value="Register api" />
     <MESSAGE value="Thêm Name trong history api" />
-    <option name="LAST_COMMIT_MESSAGE" value="Thêm Name trong history api" />
+    <MESSAGE value="Admin api - get list user" />
+    <option name="LAST_COMMIT_MESSAGE" value="Admin api - get list user" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

@@ -76,7 +76,7 @@ func main() {
 		request: adminToken
 		response: list of user{id, username, role}
 	*/
-	admin.POST("/user", controller.Register)
+	admin.POST("/user", controller.AdminAddUser)
 	/*
 		request: adminToken, username, password, role
 		response: id, username, role
