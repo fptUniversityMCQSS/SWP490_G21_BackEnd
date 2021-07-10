@@ -91,6 +91,19 @@ func main() {
 		request: adminToken, role, change_password (true/...), password
 		response: {"message":"edit user successfully"} or {"message":"edit user fail"}
 	*/
+
+	e.GET("/knowledge/:id", controller.DownloadKnowledge)
+	/*
+		request: adminToken
+		response: file
+	*/
+
+	e.DELETE("/knowledge/:id", controller.DeleteKnowledge)
+	/*
+		request: adminToken
+		response: {"message":"delete knowledge successfully"} or {"message":"delete knowledge fail"}
+	*/
+
 	e.GET("/test", func(context echo.Context) error {
 		sess, _ := session.Get("session", context)
 		sess.Options = &sessions.Options{

@@ -122,3 +122,13 @@ func KnowledgeUpload(c echo.Context) error {
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
 
 }
+
+func DownloadKnowledge(c echo.Context) error {
+
+	return c.Attachment("testdoc/autoGrad.m", "abc.m")
+}
+
+func DeleteKnowledge(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, "")
+}
