@@ -81,12 +81,12 @@ func main() {
 		request: adminToken, username, password, role
 		response: id, username, role
 	*/
-	admin.DELETE("/user/:id", controller.Register)
+	admin.DELETE("/user/:id", controller.DeleteUserById)
 	/*
 		request: adminToken
 		response: {"message":"delete user successfully"} or {"message":"delete user fail"}
 	*/
-	admin.PATCH("/user/:id", controller.Register)
+	admin.PATCH("/user/:id", controller.UpdateUser)
 	/*
 		request: adminToken, role, change_password (true/...), password
 		response: {"message":"edit user successfully"} or {"message":"edit user fail"}
