@@ -31,7 +31,7 @@ func LoginResponse(c echo.Context) error {
 
 	claims["username"] = user.Username
 	claims["userId"] = user.Id
-	claims["exp"] = time.Now().Add(3 * time.Minute).Unix() // payload
+	claims["exp"] = time.Now().Add(120 * time.Minute).Unix() // payload
 	if user.Role == "user" {
 		t, err := token.SignedString([]byte("justUser"))
 		if err != nil {
