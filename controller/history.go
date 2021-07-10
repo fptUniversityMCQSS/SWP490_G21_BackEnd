@@ -56,24 +56,23 @@ func GetExamById(c echo.Context) error {
 	var questionAll []*model.Question
 	var answerAll []*model.Option
 	var userResponse response.UserResponse
-	var answerResponse response.OptionResponse
 	o.QueryTable("exam_test").Filter("id", id).All(&examTest)
 	o.QueryTable("user").Filter("id", IntUserId).All(&user)
 	userResponse.Id = user.Id
 	userResponse.Username = user.Username
+	userResponse.Role = user.Role
 	if examTest.User.Id == IntUserId {
 		o.QueryTable("question").Filter("exam_test_id", id).RelatedSel().All(&questionAll)
 		examTest.Questions = questionAll
 
 		var questionsResponse []response.QuestionResponse
 		for i, question := range questionAll {
-			answerResponse.Key = question.Answer.Key
-			answerResponse.Content = question.Answer.Content
+
 			questionsResponse = append(questionsResponse,
 				response.QuestionResponse{
 					Number:  question.Number,
 					Content: question.Content,
-					Answer:  answerResponse,
+					Answer:  question.Answer,
 				},
 			)
 			o.QueryTable("option").Filter("question_id_id", question.Id).All(&answerAll)
