@@ -2,6 +2,8 @@ package controller
 
 import (
 	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/ultity"
 	"github.com/astaxie/beego/orm"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -16,9 +18,13 @@ func DeleteUserById(c echo.Context) error {
 	o := orm.NewOrm()
 	_, err := o.Delete(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, "Delete User Failed")
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Delete User Failed",
+		})
 	}
-	return c.JSON(http.StatusOK, "Delete User successfully")
+	return c.JSON(http.StatusOK, response.Message{
+		Message: "Delete User successfully",
+	})
 }
 
 func UpdateUser(c echo.Context) error {
@@ -28,24 +34,35 @@ func UpdateUser(c echo.Context) error {
 	user := &model.User{
 		Id: id,
 	}
-	if changePassword == "true" {
-		role := c.FormValue("role")
-		password := c.FormValue("password")
-		if role != "" {
-			user.Role = role
-			_, err := o.Update(user, "role")
-			if err != nil {
-				return err
-			}
-		}
-		if password != "" {
-			user.Password = password
-			_, err := o.Update(user, "password")
-			if err != nil {
-				return err
-			}
-		}
-		return c.JSON(http.StatusOK, "edit user successfully")
+	role := c.FormValue("role")
+	if ultity.CheckRole(role) {
+		user.Role = role
+	} else {
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "edit user failed",
+		})
 	}
-	return c.JSON(http.StatusInternalServerError, "edit user fail")
+	if changePassword == "true" {
+		password := c.FormValue("password")
+		if ultity.CheckPassword(password) {
+			user.Password = password
+			_, err := o.Update(user, "role", "password")
+			if err != nil {
+				return err
+			}
+		} else {
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "edit user failed",
+			})
+		}
+	} else {
+		_, err := o.Update(user, "role")
+		if err != nil {
+			return err
+		}
+	}
+
+	return c.JSON(http.StatusOK, response.Message{
+		Message: "edit user successfully",
+	})
 }
