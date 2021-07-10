@@ -37,13 +37,13 @@ func LoginResponse(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Token: t})
+		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
 	} else if user.Role == "admin" {
 		t, err := token.SignedString([]byte("justAdmin"))
 		if err != nil {
 			return err
 		}
-		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Token: t})
+		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
 
 	}
 	//signature
