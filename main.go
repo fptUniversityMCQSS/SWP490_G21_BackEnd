@@ -71,12 +71,12 @@ func main() {
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 	//admin group
 	admin := e.Group("/admin", middleware.JWT([]byte("justAdmin")))
-	admin.GET("/user", controller.Register)
+	admin.GET("/user", controller.ListUser)
 	/*
 		request: adminToken
 		response: list of user{id, username, role}
 	*/
-	admin.POST("/user", controller.Register)
+	admin.POST("/user", controller.AdminAddUser)
 	/*
 		request: adminToken, username, password, role
 		response: id, username, role
