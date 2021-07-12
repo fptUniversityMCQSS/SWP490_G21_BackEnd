@@ -134,6 +134,19 @@ func DownloadKnowledge(c echo.Context) error {
 }
 
 func DeleteKnowledge(c echo.Context) error {
+	o := orm.NewOrm()
+	knowledgeId := c.Param("KnowledgeId")
+	knowledgeName := c.Param("KnowledgeName")
+	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
+	_, err := o.QueryTable("knowledge").Filter("id", intKnowledgeId).Delete()
+	if err != nil {
+		fmt.Println(err)
+	}
+	err2 := os.Remove("testdoc/" + knowledgeName + ".txt")
 
-	return c.JSON(http.StatusOK, "")
+	if err2 != nil {
+		fmt.Println(err2)
+
+	}
+	return c.JSON(http.StatusOK, fmt.Sprintf("<p> Knowledge %s has been deleted!", knowledgeName))
 }
