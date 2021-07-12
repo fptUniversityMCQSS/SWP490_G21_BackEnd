@@ -3,6 +3,7 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/ultity"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
@@ -45,9 +46,9 @@ func ListUser(c echo.Context) error {
 }
 
 func AdminAddUser(c echo.Context) error {
-	Username := c.FormValue("username")
-	Password := c.FormValue("password")
-	Role := c.FormValue("role")
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	role := c.FormValue("role")
 
 	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
 	values, _ := jwt.Parse(token, nil)
@@ -56,32 +57,39 @@ func AdminAddUser(c echo.Context) error {
 	fmt.Printf("%d \n", userid)
 
 	user := &model.User{
-		Username: Username,
+		Username: username,
 	}
 	o := orm.NewOrm()
+	if ultity.CheckUsername(username) {
+		err := o.Read(user, "username")
 
-	// Get a QuerySeter object. User is table name
-	err := o.Read(user, "username")
+		if err == nil {
+			return c.JSON(http.StatusBadRequest, "user exist")
+		}
+		i, err := o.QueryTable("user").PrepareInsert()
+		if err != nil {
+			return err
+		}
+		if ultity.CheckRole(role) {
+			user.Role = role
+		}
+		if ultity.CheckPassword(password) {
+			user.Password = password
+		}
 
-	if err == nil {
-		return c.JSON(http.StatusBadRequest, "user exist")
+		insert, err := i.Insert(user)
+		if err != nil {
+			return err
+		}
+		fmt.Println(insert)
+		err1 := i.Close()
+		if err1 != nil {
+			return err1
+		}
+		return c.JSON(http.StatusOK, insert)
+	} else {
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "add user failed",
+		})
 	}
-	i, err := o.QueryTable("user").PrepareInsert()
-	if err != nil {
-		return err
-	}
-	user.Password = Password
-	user.Role = Role
-
-	insert, err := i.Insert(user)
-	if err != nil {
-		return err
-	}
-	fmt.Println(insert)
-	err1 := i.Close()
-	if err1 != nil {
-		return err1
-	}
-
-	return c.String(http.StatusOK, fmt.Sprintf("Add user success "))
 }

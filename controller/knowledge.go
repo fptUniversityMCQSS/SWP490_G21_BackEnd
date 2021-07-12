@@ -9,10 +9,9 @@ import (
 	"io"
 	"io/ioutil"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"strconv"
-
-	"net/http"
 )
 
 func ListKnowledge(c echo.Context) error {
@@ -124,7 +123,13 @@ func KnowledgeUpload(c echo.Context) error {
 }
 
 func DownloadKnowledge(c echo.Context) error {
-
+	//o := orm.NewOrm()
+	//
+	//token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
+	//values, _ := jwt.Parse(token, nil)
+	//claims := values.Claims.(jwt.MapClaims)
+	//userid := claims["userId"]
+	//fmt.Printf("%d \n", userid)
 	return c.Attachment("testdoc/autoGrad.m", "abc.m")
 }
 

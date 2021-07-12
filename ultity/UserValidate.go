@@ -1,7 +1,9 @@
 package ultity
 
 func CheckUsername(username string) bool {
-
+	if username == "" {
+		return false
+	}
 	return true
 }
 
