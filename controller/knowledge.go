@@ -123,14 +123,26 @@ func KnowledgeUpload(c echo.Context) error {
 }
 
 func DownloadKnowledge(c echo.Context) error {
-	//o := orm.NewOrm()
-	//
-	//token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	//values, _ := jwt.Parse(token, nil)
-	//claims := values.Claims.(jwt.MapClaims)
-	//userid := claims["userId"]
-	//fmt.Printf("%d \n", userid)
-	return c.Attachment("testdoc/autoGrad.m", "abc.m")
+	o := orm.NewOrm()
+	knowledgeId := c.Param("id")
+	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
+	var knowledge model.Knowledge
+
+	err := o.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
+
+	//if has problem in connection
+	if err != nil {
+		fmt.Println("File reading error", err)
+		return err
+	}
+
+	//err2, _ := os.Create("testdoc/" + knowledge.Name + ".txt")
+	//if err2 != nil {
+	//	fmt.Println(err2)
+	//}
+	//return c.JSON(http.StatusOK, knowledge)
+
+	return c.Attachment("testdoc/"+knowledge.Name, knowledge.Name)
 }
 
 func DeleteKnowledge(c echo.Context) error {
