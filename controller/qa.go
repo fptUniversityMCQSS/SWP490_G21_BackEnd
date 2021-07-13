@@ -189,26 +189,6 @@ func QaResponse(c echo.Context) error {
 
 	i2.Close()
 	i3.Close()
-	//err1 := i.Close()
-	//if err1 != nil {
-	//	return err1
-	//}
-	//insert2, err2 := i2.Insert(questions)
-	//if err2 != nil {
-	//	log.Println(err2)
-	//}
-	////fmt.Println(insert)
-	//fmt.Println(insert2)
-	//err3 := i2.Close()
-	//if err3 != nil {
-	//	return err3
-	//}
-	//insert3, err4 := i3.Insert(option1)
-	//if err4 != nil {
-	//	log.Println(err4)
-	//}
-	////fmt.Println(insert)
-	//fmt.Println(insert3)
 
 	return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully .</p>", file.Filename))
 
