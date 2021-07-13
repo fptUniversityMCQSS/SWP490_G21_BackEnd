@@ -17,18 +17,10 @@ func ListUser(c echo.Context) error {
 	var user []*model.User
 	var lists []*response.UserResponse
 
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	userid := claims["userId"]
-	fmt.Printf("%d \n", userid)
-	//log.Println("test: " + userid.(string))
-
-	qs, err := o.QueryTable("user").All(&user)
+	_, err := o.QueryTable("user").All(&user)
 
 	//if has problem in connection
 	if err != nil {
-		fmt.Println("File reading error", err)
 		return err
 	}
 
@@ -40,7 +32,6 @@ func ListUser(c echo.Context) error {
 		us.Role = u.Role
 		lists = append(lists, us)
 	}
-	fmt.Printf("", qs)
 	return c.JSON(http.StatusOK, lists)
 
 }
@@ -86,10 +77,15 @@ func AdminAddUser(c echo.Context) error {
 		if err1 != nil {
 			return err1
 		}
-		return c.JSON(http.StatusOK, insert)
+		userResponse := response.UserResponse{
+			Id:       insert,
+			Username: username,
+			Role:     role,
+		}
+		return c.JSON(http.StatusOK, userResponse)
 	} else {
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "add user failed",
+			Message: "Username exist",
 		})
 	}
 }

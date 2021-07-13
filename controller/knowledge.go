@@ -3,16 +3,16 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	"strconv"
 )
 
 func ListKnowledge(c echo.Context) error {
@@ -162,17 +162,19 @@ func DeleteKnowledge(c echo.Context) error {
 	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
 	err3 := o.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
 	if err3 != nil {
-		fmt.Println(err3)
+		return err3
 	}
 	_, err := o.QueryTable("knowledge").Filter("id", intKnowledgeId).Delete()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	err2 := os.Remove("testdoc/" + knowledge.Name)
 
 	if err2 != nil {
-		fmt.Println(err2)
-
+		return err2
 	}
-	return c.JSON(http.StatusOK, "Delete successfully")
+	message := response.Message{
+		Message: "Delete successfully",
+	}
+	return c.JSON(http.StatusOK, message)
 }
