@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/response"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
@@ -15,6 +16,7 @@ import (
 	_ "net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 func Qa(c echo.Context) error {
@@ -190,6 +192,12 @@ func QaResponse(c echo.Context) error {
 	i2.Close()
 	i3.Close()
 
-	return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully .</p>", file.Filename))
+	examResponse := response.HistoryResponse{
+		Id:   insert,
+		Name: exam.Name,
+		Date: time.Now(),
+	}
+
+	return c.JSON(http.StatusOK, examResponse)
 
 }
