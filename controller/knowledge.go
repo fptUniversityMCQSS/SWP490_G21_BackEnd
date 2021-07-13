@@ -3,15 +3,14 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"fmt"
 	"github.com/astaxie/beego/orm"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"io"
-	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"os"
-	"strconv"
+	"strings"
+	"time"
 )
 
 func ListKnowledge(c echo.Context) error {
@@ -20,22 +19,21 @@ func ListKnowledge(c echo.Context) error {
 	var knows []*model.Knowledge
 	var knowRs []*response.KnowledgResponse
 	// Get a QuerySeter object. User is table name
-	qs, err := o.QueryTable("knowledge").RelatedSel().All(&knows)
+	_, err := o.QueryTable("knowledge").OrderBy("-id").RelatedSel().All(&knows)
 
 	//if has problem in connection
 	if err != nil {
-		fmt.Println("File reading error", err)
 		return err
 	}
 	//add selected data to knowledge_Res list
 	for _, k := range knows {
 		var knowR = new(response.KnowledgResponse)
+		knowR.Id = k.Id
 		knowR.Name = k.Name
 		knowR.Date = k.Date
 		knowR.Username = k.User.Username
 		knowRs = append(knowRs, knowR)
 	}
-	fmt.Printf("%d knowledges read \n", qs)
 	return c.JSON(http.StatusOK, knowRs)
 
 }
@@ -43,12 +41,14 @@ func ListKnowledge(c echo.Context) error {
 func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
 	o := orm.NewOrm()
-
-	//date := c.FormValue("date")
-	userId := c.FormValue("userId")
-	intUserId, err := strconv.ParseInt(userId, 0, 64)
+	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
+	values, _ := jwt.Parse(token, nil)
+	claims := values.Claims.(jwt.MapClaims)
+	userId := claims["userId"].(float64)
+	username := claims["username"].(string)
+	IntUserId := int64(userId)
 	//fmt.Println("date: ", date)
-	fmt.Println("userId: ", userId)
+	//fmt.Println("userId: ", userId)
 
 	//-----------
 	// Read file
@@ -63,18 +63,20 @@ func KnowledgeUpload(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer func(src multipart.File) {
-		err := src.Close()
-		if err != nil {
+	defer src.Close()
 
-		}
-	}(src)
-	data, err := ioutil.ReadAll(src)
-	if err != nil {
-		fmt.Println("File reading error", err)
-		return err
-	}
-	fmt.Println("Contents of file:", string(data))
+	//defer func(src multipart.File) {
+	//	err := src.Close()
+	//	if err != nil {
+	//
+	//	}
+	//}(src)
+	//data, err := ioutil.ReadAll(src)
+	//if err != nil {
+	//	fmt.Println("File reading error", err)
+	//	return err
+	//}
+	//fmt.Println("Contents of file:", string(data))
 
 	// Destination
 	dst, err := os.Create("testdoc/" + file.Filename)
@@ -90,36 +92,42 @@ func KnowledgeUpload(c echo.Context) error {
 
 	//qs := o.QueryTable("knowledge")
 
-	//dateParsed, err := time.Parse("2006-01-02", time.Now().String())
-	if err != nil {
-		fmt.Println(err)
-	}
+	//dateParsed, err := time.Parse("Jan 2, 2006 at 3:04pm (MST)", time.Now().String())
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 	user := &model.User{
-		Id: intUserId,
+		Id:       IntUserId,
+		Username: username,
 	}
 
 	know := &model.Knowledge{
 		Name: file.Filename,
-		//Date: dateParsed,
 		User: user,
 	}
 	i, err := o.QueryTable("knowledge").PrepareInsert()
 	if err != nil {
 		return err
 	}
-	fmt.Println(i)
+	//fmt.Println(i)
 	insert, err := i.Insert(know)
 	if err != nil {
 		return err
 	}
-	fmt.Println(insert)
+	//fmt.Println(insert)
 	err1 := i.Close()
 	if err1 != nil {
 		return err1
 	}
 
-	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully ", file.Filename))
+	knowledgeResponse := response.KnowledgResponse{
+		Id:       insert,
+		Name:     file.Filename,
+		Date:     time.Now(),
+		Username: user.Username,
+	}
 
+	return c.JSON(http.StatusOK, knowledgeResponse)
 }
 
 func DownloadKnowledge(c echo.Context) error {
