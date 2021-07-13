@@ -10,6 +10,25 @@ import (
 	"strconv"
 )
 
+func GetUserById(c echo.Context) error {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	o := orm.NewOrm()
+	var user model.User
+
+	err := o.QueryTable("user").Filter("id", id).One(&user)
+	if err != nil {
+		return err
+	}
+
+	userResponse := response.UserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Role:     user.Role,
+	}
+
+	return c.JSON(http.StatusOK, userResponse)
+}
+
 func DeleteUserById(c echo.Context) error {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	user := &model.User{

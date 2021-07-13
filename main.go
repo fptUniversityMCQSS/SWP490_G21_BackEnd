@@ -81,6 +81,7 @@ func main() {
 		request: adminToken, username, password, role
 		response: id, username, role
 	*/
+	admin.GET("/user/:id", controller.GetUserById)
 	admin.DELETE("/user/:id", controller.DeleteUserById)
 	/*
 		request: adminToken
