@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"time"
+	"fmt"
+	"strconv"
 )
 
 func ListKnowledge(c echo.Context) error {
@@ -155,18 +157,22 @@ func DownloadKnowledge(c echo.Context) error {
 
 func DeleteKnowledge(c echo.Context) error {
 	o := orm.NewOrm()
-	knowledgeId := c.Param("KnowledgeId")
-	knowledgeName := c.Param("KnowledgeName")
+	knowledgeId := c.Param("id")
+	var knowledge model.Knowledge
 	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
+	err3 := o.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
+	if err3 != nil {
+		fmt.Println(err3)
+	}
 	_, err := o.QueryTable("knowledge").Filter("id", intKnowledgeId).Delete()
 	if err != nil {
 		fmt.Println(err)
 	}
-	err2 := os.Remove("testdoc/" + knowledgeName + ".txt")
+	err2 := os.Remove("testdoc/" + knowledge.Name)
 
 	if err2 != nil {
 		fmt.Println(err2)
 
 	}
-	return c.JSON(http.StatusOK, fmt.Sprintf("<p> Knowledge %s has been deleted!", knowledgeName))
+	return c.JSON(http.StatusOK, "Delete successfully")
 }
