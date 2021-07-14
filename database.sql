@@ -25,14 +25,16 @@ DROP TABLE IF EXISTS `exam_test`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `exam_test` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `date` datetime NOT NULL,
-  `user_id` bigint NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_UserIdExamTest_idx` (`user_id`),
-  CONSTRAINT `FK_UserIdExamTest` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                             `id` bigint NOT NULL AUTO_INCREMENT,
+                             `date` datetime NOT NULL,
+                             `user_id` bigint NOT NULL,
+                             `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                             `subject` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                             `number_of_questions` bigint NOT NULL DEFAULT '0',
+                             PRIMARY KEY (`id`),
+                             KEY `FK_UserIdExamTest_idx` (`user_id`),
+                             CONSTRAINT `FK_UserIdExamTest` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +43,7 @@ CREATE TABLE `exam_test` (
 
 LOCK TABLES `exam_test` WRITE;
 /*!40000 ALTER TABLE `exam_test` DISABLE KEYS */;
-INSERT INTO `exam_test` VALUES (1,'2021-05-26 00:00:00',1,'nameofuser1'),(2,'2021-05-25 00:00:00',2,'nameofuser2'),(3,'2021-05-24 00:00:00',3,'nameofuser3'),(4,'2021-05-26 00:00:00',4,'nameofuser4'),(5,'2021-05-27 00:00:00',5,'nameofuser5'),(6,'2021-05-26 00:00:00',5,'nameofuser5'),(31,'2021-07-10 16:24:52',2,'oke');
+INSERT INTO `exam_test` VALUES (1,'2021-05-26 00:00:00',1,'nameofuser1','',0),(2,'2021-05-25 00:00:00',2,'nameofuser2','',0),(3,'2021-05-24 00:00:00',3,'nameofuser3','',0),(4,'2021-05-26 00:00:00',4,'nameofuser4','',0),(5,'2021-05-27 00:00:00',5,'nameofuser5','',0),(6,'2021-05-26 00:00:00',5,'nameofuser5','',0),(31,'2021-07-10 16:24:52',2,'oke','',0);
 /*!40000 ALTER TABLE `exam_test` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -53,13 +55,13 @@ DROP TABLE IF EXISTS `knowledge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `knowledge` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `date` datetime DEFAULT NULL,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_UserId_idx` (`user_id`),
-  CONSTRAINT `FK_UserId` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+                             `id` bigint NOT NULL AUTO_INCREMENT,
+                             `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                             `date` datetime DEFAULT NULL,
+                             `user_id` bigint NOT NULL,
+                             PRIMARY KEY (`id`),
+                             KEY `FK_UserId_idx` (`user_id`),
+                             CONSTRAINT `FK_UserId` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -81,16 +83,16 @@ DROP TABLE IF EXISTS `option`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `option` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `question_id_id` bigint NOT NULL,
-  `key` char(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `paragraph` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `FK_QuestionId_idx` (`question_id_id`),
-  CONSTRAINT `FK_QuestionId` FOREIGN KEY (`question_id_id`) REFERENCES `question` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                          `id` bigint NOT NULL AUTO_INCREMENT,
+                          `question_id_id` bigint NOT NULL,
+                          `key` char(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                          `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                          `paragraph` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                          PRIMARY KEY (`id`),
+                          UNIQUE KEY `id_UNIQUE` (`id`),
+                          KEY `FK_QuestionId_idx` (`question_id_id`),
+                          CONSTRAINT `FK_QuestionId` FOREIGN KEY (`question_id_id`) REFERENCES `question` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +114,7 @@ DROP TABLE IF EXISTS `question`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `question` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `exam_test_id` bigint NOT NULL,
   `number` bigint NOT NULL,
   `mark` double NOT NULL,
@@ -120,7 +122,7 @@ CREATE TABLE `question` (
   PRIMARY KEY (`id`),
   KEY `FK_ExamTestId_idx` (`exam_test_id`),
   CONSTRAINT `FK_ExamTestId` FOREIGN KEY (`exam_test_id`) REFERENCES `exam_test` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=83 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,10 +160,6 @@ LOCK TABLES `user` WRITE;
 INSERT INTO `user` VALUES (1,'thienlh','1234','user'),(2,'khailq','1234','admin'),(3,'haokx','1234','user'),(4,'binhtb','1234','user'),(5,'minhpa','12345','user');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping events for database 'qadatabase'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -172,4 +170,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-12 21:35:05
+-- Dump completed on 2021-07-14 10:33:33

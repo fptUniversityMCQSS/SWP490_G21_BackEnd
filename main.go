@@ -35,17 +35,7 @@ func init() {
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
 	}
-	//// Database alias.
-	//name := "default"
-	//
-	//// Drop table and re-create.
-	//force := false
-	//
-	//// Print log.
-	//verbose := true
-	//
-	//// Error.
-	//orm.RunSyncdb(name, force, verbose)
+
 }
 func main() {
 	svConfig := ultity.ReadServerConfig()
