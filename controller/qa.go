@@ -290,7 +290,6 @@ func QaResponse(c echo.Context) error {
 	}
 	i2.Close()
 	i3.Close()
-	return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully .</p>", file.Filename))
 
 	examResponse := response.HistoryResponse{
 		Id:   insert,
