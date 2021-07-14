@@ -11,3 +11,4 @@ workspace.xml
 properties.ini
 
 !testdoc/.gitkeep
+!examtest/.gitkeep

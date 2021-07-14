@@ -11,7 +11,6 @@ import (
 	_ "github.com/labstack/gommon/log"
 	"github.com/nguyenthenguyen/docx"
 	"io"
-	"io/ioutil"
 	_ "io/ioutil"
 	"log"
 	"net/http"
@@ -133,7 +132,7 @@ func QaResponse(c echo.Context) error {
 	}
 	defer src.Close()
 
-	dst, err := os.Create("testdoc/" + file.Filename)
+	dst, err := os.Create("examtest/" + file.Filename)
 	if err != nil {
 		return err
 	}
@@ -143,33 +142,34 @@ func QaResponse(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
-	r, err := docx.ReadDocxFile("testdoc/" + file.Filename)
+	r, err := docx.ReadDocxFile("examtest/" + file.Filename)
 	// Or read from memory
 	// r, err := docx.ReadDocxFromMemory(data io.ReaderAt, size int64)
 	if err != nil {
 		log.Println(err)
 	}
-	f, err := os.Create("parseDocxToXML/" + file.Filename + ".xml")
-	defer f.Close()
-	f.WriteString(r.Editable().GetContent())
+	//f, err := os.Create("parseDocxToXML/" + file.Filename + ".xml")
+	//defer f.Close()
+	//f.WriteString(r.Editable().GetContent())
 
-	xmlFile, err := os.Open("parseDocxToXML/" + file.Filename + ".xml")
-	// if we os.Open returns an error then handle it
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// defer the closing of our xmlFile so that we can parse it later on
-	defer xmlFile.Close()
-
-	// read our opened xmlFile as a byte array.
-	byteValue, _ := ioutil.ReadAll(xmlFile)
+	//xmlFile, err := os.Open("parseDocxToXML/" + file.Filename + ".xml")
+	//// if we os.Open returns an error then handle it
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//// defer the closing of our xmlFile so that we can parse it later on
+	//defer xmlFile.Close()
+	//
+	//// read our opened xmlFile as a byte array.
+	//byteValue, _ := ioutil.ReadAll(xmlFile)
 
 	// we initialize our Users array
 	var xmlDocument model.XMLDocument
 	// we unmarshal our byteArray which contains our
 	// xmlFiles content into 'users' which we defined above
-	err = xml.Unmarshal(byteValue, &xmlDocument)
+
+	err = xml.Unmarshal([]byte(r.Editable().GetContent()), &xmlDocument)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -203,6 +203,9 @@ func QaResponse(c echo.Context) error {
 		exam.NumberOfQuestions, _ = strconv.ParseInt(VatChua2, 10, 64)
 	}
 	i, err := o.QueryTable("exam_test").PrepareInsert()
+	if err != nil {
+		log.Println(err)
+	}
 	insert, err := i.Insert(exam)
 	if err != nil {
 		log.Println(err)
