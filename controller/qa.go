@@ -187,7 +187,7 @@ func QaResponse(c echo.Context) error {
 	}
 	var exam = &model.ExamTest{
 		User: user,
-		Name: "oke",
+		Name: file.Filename,
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
 	var VatChua2 string
