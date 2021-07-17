@@ -88,7 +88,11 @@ func main() {
 		request: adminToken
 		response: file
 	*/
-
+	e.GET("/exam/:id", controller.DownloadExam)
+	/*
+		request: adminToken
+		response: file
+	*/
 	e.DELETE("/knowledge/:id", controller.DeleteKnowledge)
 	/*
 		request: adminToken
