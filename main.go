@@ -55,6 +55,7 @@ func main() {
 	e.PUT("/knowledge", controller.KnowledgeUpload)
 	e.GET("/history", controller.History, middleware.JWT([]byte("justAdmin")))
 	e.GET("/history/:id", controller.GetExamById)
+	e.GET("/history/:id/download", controller.DownloadExam)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", controller.LoginResponse)
 	e.POST("/register", controller.Register)
@@ -82,13 +83,7 @@ func main() {
 		request: adminToken, role, change_password (true/...), password
 		response: {"message":"edit user successfully"} or {"message":"edit user fail"}
 	*/
-
 	e.GET("/knowledge/:id", controller.DownloadKnowledge)
-	/*
-		request: adminToken
-		response: file
-	*/
-	e.GET("/exam/:id", controller.DownloadExam)
 	/*
 		request: adminToken
 		response: file

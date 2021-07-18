@@ -100,3 +100,19 @@ func GetExamById(c echo.Context) error {
 	return nil
 
 }
+
+func DownloadExam(c echo.Context) error {
+	o := orm.NewOrm()
+	QaId := c.Param("id")
+	intQaId, _ := strconv.ParseInt(QaId, 10, 64)
+	var examTest model.ExamTest
+
+	err := o.QueryTable("exam_test").Filter("id", intQaId).One(&examTest)
+
+	//if has problem in connection
+	if err != nil {
+		fmt.Println("File reading error", err)
+		return err
+	}
+	return c.Attachment("examtest/"+examTest.Name, examTest.Name)
+}
