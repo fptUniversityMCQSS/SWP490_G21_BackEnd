@@ -32,6 +32,15 @@ func Qa(c echo.Context) error {
 
 func QaResponse(c echo.Context) error {
 
+	o := orm.NewOrm()
+	var intUserId int64
+	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
+	values, _ := jwt.Parse(token, nil)
+	claims := values.Claims.(jwt.MapClaims)
+	userId := claims["userId"].(float64) //Ep kieu sang float64
+	userName := claims["username"].(string)
+	intUserId = int64(userId)
+
 	file, err := c.FormFile("file")
 	if err != nil {
 
@@ -43,7 +52,29 @@ func QaResponse(c echo.Context) error {
 	}
 	defer src.Close()
 
-	dst, err := os.Create("examtest/" + file.Filename)
+	userPath := "examtest/" + userName
+	timeNow := time.Now()
+	re := regexp.MustCompile(":")
+	timeNowAfterRegex := re.ReplaceAllString(timeNow.String(), "-")
+	fileFolderPath := userPath + "/" + timeNowAfterRegex
+	if _, err := os.Stat(userPath); os.IsNotExist(err) {
+		err := os.Mkdir(userPath, os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+	if _, err := os.Stat(fileFolderPath); os.IsNotExist(err) {
+		err := os.Mkdir(fileFolderPath, os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+
+	filePath := fileFolderPath + "/" + file.Filename
+
+	dst, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
@@ -78,16 +109,17 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 	}
+
 	r, err := docx.ReadDocxFromMemory(src, size)
 	// Or read from memory
 	// r, err := docx.ReadDocxFromMemory(dat
 	//a io.ReaderAt, size int64)
 	if err != nil {
-		dir, err := filepath.Abs("examtest/" + file.Filename)
+		dir, err := filepath.Abs(fileFolderPath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fileName, err := ToDocx(dir)
+		fileName, err := ToDocx(dir, file.Filename)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -98,7 +130,6 @@ func QaResponse(c echo.Context) error {
 		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
 		fileName.Close()
 		os.Remove(fileName.Name())
-
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -111,20 +142,14 @@ func QaResponse(c echo.Context) error {
 		fmt.Println(err)
 	}
 
-	o := orm.NewOrm()
-	var intUserId int64
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	userId := claims["userId"].(float64) //Ep kieu sang float64
-	intUserId = int64(userId)
-
 	var user = &model.User{
 		Id: intUserId,
 	}
 	var exam = &model.ExamTest{
 		User: user,
 		Name: file.Filename,
+		Date: timeNow,
+		Path: filePath,
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
 	var VatChua2 string
@@ -228,17 +253,15 @@ func QaResponse(c echo.Context) error {
 	i2, err := o.QueryTable("question").PrepareInsert()
 	i3, err := o.QueryTable("option").PrepareInsert()
 	for _, question := range Questions {
-		id, err := i2.Insert(question)
+		_, err := i2.Insert(question)
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Println(id)
 		for _, option := range question.Options {
-			id2, err2 := i3.Insert(option)
+			_, err2 := i3.Insert(option)
 			if err2 != nil {
 				log.Println(err2)
 			}
-			fmt.Println(id2)
 		}
 	}
 	i2.Close()
@@ -247,7 +270,7 @@ func QaResponse(c echo.Context) error {
 	examResponse := response.HistoryResponse{
 		Id:   insert,
 		Name: exam.Name,
-		Date: time.Now(),
+		Date: timeNow,
 	}
 
 	return c.JSON(http.StatusOK, examResponse)
@@ -262,8 +285,18 @@ func RemoveEndChar(s string) string {
 	return s
 }
 
-func ToDocx(path string) (*os.File, error) {
-	filename2 := path[:len(path)-4] + ".docx"
+func ToDocx(folderPath string, fileName string) (*os.File, error) {
+	inputDoc := folderPath + "/" + fileName
+	splitPath := strings.Split(fileName, ".")
+
+	outPutDocx := ""
+	for i := 0; i < len(splitPath)-1; i++ {
+		outPutDocx += splitPath[i]
+	}
+	outPutDocx = outPutDocx + ".docx"
+
+	outPutDocx = folderPath + "/" + outPutDocx
+
 	err := ole.CoInitialize(0)
 	if err != nil {
 		return nil, err
@@ -282,9 +315,9 @@ func ToDocx(path string) (*os.File, error) {
 	}
 	documents := oleutil.MustGetProperty(word, "Documents").ToIDispatch()
 	defer documents.Release()
-	document := oleutil.MustCallMethod(documents, "Open", path, false, true).ToIDispatch()
+	document := oleutil.MustCallMethod(documents, "Open", inputDoc, false, true).ToIDispatch()
 	defer document.Release()
-	oleutil.MustCallMethod(document, "SaveAs", filename2, 16).ToIDispatch()
+	oleutil.MustCallMethod(document, "SaveAs", outPutDocx, 16).ToIDispatch()
 	//_, err = oleutil.PutProperty(document, "Saved", true)
 	//if err != nil {
 	//	return nil,err
@@ -299,7 +332,7 @@ func ToDocx(path string) (*os.File, error) {
 	}
 	word.Release()
 	ole.CoUninitialize()
-	open, err := os.Open(filename2)
+	open, err := os.Open(outPutDocx)
 	if err != nil {
 		return nil, err
 	}

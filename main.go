@@ -36,6 +36,21 @@ func init() {
 		fmt.Printf("false %v", err1)
 	}
 
+	// Database alias.
+	name := "default"
+
+	// Drop table and re-create.
+	force := false
+
+	// Print log.
+	verbose := true
+
+	// Error.
+	err := orm.RunSyncdb(name, force, verbose)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 }
 func main() {
 	svConfig := ultity.ReadServerConfig()
@@ -61,7 +76,6 @@ func main() {
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 	//admin group
 	admin := e.Group("/admin", middleware.JWT([]byte("justAdmin")))
-
 	user := e.Group("/user", middleware.JWT([]byte("justUser")))
 	user.GET("/history", controller.History)
 	admin.GET("/user", controller.ListUser)
