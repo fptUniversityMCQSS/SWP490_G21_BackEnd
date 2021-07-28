@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-ole/go-ole"
+	"github.com/go-ole/go-ole/oleutil"
 	"github.com/labstack/echo/v4"
 	_ "github.com/labstack/gommon/log"
 	"github.com/nguyenthenguyen/docx"
@@ -16,10 +18,12 @@ import (
 	"net/http"
 	_ "net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	_ "unsafe"
 )
 
 func Qa(c echo.Context) error {
@@ -28,99 +32,6 @@ func Qa(c echo.Context) error {
 
 func QaResponse(c echo.Context) error {
 
-	//var questions = []*model.Question{
-	//	{
-	//		Content:  "Kha Banh di tu bao nhieu nam",
-	//		Options:  nil,
-	//		Answer:   "A",
-	//		ExamTest: exam,
-	//		Number:   1,
-	//		Mark:     1,
-	//	},
-	//	{
-	//		Content:  "Kha Banh bao nhieu tuoi",
-	//		Options:  nil,
-	//		Answer:   "B",
-	//		ExamTest: exam,
-	//		Number:   2,
-	//		Mark:     1,
-	//	},
-	//}
-	//var option1 = []*model.Option{
-	//	{
-	//		Id:         1,
-	//		QuestionId: questions[0],
-	//		Key:        "A",
-	//		Content:    "10 nam",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//	{
-	//		Id:         2,
-	//		QuestionId: questions[0],
-	//		Key:        "B",
-	//		Content:    "9 nam",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//	{
-	//		Id:         3,
-	//		QuestionId: questions[0],
-	//		Key:        "C",
-	//		Content:    "8 nam",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//	{
-	//		Id:         4,
-	//		QuestionId: questions[0],
-	//		Key:        "D",
-	//		Content:    "khong bi di tu",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//}
-	//var option2 = []*model.Option{
-	//	{
-	//		Id:         5,
-	//		QuestionId: questions[1],
-	//		Key:        "A",
-	//		Content:    "20 t",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//	{
-	//		Id:         6,
-	//		QuestionId: questions[1],
-	//		Key:        "B",
-	//		Content:    "21 t",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//	{
-	//		Id:         7,
-	//		QuestionId: questions[1],
-	//		Key:        "C",
-	//		Content:    "22 t",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//	{
-	//		Id:         8,
-	//		QuestionId: questions[1],
-	//		Key:        "D",
-	//		Content:    "23 t",
-	//		Paragraph:  "Ngo Ba Kha - Kha Banh , dang choi do bi Cong an bat phat tu 10 nam",
-	//	},
-	//}
-	//
-	//var options = [][]*model.Option{
-	//	option1, option2,
-	//}
-	//
-	//for i, question := range questions {
-	//	question.Options = options[i]
-	//}
-
-	// Parse to int64
-
-	//------------
-	// Read files
-	//------------
-	// Multipart form
 	file, err := c.FormFile("file")
 	if err != nil {
 
@@ -142,32 +53,58 @@ func QaResponse(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
-	r, err := docx.ReadDocxFile("examtest/" + file.Filename)
-	// Or read from memory
-	// r, err := docx.ReadDocxFromMemory(data io.ReaderAt, size int64)
+
+	//examtest,err := ConvertXmlToExamTest(src)
+	//if err != nil {
+	//	  convertedDocx ,err := ToDocx()
+	//	  if err != nil {
+	//	  	log.Println(err)
+	//	  }
+	//	examtest,err = ConvertXmlToExamTest(convertedDocx)
+	//	if err != nil {
+	//		log.Println(err)
+	//		//xac dinh file vo van
+	//	}
+	//}
+
+	//
+	//if err != nil {
+	//	// Could not obtain stat, handle error
+	//}
+	//
+	//fmt.Printf("The file is %d bytes long", fi.Size())
+	FileInt := c.Request().Header.Get("Content-Length")
+	size, err := strconv.ParseInt(FileInt, 10, 64)
 	if err != nil {
 		log.Println(err)
 	}
-	//f, err := os.Create("parseDocxToXML/" + file.Filename + ".xml")
-	//defer f.Close()
-	//f.WriteString(r.Editable().GetContent())
+	r, err := docx.ReadDocxFromMemory(src, size)
+	// Or read from memory
+	// r, err := docx.ReadDocxFromMemory(dat
+	//a io.ReaderAt, size int64)
+	if err != nil {
+		dir, err := filepath.Abs("examtest/" + file.Filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fileName, err := ToDocx(dir)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fi, err := fileName.Stat()
+		if err != nil {
+			log.Fatal(err)
+		}
+		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
+		fileName.Close()
+		os.Remove(fileName.Name())
 
-	//xmlFile, err := os.Open("parseDocxToXML/" + file.Filename + ".xml")
-	//// if we os.Open returns an error then handle it
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//
-	//// defer the closing of our xmlFile so that we can parse it later on
-	//defer xmlFile.Close()
-	//
-	//// read our opened xmlFile as a byte array.
-	//byteValue, _ := ioutil.ReadAll(xmlFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
-	// we initialize our Users array
 	var xmlDocument model.XMLDocument
-	// we unmarshal our byteArray which contains our
-	// xmlFiles content into 'users' which we defined above
 
 	err = xml.Unmarshal([]byte(r.Editable().GetContent()), &xmlDocument)
 	if err != nil {
@@ -202,6 +139,7 @@ func QaResponse(c echo.Context) error {
 		VatChua2 = VatChua
 		exam.NumberOfQuestions, _ = strconv.ParseInt(VatChua2, 10, 64)
 	}
+
 	i, err := o.QueryTable("exam_test").PrepareInsert()
 	if err != nil {
 		log.Println(err)
@@ -210,9 +148,20 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(insert)
 	i.Close()
 	tables := xmlDocument.XMLBody.XMLBodyTbls
+	if tables == nil {
+		src.Close()
+		dst.Close()
+		dir, err := filepath.Abs("examtest/" + file.Filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		os.Remove(dir)
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: "Cant not read file doc or docx please try again",
+		})
+	}
 	var Questions []*model.Question
 	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
 	for _, table := range tables {
@@ -272,12 +221,13 @@ func QaResponse(c echo.Context) error {
 		QuestionNumber, _ := strconv.ParseInt(QN, 10, 64)
 		QuestionModel.Number = QuestionNumber
 		QuestionModel.Content = Question
+		QuestionModel.ExamTest = exam
 		Questions = append(Questions, &QuestionModel)
 	}
+
 	i2, err := o.QueryTable("question").PrepareInsert()
 	i3, err := o.QueryTable("option").PrepareInsert()
 	for _, question := range Questions {
-		question.ExamTest = exam
 		id, err := i2.Insert(question)
 		if err != nil {
 			log.Println(err)
@@ -310,4 +260,48 @@ func RemoveEndChar(s string) string {
 		s = s[:sizeQuestion-1]
 	}
 	return s
+}
+
+func ToDocx(path string) (*os.File, error) {
+	filename2 := path[:len(path)-4] + ".docx"
+	err := ole.CoInitialize(0)
+	if err != nil {
+		return nil, err
+	}
+	unknown, err := oleutil.CreateObject("Word.Application")
+	if err != nil {
+		return nil, err
+	}
+	word, err := unknown.QueryInterface(ole.IID_IDispatch)
+	if err != nil {
+		return nil, err
+	}
+	_, err = oleutil.PutProperty(word, "Visible", true)
+	if err != nil {
+		return nil, err
+	}
+	documents := oleutil.MustGetProperty(word, "Documents").ToIDispatch()
+	defer documents.Release()
+	document := oleutil.MustCallMethod(documents, "Open", path, false, true).ToIDispatch()
+	defer document.Release()
+	oleutil.MustCallMethod(document, "SaveAs", filename2, 16).ToIDispatch()
+	//_, err = oleutil.PutProperty(document, "Saved", true)
+	//if err != nil {
+	//	return nil,err
+	//}
+	//_, err = oleutil.CallMethod(documents, "Close", false)
+	//if err != nil {
+	//	return nil,err
+	//}
+	_, err = oleutil.CallMethod(word, "Quit")
+	if err != nil {
+		return nil, err
+	}
+	word.Release()
+	ole.CoUninitialize()
+	open, err := os.Open(filename2)
+	if err != nil {
+		return nil, err
+	}
+	return open, nil
 }
