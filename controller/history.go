@@ -7,6 +7,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,14 +22,16 @@ func History(c echo.Context) error {
 	values, _ := jwt.Parse(token, nil)
 	claims := values.Claims.(jwt.MapClaims)
 	userid := claims["userId"]
+	username := claims["username"].(string)
 	//log.Println("test: " + userid.(string))
 
 	qs, err := o.QueryTable("exam_test").Filter("user_id", userid).All(&history)
 
 	//if has problem in connection
 	if err != nil {
-		fmt.Println("File reading error", err)
-		return err
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "query error",
+		})
 	}
 
 	//add selected data to knowledge_Res list
@@ -40,6 +43,7 @@ func History(c echo.Context) error {
 		hist = append(hist, his)
 	}
 	fmt.Printf("%d history read \n", qs)
+	log.Printf(username + " get list history")
 	return c.JSON(http.StatusOK, hist)
 
 }
@@ -93,6 +97,7 @@ func GetExamById(c echo.Context) error {
 			Name:      examTest.Name,
 			Questions: questionsResponse,
 		}
+		log.Printf(user.Username + " get exam by id :" + examTest.Name)
 		return c.JSON(http.StatusOK, customExamTestResponse)
 	} else {
 		return c.JSON(http.StatusUnauthorized, "You dont have permission to access this")
@@ -103,6 +108,10 @@ func GetExamById(c echo.Context) error {
 
 func DownloadExam(c echo.Context) error {
 	o := orm.NewOrm()
+	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
+	values, _ := jwt.Parse(token, nil)
+	claims := values.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
 	QaId := c.Param("id")
 	intQaId, _ := strconv.ParseInt(QaId, 10, 64)
 	var examTest model.ExamTest
@@ -111,8 +120,11 @@ func DownloadExam(c echo.Context) error {
 
 	//if has problem in connection
 	if err != nil {
-		fmt.Println("File reading error", err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "query error",
+		})
 		return err
 	}
+	log.Printf(username + " download " + examTest.Name)
 	return c.Attachment("examtest/"+examTest.Name, examTest.Name)
 }

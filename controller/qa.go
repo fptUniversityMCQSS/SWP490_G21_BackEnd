@@ -12,7 +12,6 @@ import (
 	"github.com/nguyenthenguyen/docx"
 	"io"
 	_ "io/ioutil"
-	"log"
 	"net/http"
 	_ "net/http"
 	"os"
@@ -123,30 +122,39 @@ func QaResponse(c echo.Context) error {
 	// Multipart form
 	file, err := c.FormFile("file")
 	if err != nil {
-
-		return err
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "file error",
+		})
 	}
 	src, err := file.Open()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Open file error",
+		})
 	}
 	defer src.Close()
 
 	dst, err := os.Create("examtest/" + file.Filename)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Create file error",
+		})
 	}
 	defer dst.Close()
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Copy file error",
+		})
 	}
 	r, err := docx.ReadDocxFile("examtest/" + file.Filename)
 	// Or read from memory
 	// r, err := docx.ReadDocxFromMemory(data io.ReaderAt, size int64)
 	if err != nil {
-		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Read file error",
+		})
 	}
 	//f, err := os.Create("parseDocxToXML/" + file.Filename + ".xml")
 	//defer f.Close()
@@ -204,11 +212,15 @@ func QaResponse(c echo.Context) error {
 	}
 	i, err := o.QueryTable("exam_test").PrepareInsert()
 	if err != nil {
-		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Query error",
+		})
 	}
 	insert, err := i.Insert(exam)
 	if err != nil {
-		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Insert file error",
+		})
 	}
 	fmt.Println(insert)
 	i.Close()
@@ -280,13 +292,17 @@ func QaResponse(c echo.Context) error {
 		question.ExamTest = exam
 		id, err := i2.Insert(question)
 		if err != nil {
-			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Insert question error",
+			})
 		}
 		fmt.Println(id)
 		for _, option := range question.Options {
 			id2, err2 := i3.Insert(option)
 			if err2 != nil {
-				log.Println(err2)
+				return c.JSON(http.StatusInternalServerError, response.Message{
+					Message: "Insert option error",
+				})
 			}
 			fmt.Println(id2)
 		}

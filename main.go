@@ -2,6 +2,8 @@ package main
 
 import (
 	"SWP490_G21_Backend/controller"
+	"SWP490_G21_Backend/controller/Admin"
+	"SWP490_G21_Backend/controller/Authenticate"
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/ultity"
 	"fmt"
@@ -57,28 +59,28 @@ func main() {
 	e.GET("/history/:id", controller.GetExamById)
 	e.GET("/history/:id/download", controller.DownloadExam)
 	e.GET("/api", controller.ApiWeb)
-	e.POST("/login", controller.LoginResponse)
-	e.POST("/register", controller.Register)
+	e.POST("/login", Authenticate.LoginResponse)
+	e.POST("/register", Authenticate.Register)
 	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
 	//admin group
 	admin := e.Group("/admin", middleware.JWT([]byte("justAdmin")))
-	admin.GET("/user", controller.ListUser)
+	admin.GET("/user", Admin.ListUser)
 	/*
 		request: adminToken
 		response: list of user{id, username, role}
 	*/
-	admin.POST("/user", controller.AdminAddUser)
+	admin.POST("/user", Admin.AdminAddUser)
 	/*
 		request: adminToken, username, password, role
 		response: id, username, role
 	*/
-	admin.GET("/user/:id", controller.GetUserById)
-	admin.DELETE("/user/:id", controller.DeleteUserById)
+	admin.GET("/user/:id", Admin.GetUserById)
+	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	/*
 		request: adminToken
 		response: {"message":"delete user successfully"} or {"message":"delete user fail"}
 	*/
-	admin.PATCH("/user/:id", controller.UpdateUser)
+	admin.PATCH("/user/:id", Admin.UpdateUser)
 	/*
 		request: adminToken, role, change_password (true/...), password
 		response: {"message":"edit user successfully"} or {"message":"edit user fail"}
