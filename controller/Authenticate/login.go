@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+const (
+	JwtSignature = "SWP490_G21"
+)
+
 func LoginResponse(c echo.Context) error {
 	Username := c.FormValue("username")
 	Password := c.FormValue("password")
@@ -32,25 +36,34 @@ func LoginResponse(c echo.Context) error {
 
 	claims["username"] = user.Username
 	claims["userId"] = user.Id
+	claims["role"] = user.Role
 	claims["exp"] = time.Now().Add(120 * time.Minute).Unix() // payload
-	if user.Role == "user" {
-		t, err := token.SignedString([]byte("justUser"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, "login fail")
-		}
-		log.Printf(Username + "login success")
-		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
-	} else if user.Role == "admin" {
-		t, err := token.SignedString([]byte("justAdmin"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, "login fail")
-		}
-		log.Printf(Username + " login success ")
-		return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
 
+	t, err := token.SignedString([]byte(JwtSignature))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "login fail")
 	}
-	//signature
+	log.Printf(Username + "login success")
+	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
 
-	return nil
+	//if user.Role == "user" {
+	//	t, err := token.SignedString([]byte("justUser"))
+	//	if err != nil {
+	//		return c.JSON(http.StatusBadRequest, "login fail")
+	//	}
+	//	log.Printf(Username + "login success")
+	//	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
+	//} else if user.Role == "admin" {
+	//	t, err := token.SignedString([]byte("justAdmin"))
+	//	if err != nil {
+	//		return c.JSON(http.StatusBadRequest, "login fail")
+	//	}
+	//	log.Printf(Username + " login success ")
+	//	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
+	//
+	//}
+	////signature
+	//
+	//return nil
 
 }

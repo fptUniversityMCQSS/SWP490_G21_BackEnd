@@ -5,16 +5,18 @@ import (
 	"SWP490_G21_Backend/controller/Admin"
 	"SWP490_G21_Backend/controller/Authenticate"
 	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/ultity"
 	"fmt"
 	"github.com/astaxie/beego/orm"
+	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
-	"time"
+	"strings"
 )
 
 func init() {
@@ -49,64 +51,63 @@ func main() {
 		AllowMethods: []string{"*"},
 	}))
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+
+	signedIn := e.Group("", middleware.JWT([]byte(Authenticate.JwtSignature)))
+
+	adminPermission := Role{
+		"-admin-",
+	}
+	staffPermission := Role{
+		adminPermission.requirement + "-staff-",
+	}
+	userPermission := Role{
+		staffPermission.requirement + "-user-",
+	}
 	//api
 	e.GET("/", controller.Home)
 	e.GET("/home", controller.Home)
 	e.GET("/qa", controller.Qa)
-	e.GET("/knowledge", controller.ListKnowledge)
-	e.PUT("/knowledge", controller.KnowledgeUpload)
-	e.GET("/history", controller.History, middleware.JWT([]byte("justAdmin")))
-	e.GET("/history/:id", controller.GetExamById)
-	e.GET("/history/:id/download", controller.DownloadExam)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", Authenticate.LoginResponse)
 	e.POST("/register", Authenticate.Register)
-	e.PUT("/qa", controller.QaResponse, middleware.JWT([]byte("justAdmin")))
-	//admin group
-	admin := e.Group("/admin", middleware.JWT([]byte("justAdmin")))
+
+	user := signedIn.Group("", userPermission.Header)
+	user.PUT("/qa", controller.QaResponse)
+	user.GET("/history", controller.History)
+	user.GET("/history/:id", controller.GetExamById)
+	user.GET("/history/:id/download", controller.DownloadExam)
+
+	staff := signedIn.Group("", staffPermission.Header)
+	staff.GET("/knowledge", controller.ListKnowledge)
+	staff.PUT("/knowledge", controller.KnowledgeUpload)
+	staff.GET("/knowledge/:id", controller.DownloadKnowledge)
+	staff.DELETE("/knowledge/:id", controller.DeleteKnowledge)
+
+	admin := signedIn.Group("/admin", adminPermission.Header)
 	admin.GET("/user", Admin.ListUser)
-	/*
-		request: adminToken
-		response: list of user{id, username, role}
-	*/
 	admin.POST("/user", Admin.AdminAddUser)
-	/*
-		request: adminToken, username, password, role
-		response: id, username, role
-	*/
 	admin.GET("/user/:id", Admin.GetUserById)
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
-	/*
-		request: adminToken
-		response: {"message":"delete user successfully"} or {"message":"delete user fail"}
-	*/
 	admin.PATCH("/user/:id", Admin.UpdateUser)
-	/*
-		request: adminToken, role, change_password (true/...), password
-		response: {"message":"edit user successfully"} or {"message":"edit user fail"}
-	*/
-	e.GET("/knowledge/:id", controller.DownloadKnowledge)
-	/*
-		request: adminToken
-		response: file
-	*/
-	e.DELETE("/knowledge/:id", controller.DeleteKnowledge)
-	/*
-		request: adminToken
-		response: {"message":"delete knowledge successfully"} or {"message":"delete knowledge fail"}
-	*/
-
-	e.GET("/test", func(context echo.Context) error {
-		sess, _ := session.Get("session", context)
-		sess.Options = &sessions.Options{
-			Path:   "/",
-			MaxAge: 86400 * 7, // in seconds
-		}
-		dt := time.Now()
-		sess.Values["username"] = dt.String()
-		sess.Save(context.Request(), context.Response())
-		return context.HTML(http.StatusOK, "ok")
-	})
 
 	e.Logger.Fatal(e.Start(":" + svConfig.PortBackend))
+}
+
+type Role struct {
+	requirement string
+}
+
+func (r *Role) Header(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Get("user").(*jwt.Token)
+		claims := token.Claims.(jwt.MapClaims)
+		role := claims["role"].(string)
+		if strings.Contains(r.requirement, role) {
+			return next(c)
+		} else {
+			return c.JSON(http.StatusForbidden, response.Message{
+				Message: "Access denied",
+			})
+		}
+	}
 }
