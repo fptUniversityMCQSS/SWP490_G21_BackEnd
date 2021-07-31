@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `qadatabase` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `qadatabase`;
--- MySQL dump 10.13  Distrib 8.0.20, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.25, for Win64 (x86_64)
 --
 -- Host: localhost    Database: qadatabase
 -- ------------------------------------------------------
--- Server version	8.0.20
+-- Server version	8.0.25
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -31,6 +31,7 @@ CREATE TABLE `exam_test` (
                              `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `subject` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                              `number_of_questions` bigint NOT NULL DEFAULT '0',
+                             `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                              PRIMARY KEY (`id`),
                              KEY `FK_UserIdExamTest_idx` (`user_id`),
                              CONSTRAINT `FK_UserIdExamTest` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
@@ -43,7 +44,7 @@ CREATE TABLE `exam_test` (
 
 LOCK TABLES `exam_test` WRITE;
 /*!40000 ALTER TABLE `exam_test` DISABLE KEYS */;
-INSERT INTO `exam_test` VALUES (37,'2021-07-16 14:23:35',1,'TestFormat.docx','SWT391',30),(38,'2021-07-16 14:24:14',1,'SWR301.docx','SWR301',30),(39,'2021-07-16 14:24:20',1,'SWE102.docx','SWE102',30),(40,'2021-07-16 14:24:27',1,'SSC201.docx','SSC201',30),(41,'2021-07-16 14:24:33',1,'PRO192.docx','PRO192',30),(42,'2021-07-16 14:24:41',1,'PRN292.docx','PRN292',30),(43,'2021-07-16 14:24:50',1,'PRM391.docx','PRM391',30),(44,'2021-07-16 14:24:58',1,'PRF192.docx','PRF192',30),(45,'2021-07-16 14:25:08',1,'MLN101.docx','MLN101',30),(46,'2021-07-16 14:25:17',1,'MAE101.docx','MAE101',30),(47,'2021-07-16 14:25:28',1,'ISC301.docx','ISC301',30),(48,'2021-07-16 14:26:07',1,'JPD121.docx','JPD121',30),(49,'2021-07-16 14:26:15',1,'HCI201.docx','HCI201',30),(50,'2021-07-16 14:26:24',1,'DBW301.docx','DBW301',30),(51,'2021-07-16 14:26:31',1,'CEA201.docx','CEA201',30);
+INSERT INTO `exam_test` VALUES (37,'2021-07-16 14:23:35',1,'TestFormat.docx','SWT391',30,''),(38,'2021-07-16 14:24:14',1,'SWR301.docx','SWR301',30,''),(39,'2021-07-16 14:24:20',1,'SWE102.docx','SWE102',30,''),(40,'2021-07-16 14:24:27',1,'SSC201.docx','SSC201',30,''),(41,'2021-07-16 14:24:33',1,'PRO192.docx','PRO192',30,''),(42,'2021-07-16 14:24:41',1,'PRN292.docx','PRN292',30,''),(43,'2021-07-16 14:24:50',1,'PRM391.docx','PRM391',30,''),(44,'2021-07-16 14:24:58',1,'PRF192.docx','PRF192',30,''),(45,'2021-07-16 14:25:08',1,'MLN101.docx','MLN101',30,''),(46,'2021-07-16 14:25:17',1,'MAE101.docx','MAE101',30,''),(47,'2021-07-16 14:25:28',1,'ISC301.docx','ISC301',30,''),(48,'2021-07-16 14:26:07',1,'JPD121.docx','JPD121',30,''),(49,'2021-07-16 14:26:15',1,'HCI201.docx','HCI201',30,''),(50,'2021-07-16 14:26:24',1,'DBW301.docx','DBW301',30,''),(51,'2021-07-16 14:26:31',1,'CEA201.docx','CEA201',30,'');
 /*!40000 ALTER TABLE `exam_test` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -170,4 +171,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-16 21:34:16
+-- Dump completed on 2021-07-29  0:46:50
