@@ -3,6 +3,7 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"encoding/json"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
@@ -58,8 +59,6 @@ func KnowledgeUpload(c echo.Context) error {
 	userId := claims["userId"].(float64)
 	username := claims["username"].(string)
 	IntUserId := int64(userId)
-	//fmt.Println("date: ", date)
-	//fmt.Println("userId: ", userId)
 
 	//-----------
 	// Read file
@@ -80,19 +79,6 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 	defer src.Close()
 
-	//defer func(src multipart.File) {
-	//	err := src.Close()
-	//	if err != nil {
-	//
-	//	}
-	//}(src)
-	//data, err := ioutil.ReadAll(src)
-	//if err != nil {
-	//	fmt.Println("File reading error", err)
-	//	return err
-	//}
-	//fmt.Println("Contents of file:", string(data))
-
 	// Destination
 	dst, err := os.Create("testdoc/" + file.Filename)
 	if err != nil {
@@ -109,12 +95,6 @@ func KnowledgeUpload(c echo.Context) error {
 		})
 	}
 
-	//qs := o.QueryTable("knowledge")
-
-	//dateParsed, err := time.Parse("Jan 2, 2006 at 3:04pm (MST)", time.Now().String())
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 	user := &model.User{
 		Id:       IntUserId,
 		Username: username,
@@ -150,7 +130,23 @@ func KnowledgeUpload(c echo.Context) error {
 		Name:     file.Filename,
 		Date:     time.Now(),
 		Username: user.Username,
+		Status:   "Encoding",
 	}
+
+	enc := json.NewEncoder(c.Response())
+	enc.Encode(knowledgeResponse)
+	c.Response().Flush()
+
+	time.Sleep(3 * time.Second)
+
+	knowledgeResponse = response.KnowledgResponse{
+		Id:       insert,
+		Name:     file.Filename,
+		Date:     time.Now(),
+		Username: user.Username,
+		Status:   "Ready",
+	}
+
 	log.Printf(username + " upload file : " + file.Filename)
 	return c.JSON(http.StatusOK, knowledgeResponse)
 }

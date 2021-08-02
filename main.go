@@ -91,6 +91,7 @@ func main() {
 	admin.PATCH("/user/:id", Admin.UpdateUser)
 
 	e.Logger.Fatal(e.Start(":" + svConfig.PortBackend))
+
 }
 
 type Role struct {
