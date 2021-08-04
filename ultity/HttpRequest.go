@@ -2,6 +2,7 @@ package ultity
 
 import (
 	"SWP490_G21_Backend/model"
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -48,12 +49,22 @@ func SendFileRequest(url string, method string, path string) {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return
+	reader := bufio.NewReader(res.Body)
+	str := ""
+	for {
+		b, err := reader.ReadByte()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Fatal("Error reading HTTP response: ", err.Error())
+		}
+		str += string(b)
+		if reader.Buffered() <= 0 {
+			println(str)
+			str = ""
+		}
 	}
-	fmt.Println(string(body))
 }
 
 type QuestionRequest struct {
@@ -113,7 +124,6 @@ func SendQuestions(url string, method string, questions []*model.Question) {
 
 		}
 	}(res.Body)
-
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
