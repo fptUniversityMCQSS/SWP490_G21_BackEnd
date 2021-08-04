@@ -8,7 +8,6 @@ import (
 
 type DBConfig struct {
 	DbServer   string
-	Abc        string
 	DbPort     string
 	DbUser     string
 	DbPassword string
@@ -17,8 +16,16 @@ type DBConfig struct {
 
 type ServerConfig struct {
 	Server       string
+	AIServer     string
 	PortBackend  string
 	PortFrontend string
+}
+
+var AIServer = ""
+
+func init() {
+	serverConfig := ReadServerConfig()
+	AIServer = serverConfig.AIServer
 }
 
 func ReadDBConfig() DBConfig {

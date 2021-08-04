@@ -39,8 +39,10 @@ func init() {
 	if err1 != nil {
 		fmt.Printf("false %v", err1)
 	}
-
 }
+
+const AI_server = "abc"
+
 func main() {
 	svConfig := ultity.ReadServerConfig()
 	//start echo

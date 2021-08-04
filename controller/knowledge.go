@@ -3,6 +3,7 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/ultity"
 	"encoding/json"
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
@@ -137,7 +138,7 @@ func KnowledgeUpload(c echo.Context) error {
 	enc.Encode(knowledgeResponse)
 	c.Response().Flush()
 
-	time.Sleep(3 * time.Second)
+	ultity.SendFileRequest(ultity.AIServer+"/knowledge", "POST", "testdoc/"+file.Filename)
 
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,

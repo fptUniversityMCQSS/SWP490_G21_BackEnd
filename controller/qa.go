@@ -3,6 +3,7 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/ultity"
 	"encoding/xml"
 	"fmt"
 	"github.com/astaxie/beego/orm"
@@ -84,26 +85,6 @@ func QaResponse(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
-
-	//examtest,err := ConvertXmlToExamTest(src)
-	//if err != nil {
-	//	  convertedDocx ,err := ToDocx()
-	//	  if err != nil {
-	//	  	log.Println(err)
-	//	  }
-	//	examtest,err = ConvertXmlToExamTest(convertedDocx)
-	//	if err != nil {
-	//		log.Println(err)
-	//		//xac dinh file vo van
-	//	}
-	//}
-
-	//
-	//if err != nil {
-	//	// Could not obtain stat, handle error
-	//}
-	//
-	//fmt.Printf("The file is %d bytes long", fi.Size())
 	FileInt := c.Request().Header.Get("Content-Length")
 	size, err := strconv.ParseInt(FileInt, 10, 64)
 	if err != nil {
@@ -272,6 +253,8 @@ func QaResponse(c echo.Context) error {
 		Name: exam.Name,
 		Date: timeNow,
 	}
+
+	ultity.SendQuestions(ultity.AIServer+"/qa", "POST", Questions)
 
 	return c.JSON(http.StatusOK, examResponse)
 
