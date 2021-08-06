@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="Done Api DownloadKnowledge">
+    <list default="true" id="dc8dbd29-63fe-4c1d-858d-cccdd1627743" name="Default Changelist" comment="complete final api qa response">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/Admin/manageUser .go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/history.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/history.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/knowledge.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/knowledge.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/Authenticate/login.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/qa.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/qa.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/register.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/Authenticate/register.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/user.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -24,11 +19,11 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/go/go1.16.5" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../Go-WorkSpace3/go1.16.4" />
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="minhpa_be_fixAdminAPI" />
+        <entry key="$PROJECT_DIR$" value="dev" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
