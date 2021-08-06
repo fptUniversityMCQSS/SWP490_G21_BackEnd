@@ -5,7 +5,7 @@ import (
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/ultity"
 	"github.com/astaxie/beego/orm"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"

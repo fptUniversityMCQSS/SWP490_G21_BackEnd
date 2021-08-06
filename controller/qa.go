@@ -3,13 +3,12 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/ultity"
 	"encoding/xml"
 	"fmt"
 	"github.com/astaxie/beego/orm"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	_ "github.com/labstack/gommon/log"
 	"github.com/nguyenthenguyen/docx"
@@ -254,7 +253,7 @@ func QaResponse(c echo.Context) error {
 		Date: timeNow,
 	}
 
-	ultity.SendQuestions(ultity.AIServer+"/qa", "POST", Questions)
+	//ultity.SendQuestions(ultity.AIServer+"/qa", "POST", Questions)
 
 	return c.JSON(http.StatusOK, examResponse)
 
