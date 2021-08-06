@@ -41,8 +41,6 @@ func init() {
 	}
 }
 
-const AI_server = "abc"
-
 func main() {
 	svConfig := ultity.ReadServerConfig()
 	//start echo
