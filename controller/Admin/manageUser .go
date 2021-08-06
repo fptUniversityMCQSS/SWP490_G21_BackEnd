@@ -14,10 +14,9 @@ import (
 )
 
 func ListUser(c echo.Context) error {
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
 
 	o := orm.NewOrm()
 	var user []*model.User
@@ -40,7 +39,7 @@ func ListUser(c echo.Context) error {
 		us.Role = u.Role
 		lists = append(lists, us)
 	}
-	log.Printf(username + " get list user ")
+	log.Printf(userName + " get list user ")
 	return c.JSON(http.StatusOK, lists)
 
 }
@@ -152,11 +151,9 @@ func DeleteUserById(c echo.Context) error {
 }
 
 func UpdateUser(c echo.Context) error {
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	//userid := claims["userId"]
-	Username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
 
 	changePassword := c.FormValue("change_password")
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -195,7 +192,7 @@ func UpdateUser(c echo.Context) error {
 			})
 		}
 	}
-	log.Printf(Username + "edit user: " + user.Username)
+	log.Printf(userName + "edit user: " + user.Username)
 	return c.JSON(http.StatusOK, response.Message{
 		Message: "edit user successfully",
 	})

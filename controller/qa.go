@@ -34,11 +34,10 @@ func QaResponse(c echo.Context) error {
 
 	o := orm.NewOrm()
 	var intUserId int64
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	userId := claims["userId"].(float64) //Ep kieu sang float64
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
+	userId := claims["userId"].(float64)
 	intUserId = int64(userId)
 
 	file, err := c.FormFile("file")

@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func History(c echo.Context) error {
@@ -18,14 +17,13 @@ func History(c echo.Context) error {
 	var history []*model.ExamTest
 	var hist []*response.HistoryResponse
 
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	userid := claims["userId"]
-	username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
+	userId := claims["userId"].(float64)
 	//log.Println("test: " + userid.(string))
 
-	qs, err := o.QueryTable("exam_test").Filter("user_id", userid).All(&history)
+	qs, err := o.QueryTable("exam_test").Filter("user_id", userId).All(&history)
 
 	//if has problem in connection
 	if err != nil {
@@ -43,14 +41,13 @@ func History(c echo.Context) error {
 		hist = append(hist, his)
 	}
 	fmt.Printf("%d history read \n", qs)
-	log.Printf(username + " get list history")
+	log.Printf(userName + " get list history")
 	return c.JSON(http.StatusOK, hist)
 
 }
 func GetExamById(c echo.Context) error {
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
 	userId := claims["userId"].(float64)
 	IntUserId := int64(userId)
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -108,10 +105,10 @@ func GetExamById(c echo.Context) error {
 
 func DownloadExam(c echo.Context) error {
 	o := orm.NewOrm()
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
+
 	QaId := c.Param("id")
 	intQaId, _ := strconv.ParseInt(QaId, 10, 64)
 	var examTest model.ExamTest
@@ -125,6 +122,6 @@ func DownloadExam(c echo.Context) error {
 		})
 		return err
 	}
-	log.Printf(username + " download " + examTest.Name)
+	log.Printf(userName + " download " + examTest.Name)
 	return c.Attachment("examtest/"+examTest.Name, examTest.Name)
 }

@@ -3,7 +3,6 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/ultity"
 	"encoding/json"
 	"github.com/astaxie/beego/orm"
 	"github.com/golang-jwt/jwt"
@@ -12,18 +11,18 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
-	"strings"
 	"time"
 )
 
 func ListKnowledge(c echo.Context) error {
 
 	o := orm.NewOrm()
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
+
 	//userId := claims["userId"].(float64)
 
 	var knows []*model.Knowledge
@@ -46,7 +45,7 @@ func ListKnowledge(c echo.Context) error {
 		knowR.Username = k.User.Username
 		knowRs = append(knowRs, knowR)
 	}
-	log.Printf(username + "get list knowledge")
+	log.Printf(userName + " get list knowledge")
 	return c.JSON(http.StatusOK, knowRs)
 
 }
@@ -54,11 +53,10 @@ func ListKnowledge(c echo.Context) error {
 func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
 	o := orm.NewOrm()
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
 	userId := claims["userId"].(float64)
-	username := claims["username"].(string)
 	IntUserId := int64(userId)
 
 	//-----------
@@ -80,12 +78,31 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 	defer src.Close()
 
-	// Destination
-	dst, err := os.Create("testdoc/" + file.Filename)
+	userPath := "knowledge/" + userName
+	timeNow := time.Now()
+	re := regexp.MustCompile(":")
+	timeNowAfterRegex := re.ReplaceAllString(timeNow.String(), "-")
+	fileFolderPath := userPath + "/" + timeNowAfterRegex
+	if _, err := os.Stat(userPath); os.IsNotExist(err) {
+		err := os.Mkdir(userPath, os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+	if _, err := os.Stat(fileFolderPath); os.IsNotExist(err) {
+		err := os.Mkdir(fileFolderPath, os.ModeDir)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+
+	filePath := fileFolderPath + "/" + file.Filename
+
+	dst, err := os.Create(filePath)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Create file in testdoc/ error",
-		})
+		return err
 	}
 	defer dst.Close()
 
@@ -98,12 +115,13 @@ func KnowledgeUpload(c echo.Context) error {
 
 	user := &model.User{
 		Id:       IntUserId,
-		Username: username,
+		Username: userName,
 	}
 
 	know := &model.Knowledge{
 		Name: file.Filename,
 		User: user,
+		Path: fileFolderPath,
 	}
 	i, err := o.QueryTable("knowledge").PrepareInsert()
 	if err != nil {
@@ -138,7 +156,7 @@ func KnowledgeUpload(c echo.Context) error {
 	enc.Encode(knowledgeResponse)
 	c.Response().Flush()
 
-	ultity.SendFileRequest(ultity.AIServer+"/knowledge", "POST", "testdoc/"+file.Filename)
+	//ultity.SendFileRequest(ultity.AIServer+"/knowledge", "POST", "knowledge/"+file.Filename)
 
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,
@@ -148,16 +166,15 @@ func KnowledgeUpload(c echo.Context) error {
 		Status:   "Ready",
 	}
 
-	log.Printf(username + " upload file : " + file.Filename)
+	log.Printf(userName + " upload file : " + file.Filename)
 	return c.JSON(http.StatusOK, knowledgeResponse)
 }
 
 func DownloadKnowledge(c echo.Context) error {
 	o := orm.NewOrm()
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
 
 	knowledgeId := c.Param("id")
 	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
@@ -172,21 +189,21 @@ func DownloadKnowledge(c echo.Context) error {
 		})
 	}
 
-	//err2, _ := os.Create("testdoc/" + knowledge.Name + ".txt")
+	//err2, _ := os.Create("knowledgeknowledge/" + knowledge.Name + ".txt")
 	//if err2 != nil {
 	//	fmt.Println(err2)
 	//}
 	//return c.JSON(http.StatusOK, knowledge)
-	log.Printf(username + " downloaded " + knowledge.Name)
-	return c.Attachment("testdoc/"+knowledge.Name, knowledge.Name)
+	log.Printf(userName + " downloaded " + knowledge.Name)
+
+	return c.Attachment(knowledge.Path+"/"+knowledge.Name, knowledge.Name)
 }
 
 func DeleteKnowledge(c echo.Context) error {
 	o := orm.NewOrm()
-	token := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
-	values, _ := jwt.Parse(token, nil)
-	claims := values.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
 
 	knowledgeId := c.Param("id")
 	var knowledge model.Knowledge
@@ -203,7 +220,8 @@ func DeleteKnowledge(c echo.Context) error {
 			Message: "query error",
 		})
 	}
-	err2 := os.Remove("testdoc/" + knowledge.Name)
+
+	err2 := os.RemoveAll(knowledge.Path)
 
 	if err2 != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -213,6 +231,6 @@ func DeleteKnowledge(c echo.Context) error {
 	message := response.Message{
 		Message: "Delete successfully",
 	}
-	log.Printf(username + " delete file " + knowledge.Name)
+	log.Printf(userName + " delete file " + knowledge.Name)
 	return c.JSON(http.StatusOK, message)
 }
