@@ -3,7 +3,6 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -23,10 +22,11 @@ func History(c echo.Context) error {
 	userId := claims["userId"].(float64)
 	//log.Println("test: " + userid.(string))
 
-	qs, err := o.QueryTable("exam_test").Filter("user_id", userId).All(&history)
+	_, err := o.QueryTable("exam_test").Filter("user_id", userId).All(&history)
 
 	//if has problem in connection
 	if err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "query error",
 		})
@@ -40,7 +40,6 @@ func History(c echo.Context) error {
 		his.Date = h.Date
 		hist = append(hist, his)
 	}
-	fmt.Printf("%d history read \n", qs)
 	log.Printf(userName + " get list history")
 	return c.JSON(http.StatusOK, hist)
 

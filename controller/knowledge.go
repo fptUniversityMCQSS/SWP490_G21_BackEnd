@@ -83,26 +83,16 @@ func KnowledgeUpload(c echo.Context) error {
 	re := regexp.MustCompile(":")
 	timeNowAfterRegex := re.ReplaceAllString(timeNow.String(), "-")
 	fileFolderPath := userPath + "/" + timeNowAfterRegex
-	if _, err := os.Stat(userPath); os.IsNotExist(err) {
-		err := os.Mkdir(userPath, os.ModeDir)
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
-	}
-	if _, err := os.Stat(fileFolderPath); os.IsNotExist(err) {
-		err := os.Mkdir(fileFolderPath, os.ModeDir)
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
+	err = os.MkdirAll(fileFolderPath, os.ModePerm)
+	if err != nil {
+		log.Print(err)
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
 
 	dst, err := os.Create(filePath)
 	if err != nil {
-		return err
+		log.Print(err)
 	}
 	defer dst.Close()
 
@@ -126,7 +116,7 @@ func KnowledgeUpload(c echo.Context) error {
 	i, err := o.QueryTable("knowledge").PrepareInsert()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Query error",
+			Message: err.Error(),
 		})
 	}
 	//fmt.Println(i)
