@@ -4,11 +4,8 @@ import (
 	"SWP490_G21_Backend/controller"
 	"SWP490_G21_Backend/controller/Admin"
 	"SWP490_G21_Backend/controller/Authenticate"
-	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/ultity"
-	"fmt"
-	"github.com/astaxie/beego/orm"
+	"SWP490_G21_Backend/utility"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/sessions"
@@ -19,30 +16,7 @@ import (
 	"strings"
 )
 
-func init() {
-	dbConfig := ultity.ReadDBConfig()
-	stringConfig := dbConfig.DbUser + ":" +
-		dbConfig.DbPassword + "@tcp(" +
-		dbConfig.DbServer + ":" +
-		dbConfig.DbPort + ")/" +
-		dbConfig.Database + "?charset=utf8"
-	orm.RegisterModel(
-		new(model.Knowledge),
-		new(model.Option),
-		new(model.Question),
-		new(model.User),
-		new(model.ExamTest),
-	)
-	orm.RegisterDriver("mysql", orm.DRMySQL)
-
-	err1 := orm.RegisterDataBase("default", "mysql", stringConfig)
-	if err1 != nil {
-		fmt.Printf("false %v", err1)
-	}
-}
-
 func main() {
-	svConfig := ultity.ReadServerConfig()
 	//start echo
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -63,10 +37,9 @@ func main() {
 	userPermission := Role{
 		staffPermission.requirement + "-user-",
 	}
+
 	//api
 	e.GET("/", controller.Home)
-	e.GET("/home", controller.Home)
-	e.GET("/qa", controller.Qa)
 	e.GET("/api", controller.ApiWeb)
 	e.POST("/login", Authenticate.LoginResponse)
 	e.POST("/register", Authenticate.Register)
@@ -90,7 +63,7 @@ func main() {
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)
 
-	e.Logger.Fatal(e.Start(":" + svConfig.PortBackend))
+	e.Logger.Fatal(e.Start(":" + utility.ConfigData.PortBackend))
 
 }
 

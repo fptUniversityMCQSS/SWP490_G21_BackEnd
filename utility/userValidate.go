@@ -1,4 +1,4 @@
-package ultity
+package utility
 
 func CheckUsername(username string) bool {
 	if username == "" {

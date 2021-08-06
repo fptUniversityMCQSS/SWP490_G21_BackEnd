@@ -1,14 +1,7 @@
-knowledge/
-
-# Editor directories and files
 .idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-workspace.xml
-properties.ini
+knowledge/
+examtest/
 
+workspace.xml
 !knowledge/.gitkeep
 !examtest/.gitkeep

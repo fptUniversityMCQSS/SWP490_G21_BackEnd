@@ -3,7 +3,7 @@ package Authenticate
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"github.com/astaxie/beego/orm"
+	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -22,10 +22,9 @@ func LoginResponse(c echo.Context) error {
 		Username: Username,
 		Password: Password,
 	}
-	o := orm.NewOrm()
 
 	// Get a QuerySeter object. User is table name
-	err := o.Read(user, "username", "password")
+	err := utility.DB.Read(user, "username", "password")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "InvalidUser")
 	}

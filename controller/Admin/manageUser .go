@@ -3,7 +3,7 @@ package Admin
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/ultity"
+	"SWP490_G21_Backend/utility"
 	"github.com/astaxie/beego/orm"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -60,7 +60,7 @@ func AdminAddUser(c echo.Context) error {
 		Username: username,
 	}
 	o := orm.NewOrm()
-	if ultity.CheckUsername(username) {
+	if utility.CheckUsername(username) {
 		err := o.Read(user, "username")
 
 		if err == nil {
@@ -72,10 +72,10 @@ func AdminAddUser(c echo.Context) error {
 				Message: "query error",
 			})
 		}
-		if ultity.CheckRole(role) {
+		if utility.CheckRole(role) {
 			user.Role = role
 		}
-		if ultity.CheckPassword(password) {
+		if utility.CheckPassword(password) {
 			user.Password = password
 		}
 
@@ -162,7 +162,7 @@ func UpdateUser(c echo.Context) error {
 		Id: id,
 	}
 	role := c.FormValue("role")
-	if ultity.CheckRole(role) {
+	if utility.CheckRole(role) {
 		user.Role = role
 	} else {
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -171,7 +171,7 @@ func UpdateUser(c echo.Context) error {
 	}
 	if changePassword == "true" {
 		password := c.FormValue("password")
-		if ultity.CheckPassword(password) {
+		if utility.CheckPassword(password) {
 			user.Password = password
 			_, err := o.Update(user, "role", "password")
 			if err != nil {

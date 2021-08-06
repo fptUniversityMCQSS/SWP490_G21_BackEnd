@@ -3,6 +3,7 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/utility"
 	"encoding/xml"
 	"fmt"
 	"github.com/astaxie/beego/orm"
@@ -252,7 +253,7 @@ func QaResponse(c echo.Context) error {
 		Date: timeNow,
 	}
 
-	//ultity.SendQuestions(ultity.AIServer+"/qa", "POST", Questions)
+	utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
 
 	return c.JSON(http.StatusOK, examResponse)
 

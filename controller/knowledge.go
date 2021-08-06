@@ -156,7 +156,7 @@ func KnowledgeUpload(c echo.Context) error {
 	enc.Encode(knowledgeResponse)
 	c.Response().Flush()
 
-	//ultity.SendFileRequest(ultity.AIServer+"/knowledge", "POST", "knowledge/"+file.Filename)
+	//utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", "knowledge/"+file.Filename)
 
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,
