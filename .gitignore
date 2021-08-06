@@ -1,7 +1,5 @@
-.idea
+.idea/
 knowledge/
 examtest/
 
 workspace.xml
-!knowledge/.gitkeep
-!examtest/.gitkeep

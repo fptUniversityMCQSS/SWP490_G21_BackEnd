@@ -45,10 +45,20 @@ func init() {
 
 	err = orm.RegisterDataBase("default", ConfigData.DBDriver, stringConfig)
 	if err != nil {
-		log.Printf("false %v", err)
+		log.Print(err)
 	}
 
 	DB = orm.NewOrm()
+
+	err = os.MkdirAll("examtest", os.ModePerm)
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = os.MkdirAll("knowledge", os.ModePerm)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func ReadConfig() Config {
