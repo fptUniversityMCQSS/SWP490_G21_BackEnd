@@ -1,4 +1,4 @@
-testdoc/
+knowledge/
 
 # Editor directories and files
 .idea
@@ -10,5 +10,5 @@ testdoc/
 workspace.xml
 properties.ini
 
-!testdoc/.gitkeep
+!knowledge/.gitkeep
 !examtest/.gitkeep
