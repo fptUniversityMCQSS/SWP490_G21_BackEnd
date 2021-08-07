@@ -5,8 +5,6 @@ import (
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	"encoding/xml"
-	"fmt"
-	"github.com/astaxie/beego/orm"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
 	"github.com/golang-jwt/jwt"
@@ -29,7 +27,6 @@ import (
 
 func QaResponse(c echo.Context) error {
 
-	o := orm.NewOrm()
 	var intUserId int64
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
@@ -39,12 +36,17 @@ func QaResponse(c echo.Context) error {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-
-		return err
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "send file error",
+		})
 	}
 	src, err := file.Open()
 	if err != nil {
-		return err
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "open file error",
+		})
 	}
 	defer src.Close()
 
@@ -56,48 +58,77 @@ func QaResponse(c echo.Context) error {
 	err = os.MkdirAll(fileFolderPath, os.ModePerm)
 	if err != nil {
 		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Can't create directory",
+		})
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
 
 	dst, err := os.Create(filePath)
 	if err != nil {
-		return err
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Can't create directory of file",
+		})
 	}
 	defer dst.Close()
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
-		return err
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Copy file error",
+		})
 	}
+
 	FileInt := c.Request().Header.Get("Content-Length")
 	size, err := strconv.ParseInt(FileInt, 10, 64)
 	if err != nil {
 		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Can not parse file size",
+		})
 	}
 
 	r, err := docx.ReadDocxFromMemory(src, size)
-	// Or read from memory
-	// r, err := docx.ReadDocxFromMemory(dat
-	//a io.ReaderAt, size int64)
+
 	if err != nil {
 		dir, err := filepath.Abs(fileFolderPath)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Can not get directory path",
+			})
 		}
 		fileName, err := ToDocx(dir, file.Filename)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Can not parse file",
+			})
 		}
 		fi, err := fileName.Stat()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Stat() file error",
+			})
 		}
 		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
 		fileName.Close()
-		os.Remove(fileName.Name())
+		err3 := os.Remove(fileName.Name())
+		if err3 != nil {
+			log.Println(err3)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Romove file error",
+			})
+		}
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Read file error",
+			})
 		}
 	}
 
@@ -105,7 +136,10 @@ func QaResponse(c echo.Context) error {
 
 	err = xml.Unmarshal([]byte(r.Editable().GetContent()), &xmlDocument)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Parse xml false",
+		})
 	}
 
 	var user = &model.User{
@@ -118,37 +152,70 @@ func QaResponse(c echo.Context) error {
 		Path: filePath,
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
-	var VatChua2 string
+	var Content string
 	for i := 0; i < 2; i++ {
-		exam.Subject = VatChua2
-		VatChua := ""
+		exam.Subject = Content
+		NumberOfQuestions := ""
 		for j := 0; j < len(array[i].XMLBodyPr); j++ {
-			VatChua += array[i].XMLBodyPr[j].Subject
+			NumberOfQuestions += array[i].XMLBodyPr[j].Subject
 		}
 		re, _ := regexp.Compile("(.*)\\s")
-		VatChua = re.ReplaceAllString(VatChua, "")
-		VatChua2 = VatChua
-		exam.NumberOfQuestions, _ = strconv.ParseInt(VatChua2, 10, 64)
+		NumberOfQuestions = re.ReplaceAllString(NumberOfQuestions, "")
+		Content = NumberOfQuestions
+		exam.NumberOfQuestions, _ = strconv.ParseInt(Content, 10, 64)
 	}
 
-	i, err := o.QueryTable("exam_test").PrepareInsert()
+	i, err := utility.DB.QueryTable("exam_test").PrepareInsert()
 	if err != nil {
 		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Query table examtest failed",
+		})
 	}
 	insert, err := i.Insert(exam)
 	if err != nil {
 		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "insert exam error",
+		})
 	}
-	i.Close()
+	err2 := i.Close()
+	if err2 != nil {
+		log.Println(err2)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Close connection error",
+		})
+	}
 	tables := xmlDocument.XMLBody.XMLBodyTbls
 	if tables == nil {
-		src.Close()
-		dst.Close()
+		err := src.Close()
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Close src error",
+			})
+		}
+		err2 := dst.Close()
+		if err2 != nil {
+			log.Println(err2)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Close dst error",
+			})
+		}
 		dir, err := filepath.Abs("examtest/" + file.Filename)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Can not get directory path",
+			})
 		}
-		os.Remove(dir)
+		err3 := os.Remove(dir)
+		if err3 != nil {
+			log.Println(err3)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Romove file error",
+			})
+		}
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: "Cant not read file doc or docx please try again",
 		})
@@ -216,22 +283,40 @@ func QaResponse(c echo.Context) error {
 		Questions = append(Questions, &QuestionModel)
 	}
 
-	i2, err := o.QueryTable("question").PrepareInsert()
-	i3, err := o.QueryTable("option").PrepareInsert()
+	i2, err := utility.DB.QueryTable("question").PrepareInsert()
+	i3, err := utility.DB.QueryTable("option").PrepareInsert()
 	for _, question := range Questions {
 		_, err := i2.Insert(question)
 		if err != nil {
 			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Insert Question error",
+			})
 		}
 		for _, option := range question.Options {
 			_, err2 := i3.Insert(option)
 			if err2 != nil {
 				log.Println(err2)
+				return c.JSON(http.StatusInternalServerError, response.Message{
+					Message: "Insert Option error",
+				})
 			}
 		}
 	}
-	i2.Close()
-	i3.Close()
+	err4 := i2.Close()
+	if err4 != nil {
+		log.Println(err4)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Close insert question error",
+		})
+	}
+	err5 := i3.Close()
+	if err5 != nil {
+		log.Println(err5)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Close insert option error",
+		})
+	}
 
 	examResponse := response.HistoryResponse{
 		Id:   insert,
@@ -267,6 +352,7 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 
 	err := ole.CoInitialize(0)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	unknown, err := oleutil.CreateObject("Word.Application")
@@ -286,14 +372,6 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 	document := oleutil.MustCallMethod(documents, "Open", inputDoc, false, true).ToIDispatch()
 	defer document.Release()
 	oleutil.MustCallMethod(document, "SaveAs", outPutDocx, 16).ToIDispatch()
-	//_, err = oleutil.PutProperty(document, "Saved", true)
-	//if err != nil {
-	//	return nil,err
-	//}
-	//_, err = oleutil.CallMethod(documents, "Close", false)
-	//if err != nil {
-	//	return nil,err
-	//}
 	_, err = oleutil.CallMethod(word, "Quit")
 	if err != nil {
 		return nil, err
@@ -306,3 +384,7 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 	}
 	return open, nil
 }
+
+//func convertXmlToDocx(folderPath string, fileName string) (question []*model.Question) {
+//
+//}

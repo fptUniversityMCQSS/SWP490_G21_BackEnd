@@ -3,8 +3,8 @@ package controller
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/utility"
 	"encoding/json"
-	"github.com/astaxie/beego/orm"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"io"
@@ -18,7 +18,6 @@ import (
 
 func ListKnowledge(c echo.Context) error {
 
-	o := orm.NewOrm()
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
@@ -28,12 +27,13 @@ func ListKnowledge(c echo.Context) error {
 	var knows []*model.Knowledge
 	var knowRs []*response.KnowledgResponse
 	// Get a QuerySeter object. User is table name
-	_, err := o.QueryTable("knowledge").OrderBy("-id").RelatedSel().All(&knows)
+	_, err := utility.DB.QueryTable("knowledge").OrderBy("-id").RelatedSel().All(&knows)
 
 	//if has problem in connection
 	if err != nil {
+		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "query error",
+			Message: "query knowledge error",
 		})
 	}
 	//add selected data to knowledge_Res list
@@ -52,7 +52,7 @@ func ListKnowledge(c echo.Context) error {
 
 func KnowledgeUpload(c echo.Context) error {
 	// Read form fields
-	o := orm.NewOrm()
+
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
@@ -66,14 +66,16 @@ func KnowledgeUpload(c echo.Context) error {
 	// Source
 	file, err := c.FormFile("file")
 	if err != nil {
+		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "file error",
+			Message: "send file error",
 		})
 	}
 	src, err := file.Open()
 	if err != nil {
+		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "open error",
+			Message: "open file error",
 		})
 	}
 	defer src.Close()
@@ -86,6 +88,9 @@ func KnowledgeUpload(c echo.Context) error {
 	err = os.MkdirAll(fileFolderPath, os.ModePerm)
 	if err != nil {
 		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Can't create directory",
+		})
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
@@ -93,11 +98,15 @@ func KnowledgeUpload(c echo.Context) error {
 	dst, err := os.Create(filePath)
 	if err != nil {
 		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Can't create directory of file",
+		})
 	}
 	defer dst.Close()
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "Copy file error",
 		})
@@ -109,19 +118,24 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 
 	know := &model.Knowledge{
-		Name: file.Filename,
-		User: user,
-		Path: fileFolderPath,
+		Name:   file.Filename,
+		User:   user,
+		Path:   fileFolderPath,
+		Status: "Encoding",
 	}
-	i, err := o.QueryTable("knowledge").PrepareInsert()
+
+	i, err := utility.DB.QueryTable("knowledge").PrepareInsert()
+
 	if err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: err.Error(),
+			Message: "Can't find knowledge",
 		})
 	}
 	//fmt.Println(i)
 	insert, err := i.Insert(know)
 	if err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "Insert file error",
 		})
@@ -129,6 +143,7 @@ func KnowledgeUpload(c echo.Context) error {
 	//fmt.Println(insert)
 	err1 := i.Close()
 	if err1 != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "Close error",
 		})
@@ -139,21 +154,24 @@ func KnowledgeUpload(c echo.Context) error {
 		Name:     file.Filename,
 		Date:     time.Now(),
 		Username: user.Username,
-		Status:   "Encoding",
+		Status:   know.Status,
 	}
 
 	enc := json.NewEncoder(c.Response())
 	enc.Encode(knowledgeResponse)
 	c.Response().Flush()
 
-	//utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", "knowledge/"+file.Filename)
+	utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", "knowledge/"+file.Filename)
+
+	know.Status = "Ready"
+	_, err = utility.DB.Update(know)
 
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,
 		Name:     file.Filename,
 		Date:     time.Now(),
 		Username: user.Username,
-		Status:   "Ready",
+		Status:   know.Status,
 	}
 
 	log.Printf(userName + " upload file : " + file.Filename)
@@ -161,7 +179,7 @@ func KnowledgeUpload(c echo.Context) error {
 }
 
 func DownloadKnowledge(c echo.Context) error {
-	o := orm.NewOrm()
+
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
@@ -170,12 +188,13 @@ func DownloadKnowledge(c echo.Context) error {
 	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
 	var knowledge model.Knowledge
 
-	err := o.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
+	err := utility.DB.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
 
 	//if has problem in connection
 	if err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "query error",
+			Message: "query knowledge error",
 		})
 	}
 
@@ -190,7 +209,7 @@ func DownloadKnowledge(c echo.Context) error {
 }
 
 func DeleteKnowledge(c echo.Context) error {
-	o := orm.NewOrm()
+
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
@@ -198,29 +217,31 @@ func DeleteKnowledge(c echo.Context) error {
 	knowledgeId := c.Param("id")
 	var knowledge model.Knowledge
 	intKnowledgeId, _ := strconv.ParseInt(knowledgeId, 10, 64)
-	err3 := o.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
+	err3 := utility.DB.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
 	if err3 != nil {
+		log.Print(err3)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "query error",
+			Message: "query knowledge failed",
 		})
 	}
-	_, err := o.QueryTable("knowledge").Filter("id", intKnowledgeId).Delete()
+	_, err := utility.DB.QueryTable("knowledge").Filter("id", intKnowledgeId).Delete()
 	if err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "query error",
+			Message: "Delete fail",
 		})
 	}
 
 	err2 := os.RemoveAll(knowledge.Path)
 
 	if err2 != nil {
+		log.Print(err2)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "remove file error",
 		})
 	}
-	message := response.Message{
-		Message: "Delete successfully",
-	}
 	log.Printf(userName + " delete file " + knowledge.Name)
-	return c.JSON(http.StatusOK, message)
+	return c.JSON(http.StatusOK, response.Message{
+		Message: "Delete successfully",
+	})
 }

@@ -6,5 +6,4 @@ type User struct {
 	Password  string       `json:"password" form:"password"`
 	Role      string       `json:"role" form:"role"`
 	Knowledge []*Knowledge `orm:"reverse(many)" json:"list_knowledge" form:"list_knowledge"`
-	//Question  []*Question  `orm:"reverse(many)"   json:"list_question" form:"list_question"`
 }

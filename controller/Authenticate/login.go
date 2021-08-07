@@ -26,7 +26,10 @@ func LoginResponse(c echo.Context) error {
 	// Get a QuerySeter object. User is table name
 	err := utility.DB.Read(user, "username", "password")
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "InvalidUser")
+		log.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: "Invalid User",
+		})
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256) //header
@@ -40,7 +43,10 @@ func LoginResponse(c echo.Context) error {
 
 	t, err := token.SignedString([]byte(JwtSignature))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "login fail")
+		log.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: "login fail",
+		})
 	}
 	log.Printf(Username + "login success")
 	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})

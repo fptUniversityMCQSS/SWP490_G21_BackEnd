@@ -58,7 +58,7 @@ func main() {
 
 	admin := signedIn.Group("/admin", adminPermission.Header)
 	admin.GET("/user", Admin.ListUser)
-	admin.POST("/user", Admin.AdminAddUser)
+	admin.POST("/user", Admin.AddUser)
 	admin.GET("/user/:id", Admin.GetUserById)
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)

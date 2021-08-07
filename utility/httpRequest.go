@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"mime/multipart"
@@ -24,12 +23,12 @@ func SendFileRequest(url string, method string, path string) {
 		errFile1 := writer.CreateFormFile("file", filepath.Base(path))
 	_, errFile1 = io.Copy(part1, file)
 	if errFile1 != nil {
-		fmt.Println(errFile1)
+		log.Println(errFile1)
 		return
 	}
 	err := writer.Close()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
@@ -37,13 +36,13 @@ func SendFileRequest(url string, method string, path string) {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer res.Body.Close()
@@ -97,7 +96,7 @@ func SendQuestions(url string, method string, questions []*model.Question) {
 	}
 	jsonQuestions, err := json.Marshal(questionRequests)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	log.Println(string(jsonQuestions))
@@ -107,14 +106,14 @@ func SendQuestions(url string, method string, questions []*model.Question) {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer func(Body io.ReadCloser) {
