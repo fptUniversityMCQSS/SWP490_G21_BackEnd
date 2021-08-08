@@ -161,7 +161,7 @@ func KnowledgeUpload(c echo.Context) error {
 	enc.Encode(knowledgeResponse)
 	c.Response().Flush()
 
-	utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", "knowledge/"+file.Filename)
+	utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", filePath)
 
 	know.Status = "Ready"
 	_, err = utility.DB.Update(know)
