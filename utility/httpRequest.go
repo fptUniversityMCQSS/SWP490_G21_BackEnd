@@ -14,38 +14,43 @@ import (
 	"strings"
 )
 
-func SendFileRequest(url string, method string, path string) {
+func SendFileRequest(url string, method string, path string) error {
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
-	file, errFile1 := os.Open(path)
-	defer file.Close()
-	part1,
-		errFile1 := writer.CreateFormFile("file", filepath.Base(path))
-	_, errFile1 = io.Copy(part1, file)
-	if errFile1 != nil {
-		log.Println(errFile1)
-		return
-	}
-	err := writer.Close()
+	file, err := os.Open(path)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			return
+		}
+	}(file)
+	part1, err := writer.CreateFormFile("file", filepath.Base(path))
+	_, err = io.Copy(part1, file)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
+	}
+	err = writer.Close()
+	if err != nil {
+		return err
 	}
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(res.Body)
 
 	reader := bufio.NewReader(res.Body)
 	str := ""
@@ -55,7 +60,7 @@ func SendFileRequest(url string, method string, path string) {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal("Error reading HTTP response: ", err.Error())
+			return err
 		}
 		str += string(b)
 		if reader.Buffered() <= 0 {
@@ -63,6 +68,7 @@ func SendFileRequest(url string, method string, path string) {
 			str = ""
 		}
 	}
+	return nil
 }
 
 type QuestionRequest struct {
@@ -96,7 +102,6 @@ func SendQuestions(url string, method string, questions []*model.Question) (*htt
 	}
 	jsonQuestions, err := json.Marshal(questionRequests)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	log.Println(string(jsonQuestions))
@@ -106,24 +111,13 @@ func SendQuestions(url string, method string, questions []*model.Question) (*htt
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	return res, nil
-	//defer func(Body io.ReadCloser) {
-	//	err := Body.Close()
-	//	if err != nil {
-	//		return
-	//	}
-	//}(res.Body)
-	//
-	//reader := bufio.NewReader(res.Body)
-	//return reader, nil
 }

@@ -59,7 +59,7 @@ func ListKnowledge(c echo.Context) error {
 }
 
 func KnowledgeUpload(c echo.Context) error {
-	// Read form fields
+	//WARNING: missing delete knowledge if uploading failed
 
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
@@ -67,11 +67,6 @@ func KnowledgeUpload(c echo.Context) error {
 	userId := claims["userId"].(float64)
 	IntUserId := int64(userId)
 
-	//-----------
-	// Read file
-	//-----------
-
-	// Source
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -128,15 +123,27 @@ func KnowledgeUpload(c echo.Context) error {
 	err = os.MkdirAll(fileFolderPath, os.ModePerm)
 	if err != nil {
 		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Failed to create directory",
+		})
 	}
 	know.Path = fileFolderPath
 	_, err = utility.DB.Update(know)
+	if err != nil {
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Failed to update knowledge",
+		})
+	}
 
 	filePath := fileFolderPath + "/" + file.Filename
 
 	dst, err := os.Create(filePath)
 	if err != nil {
 		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Failed to create file",
+		})
 	}
 	defer func(dst *os.File) {
 		err := dst.Close()
@@ -147,6 +154,7 @@ func KnowledgeUpload(c echo.Context) error {
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
+		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "Copy file error",
 		})
@@ -177,7 +185,7 @@ func KnowledgeUpload(c echo.Context) error {
 	switch extension {
 
 	case ".pdf":
-		err := convertPdfToTxt(filePath, file.Filename, extension, fileFolderPath, insert)
+		placeToSaveFileTxt, err = convertPdfToTxt(filePath, file.Filename, extension, fileFolderPath, insert)
 		if err != nil {
 			log.Print(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
@@ -256,7 +264,13 @@ func KnowledgeUpload(c echo.Context) error {
 	c.Response().Flush()
 
 	//placeToSaveFileTxt := createFolderOfTxtFile(file.Filename,extension,fileFolderPath,insert)          //placeToSaveFileTxt get path of txt file
-	utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt)
+	err = utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt)
+	if err != nil {
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Failed to request to AI server",
+		})
+	}
 
 	know.Status = "Ready"
 	_, err = utility.DB.Update(know)
@@ -388,10 +402,10 @@ func createFolderOfTxtFile(fileName string, extension string, fileFolderPath str
 	placeToSaveFileTxt := fileFolderPath + "/" + extensionNewFormat
 	return placeToSaveFileTxt
 }
-func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, insert int64) error {
+func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, insert int64) (string, error) {
 	doc, err := fitz.New(filepath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer func(doc *fitz.Document) {
 		err := doc.Close()
@@ -402,19 +416,19 @@ func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, i
 	placeToSaveFileTxt := createFolderOfTxtFile(fileFileName, extension, fileFolderPath, insert)
 	f, err := os.Create(placeToSaveFileTxt)
 	if err != nil {
-		return err
+		return "", err
 	}
 	for n := 0; n < doc.NumPage(); n++ {
 		text, err := doc.Text(n)
 		if err != nil {
-			return err
+			return "", err
 		}
 		_, err = f.WriteString(text)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
-	return nil
+	return "", nil
 }
 func convertDocToText(fileFolderPath, fileFileName, extension string, insert int64) (string, error) {
 	dir, err := filepath.Abs(fileFolderPath)
