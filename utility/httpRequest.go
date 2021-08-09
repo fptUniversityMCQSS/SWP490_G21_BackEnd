@@ -76,7 +76,7 @@ type OptionRequest struct {
 	Content string `json:"content"`
 }
 
-func SendQuestions(url string, method string, questions []*model.Question) {
+func SendQuestions(url string, method string, questions []*model.Question) (*bufio.Reader, error) {
 	var questionRequests []QuestionRequest
 	for _, question := range questions {
 		var optionRequests []OptionRequest
@@ -97,7 +97,7 @@ func SendQuestions(url string, method string, questions []*model.Question) {
 	jsonQuestions, err := json.Marshal(questionRequests)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil, err
 	}
 	log.Println(string(jsonQuestions))
 	payload := strings.NewReader(string(jsonQuestions))
@@ -107,36 +107,22 @@ func SendQuestions(url string, method string, questions []*model.Question) {
 
 	if err != nil {
 		log.Println(err)
-		return
+		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-
+			return
 		}
 	}(res.Body)
 
 	reader := bufio.NewReader(res.Body)
-	str := ""
-	for {
-		b, err := reader.ReadByte()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Fatal("Error reading HTTP response: ", err.Error())
-		}
-		str += string(b)
-		if reader.Buffered() <= 0 {
-			println(str)
-			str = ""
-		}
-	}
+	return reader, nil
 }
