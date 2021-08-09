@@ -15,6 +15,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -83,7 +84,12 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: "open error",
 		})
 	}
-	defer src.Close()
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
+
+		}
+	}(src)
 
 	user := &model.User{
 		Id:       IntUserId,
@@ -132,7 +138,12 @@ func KnowledgeUpload(c echo.Context) error {
 	if err != nil {
 		log.Print(err)
 	}
-	defer dst.Close()
+	defer func(dst *os.File) {
+		err := dst.Close()
+		if err != nil {
+			return
+		}
+	}(dst)
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
@@ -150,10 +161,18 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 
 	enc := json.NewEncoder(c.Response())
-	enc.Encode(knowledgeResponse)
+	err = enc.Encode(knowledgeResponse)
+	if err != nil {
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Fail to encoding response",
+		})
+	}
 	c.Response().Flush()
 
 	extension := filepath.Ext(file.Filename)
+
+	var placeToSaveFileTxt string
 
 	switch extension {
 
@@ -167,7 +186,7 @@ func KnowledgeUpload(c echo.Context) error {
 		}
 
 	case ".doc":
-		err := converDocToText(fileFolderPath, file.Filename, extension, insert)
+		placeToSaveFileTxt, err = convertDocToText(fileFolderPath, file.Filename, extension, insert)
 		if err != nil {
 			log.Print(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
@@ -176,7 +195,7 @@ func KnowledgeUpload(c echo.Context) error {
 		}
 
 	case ".docx":
-		err := convertDocxToText(filePath, file.Filename, extension, fileFolderPath, insert)
+		placeToSaveFileTxt, err = convertDocxToText(filePath, file.Filename, extension, fileFolderPath, insert)
 		if err != nil {
 			log.Print(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
@@ -185,7 +204,7 @@ func KnowledgeUpload(c echo.Context) error {
 		}
 
 	case ".txt":
-		err := modifyTxtFile(filePath, file.Filename, extension, fileFolderPath, insert)
+		placeToSaveFileTxt, err = modifyTxtFile(filePath, file.Filename, extension, fileFolderPath, insert)
 		if err != nil {
 			log.Print(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
@@ -193,9 +212,21 @@ func KnowledgeUpload(c echo.Context) error {
 			})
 		}
 	default:
-		src.Close()
-		dst.Close()
-		err := os.RemoveAll(fileFolderPath)
+		err = src.Close()
+		if err != nil {
+			log.Print(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "File error",
+			})
+		}
+		err = dst.Close()
+		if err != nil {
+			log.Print(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "File error",
+			})
+		}
+		err = os.RemoveAll(fileFolderPath)
 		if err != nil {
 			log.Print(err)
 			return err
@@ -215,11 +246,17 @@ func KnowledgeUpload(c echo.Context) error {
 		Status:   know.Status,
 	}
 
-	enc.Encode(knowledgeResponse)
+	err = enc.Encode(knowledgeResponse)
+	if err != nil {
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Fail to encoding response",
+		})
+	}
 	c.Response().Flush()
 
 	//placeToSaveFileTxt := createFolderOfTxtFile(file.Filename,extension,fileFolderPath,insert)          //placeToSaveFileTxt get path of txt file
-	//utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt)
+	utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt)
 
 	know.Status = "Ready"
 	_, err = utility.DB.Update(know)
@@ -354,7 +391,6 @@ func createFolderOfTxtFile(fileName string, extension string, fileFolderPath str
 func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, insert int64) error {
 	doc, err := fitz.New(filepath)
 	if err != nil {
-		log.Print(err)
 		return err
 	}
 	defer func(doc *fitz.Document) {
@@ -365,69 +401,84 @@ func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, i
 	}(doc)
 	placeToSaveFileTxt := createFolderOfTxtFile(fileFileName, extension, fileFolderPath, insert)
 	f, err := os.Create(placeToSaveFileTxt)
+	if err != nil {
+		return err
+	}
 	for n := 0; n < doc.NumPage(); n++ {
 		text, err := doc.Text(n)
 		if err != nil {
-			panic(err)
+			return err
 		}
-		f.WriteString(text)
+		_, err = f.WriteString(text)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
-func converDocToText(fileFolderPath, fileFileName, extension string, insert int64) error {
+func convertDocToText(fileFolderPath, fileFileName, extension string, insert int64) (string, error) {
 	dir, err := filepath.Abs(fileFolderPath)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	fileName, err := toDocx(dir, fileFileName)
+	if err != nil {
+		return "", err
+	}
 	text, err := parseTextFromDocorDocx(fileName.Name())
 	if err != nil {
-		log.Print(err)
-		return err
+		return "", err
 	}
 	placeToSaveFileTxt := createFolderOfTxtFile(fileFileName, extension, fileFolderPath, insert)
 	f, err := os.Create(placeToSaveFileTxt)
+	if err != nil {
+		return "", err
+	}
 	_, err = f.WriteString(text)
 	if err != nil {
-		log.Print(err)
-		return err
+		return "", err
 	}
-	err2 := fileName.Close()
-	if err2 != nil {
-		log.Print(err)
-		return err
+	err = fileName.Close()
+	if err != nil {
+		return "", err
 	}
-	os.Remove(fileName.Name())
-	return nil
+	err = os.Remove(fileName.Name())
+	if err != nil {
+		return "", err
+	}
+	return "", nil
 }
 
-func convertDocxToText(filePath, fileFileName, extension, fileFolderPath string, insert int64) error {
+func convertDocxToText(filePath, fileFileName, extension, fileFolderPath string, insert int64) (string, error) {
 	text, err := parseTextFromDocorDocx(filePath)
 	if err != nil {
-		log.Print(err)
-		return err
+		return "", err
 	}
 	placeToSaveFileTxt := createFolderOfTxtFile(fileFileName, extension, fileFolderPath, insert)
 	f, err := os.Create(placeToSaveFileTxt)
+	if err != nil {
+		return "", err
+	}
 	_, err = f.WriteString(text)
 	if err != nil {
-		log.Print(err)
-		return err
+		return "", err
 	}
-	return nil
+	return placeToSaveFileTxt, nil
 }
-func modifyTxtFile(filePath, fileFileName, extension, fileFolderPath string, insert int64) error {
+func modifyTxtFile(filePath, fileFileName, extension, fileFolderPath string, insert int64) (string, error) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	text := string(content)
 	placeToSaveFileTxt := createFolderOfTxtFile(fileFileName, extension, fileFolderPath, insert)
 	f, err := os.Create(placeToSaveFileTxt)
+	if err != nil {
+		return "", err
+	}
 	_, err = f.WriteString(text)
 	if err != nil {
-		log.Print(err)
-		return err
+		return "", err
 	}
-	return nil
+	return "", nil
 }

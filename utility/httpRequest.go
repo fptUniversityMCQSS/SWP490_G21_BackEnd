@@ -76,7 +76,7 @@ type OptionRequest struct {
 	Content string `json:"content"`
 }
 
-func SendQuestions(url string, method string, questions []*model.Question) (*bufio.Reader, error) {
+func SendQuestions(url string, method string, questions []*model.Question) (*http.Response, error) {
 	var questionRequests []QuestionRequest
 	for _, question := range questions {
 		var optionRequests []OptionRequest
@@ -116,13 +116,14 @@ func SendQuestions(url string, method string, questions []*model.Question) (*buf
 		log.Println(err)
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(res.Body)
-
-	reader := bufio.NewReader(res.Body)
-	return reader, nil
+	return res, nil
+	//defer func(Body io.ReadCloser) {
+	//	err := Body.Close()
+	//	if err != nil {
+	//		return
+	//	}
+	//}(res.Body)
+	//
+	//reader := bufio.NewReader(res.Body)
+	//return reader, nil
 }

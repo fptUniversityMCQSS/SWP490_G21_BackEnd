@@ -4,6 +4,7 @@ import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
+	"bufio"
 	"encoding/json"
 	"encoding/xml"
 	"github.com/go-ole/go-ole"
@@ -325,11 +326,23 @@ func QaResponse(c echo.Context) error {
 		Date: timeNow,
 	}
 
-	reader, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
+	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
+	questionsMap := make(map[int64]*model.Question)
+	for _, question := range Questions {
+		questionsMap[question.Number] = question
+	}
 	if err != nil {
 		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{Message: "No data of question send"})
+		return c.JSON(http.StatusInternalServerError, response.Message{Message: "Fail to receive response from AI server"})
 	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(res.Body)
+
+	reader := bufio.NewReader(res.Body)
 	str := ""
 	enc := json.NewEncoder(c.Response())
 	for {
@@ -338,13 +351,37 @@ func QaResponse(c echo.Context) error {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal("Error reading HTTP response: ", err.Error())
+			log.Println("Error reading HTTP response: ", err.Error())
+			return c.JSON(http.StatusInternalServerError, response.Message{Message: "Fail to receive response from AI server"})
 		}
 		str += string(b)
 
 		if reader.Buffered() <= 0 {
 			println(str)
-			enc.Encode(str)
+			var qaResponse response.QuestionAnswerResponse
+			err := json.Unmarshal([]byte(str), &qaResponse)
+			if err != nil {
+				log.Println("json unmarshal from AI server failed")
+				continue
+			}
+			var optionsQAResponse []response.OptionResponse
+			for _, option := range questionsMap[qaResponse.Qn].Options {
+				optionsQAResponse = append(optionsQAResponse, response.OptionResponse{
+					Key:     option.Key,
+					Content: option.Content,
+				})
+			}
+			var questionsResponse = response.QuestionResponse{
+				Number:  qaResponse.Qn,
+				Content: questionsMap[qaResponse.Qn].Content,
+				Options: optionsQAResponse,
+				Answer:  qaResponse.Answer,
+			}
+			err = enc.Encode(questionsResponse)
+			if err != nil {
+				log.Println("json encoding for responding failed")
+				continue
+			}
 			c.Response().Flush()
 			str = ""
 		}

@@ -6,3 +6,8 @@ type QuestionResponse struct {
 	Options []OptionResponse
 	Answer  string
 }
+
+type QuestionAnswerResponse struct {
+	Qn     int64  `json:"qn"`
+	Answer string `json:"answer"`
+}
