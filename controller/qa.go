@@ -4,6 +4,7 @@ import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
+	"encoding/json"
 	"encoding/xml"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
@@ -324,7 +325,30 @@ func QaResponse(c echo.Context) error {
 		Date: timeNow,
 	}
 
-	utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
+	reader, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{Message: "No data of question send"})
+	}
+	str := ""
+	enc := json.NewEncoder(c.Response())
+	for {
+		b, err := reader.ReadByte()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Fatal("Error reading HTTP response: ", err.Error())
+		}
+		str += string(b)
+
+		if reader.Buffered() <= 0 {
+			println(str)
+			enc.Encode(str)
+			c.Response().Flush()
+			str = ""
+		}
+	}
 
 	return c.JSON(http.StatusOK, examResponse)
 
