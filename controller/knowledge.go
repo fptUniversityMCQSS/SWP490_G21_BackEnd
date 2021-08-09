@@ -428,7 +428,7 @@ func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, i
 			return "", err
 		}
 	}
-	return "", nil
+	return placeToSaveFileTxt, nil
 }
 func convertDocToText(fileFolderPath, fileFileName, extension string, insert int64) (string, error) {
 	dir, err := filepath.Abs(fileFolderPath)
@@ -460,7 +460,7 @@ func convertDocToText(fileFolderPath, fileFileName, extension string, insert int
 	if err != nil {
 		return "", err
 	}
-	return "", nil
+	return placeToSaveFileTxt, nil
 }
 
 func convertDocxToText(filePath, fileFileName, extension, fileFolderPath string, insert int64) (string, error) {
@@ -494,5 +494,5 @@ func modifyTxtFile(filePath, fileFileName, extension, fileFolderPath string, ins
 	if err != nil {
 		return "", err
 	}
-	return "", nil
+	return placeToSaveFileTxt, nil
 }
