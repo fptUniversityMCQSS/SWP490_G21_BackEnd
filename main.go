@@ -16,6 +16,9 @@ import (
 	"strings"
 )
 
+/*
+	Require to install GCC at https://jmeubank.github.io/tdm-gcc/download/
+*/
 func main() {
 	//start echo
 	e := echo.New()
