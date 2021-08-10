@@ -33,10 +33,15 @@ func History(c echo.Context) error {
 
 	//add selected data to knowledge_Res list
 	for _, h := range history {
-		var his = new(response.HistoryResponse)
-		his.Id = h.Id
-		his.Name = h.Name
-		his.Date = h.Date
+		var his = &response.HistoryResponse{
+			Id:                h.Id,
+			Date:              h.Date,
+			Name:              h.Name,
+			User:              h.User.Username,
+			Subject:           h.Subject,
+			NumberOfQuestions: h.NumberOfQuestions,
+		}
+
 		hist = append(hist, his)
 	}
 	log.Printf(userName + " get list history")
@@ -101,11 +106,13 @@ func GetExamById(c echo.Context) error {
 			questionsResponse[i].Options = OptionResponse
 		}
 		var customExamTestResponse = response.ExamTestResponse{
-			Id:        examTest.Id,
-			User:      userResponse,
-			Date:      examTest.Date,
-			Name:      examTest.Name,
-			Questions: questionsResponse,
+			Id:                examTest.Id,
+			User:              userResponse,
+			Date:              examTest.Date,
+			Name:              examTest.Name,
+			NumberOfQuestions: examTest.NumberOfQuestions,
+			Subject:           examTest.Subject,
+			Questions:         questionsResponse,
 		}
 		log.Printf(user.Username + " get exam by id :" + examTest.Name)
 		return c.JSON(http.StatusOK, customExamTestResponse)

@@ -16,6 +16,7 @@ import (
 	"io"
 	_ "io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	_ "net/http"
 	"os"
@@ -29,6 +30,7 @@ import (
 
 func QaResponse(c echo.Context) error {
 	// sending file with the wrong format doesn't return error
+	// not deleting if fail
 
 	var intUserId int64
 	token := c.Get("user").(*jwt.Token)
@@ -51,7 +53,12 @@ func QaResponse(c echo.Context) error {
 			Message: "open file error",
 		})
 	}
-	defer src.Close()
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
+			return
+		}
+	}(src)
 
 	userPath := "examtest/" + userName
 	timeNow := time.Now()
@@ -75,7 +82,12 @@ func QaResponse(c echo.Context) error {
 			Message: "Can't create directory of file",
 		})
 	}
-	defer dst.Close()
+	defer func(dst *os.File) {
+		err := dst.Close()
+		if err != nil {
+			return
+		}
+	}(dst)
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
@@ -119,18 +131,18 @@ func QaResponse(c echo.Context) error {
 			})
 		}
 		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
-		fileName.Close()
+		err = fileName.Close()
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: "Close file error",
+			})
+		}
 		err3 := os.Remove(fileName.Name())
 		if err3 != nil {
 			log.Println(err3)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Romove file error",
-			})
-		}
-		if err != nil {
-			log.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Read file error",
+				Message: "Remove file error",
 			})
 		}
 	}
@@ -146,7 +158,8 @@ func QaResponse(c echo.Context) error {
 	}
 
 	var user = &model.User{
-		Id: intUserId,
+		Id:       intUserId,
+		Username: userName,
 	}
 	var exam = &model.ExamTest{
 		User: user,
@@ -287,13 +300,25 @@ func QaResponse(c echo.Context) error {
 	}
 
 	i2, err := utility.DB.QueryTable("question").PrepareInsert()
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Insert Question error",
+		})
+	}
 	i3, err := utility.DB.QueryTable("option").PrepareInsert()
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Insert Option error",
+		})
+	}
 	for _, question := range Questions {
 		_, err := i2.Insert(question)
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Insert Question error",
+				Message: "Insert Option error",
 			})
 		}
 		for _, option := range question.Options {
@@ -322,9 +347,12 @@ func QaResponse(c echo.Context) error {
 	}
 
 	examResponse := response.HistoryResponse{
-		Id:   insert,
-		Name: exam.Name,
-		Date: timeNow,
+		Id:                insert,
+		Date:              timeNow,
+		Name:              exam.Name,
+		User:              userName,
+		Subject:           exam.Subject,
+		NumberOfQuestions: exam.NumberOfQuestions,
 	}
 	enc := json.NewEncoder(c.Response())
 	err = enc.Encode(examResponse)
