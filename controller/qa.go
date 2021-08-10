@@ -28,6 +28,7 @@ import (
 )
 
 func QaResponse(c echo.Context) error {
+	// sending file with the wrong format doesn't return error
 
 	var intUserId int64
 	token := c.Get("user").(*jwt.Token)
@@ -325,6 +326,9 @@ func QaResponse(c echo.Context) error {
 		Name: exam.Name,
 		Date: timeNow,
 	}
+	enc := json.NewEncoder(c.Response())
+	err = enc.Encode(examResponse)
+	c.Response().Flush()
 
 	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
 	questionsMap := make(map[int64]*model.Question)
@@ -344,7 +348,6 @@ func QaResponse(c echo.Context) error {
 
 	reader := bufio.NewReader(res.Body)
 	str := ""
-	enc := json.NewEncoder(c.Response())
 	for {
 		b, err := reader.ReadByte()
 		if err != nil {
@@ -387,7 +390,7 @@ func QaResponse(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, examResponse)
+	return c.JSON(http.StatusOK, response.Message{Message: "DONE"})
 
 }
 func RemoveEndChar(s string) string {

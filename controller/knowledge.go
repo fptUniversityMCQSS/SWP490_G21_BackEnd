@@ -397,8 +397,8 @@ func parseTextFromDocorDocx(path string) (string, error) {
 }
 
 func createFolderOfTxtFile(fileName string, extension string, fileFolderPath string, id int64) string {
-	stringId := strconv.Itoa(int(id))
-	extensionNewFormat := strings.ReplaceAll(fileName, extension, stringId+".txt")
+	//stringId := strconv.Itoa(int(id))
+	extensionNewFormat := strings.ReplaceAll(fileName, extension, ".txt")
 	placeToSaveFileTxt := fileFolderPath + "/" + extensionNewFormat
 	return placeToSaveFileTxt
 }
