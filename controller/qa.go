@@ -60,11 +60,41 @@ func QaResponse(c echo.Context) error {
 		}
 	}(src)
 
-	userPath := "examtest/" + userName
 	timeNow := time.Now()
-	re := regexp.MustCompile(":")
-	timeNowAfterRegex := re.ReplaceAllString(timeNow.String(), "-")
-	fileFolderPath := userPath + "/" + timeNowAfterRegex
+	var user = &model.User{
+		Id: intUserId,
+	}
+	var exam = &model.ExamTest{
+		User: user,
+		Name: file.Filename,
+		Date: timeNow,
+	}
+
+	i, err := utility.DB.QueryTable("exam_test").PrepareInsert()
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Query table examtest failed",
+		})
+	}
+	insert, err := i.Insert(exam)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "insert exam error",
+		})
+	}
+	err2 := i.Close()
+	if err2 != nil {
+		log.Println(err2)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Close connection error",
+		})
+	}
+
+	userPath := "examtest/" + userName
+	stringIdInsert := strconv.Itoa(int(insert))
+	fileFolderPath := userPath + "/" + stringIdInsert
 	err = os.MkdirAll(fileFolderPath, os.ModePerm)
 	if err != nil {
 		log.Print(err)
@@ -74,7 +104,8 @@ func QaResponse(c echo.Context) error {
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
-
+	exam.Path = filePath
+	_, err = utility.DB.Update(exam)
 	dst, err := os.Create(filePath)
 	if err != nil {
 		log.Print(err)
@@ -156,17 +187,6 @@ func QaResponse(c echo.Context) error {
 			Message: "Parse xml false",
 		})
 	}
-
-	var user = &model.User{
-		Id:       intUserId,
-		Username: userName,
-	}
-	var exam = &model.ExamTest{
-		User: user,
-		Name: file.Filename,
-		Date: timeNow,
-		Path: filePath,
-	}
 	array := xmlDocument.XMLBody.XMLBodyPs
 	var Content string
 	for i := 0; i < 2; i++ {
@@ -181,27 +201,7 @@ func QaResponse(c echo.Context) error {
 		exam.NumberOfQuestions, _ = strconv.ParseInt(Content, 10, 64)
 	}
 
-	i, err := utility.DB.QueryTable("exam_test").PrepareInsert()
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Query table examtest failed",
-		})
-	}
-	insert, err := i.Insert(exam)
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "insert exam error",
-		})
-	}
-	err2 := i.Close()
-	if err2 != nil {
-		log.Println(err2)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Close connection error",
-		})
-	}
+	_, err = utility.DB.Update(exam)
 	tables := xmlDocument.XMLBody.XMLBodyTbls
 	if tables == nil {
 		err := src.Close()
@@ -264,10 +264,6 @@ func QaResponse(c echo.Context) error {
 								}
 								option.Content += content.QN
 							}
-						} else if x == 7 {
-							if y != 0 {
-								QuestionModel.Answer = content.QN
-							}
 						}
 					}
 					if y != 0 {
@@ -298,7 +294,6 @@ func QaResponse(c echo.Context) error {
 		QuestionModel.ExamTest = exam
 		Questions = append(Questions, &QuestionModel)
 	}
-
 	i2, err := utility.DB.QueryTable("question").PrepareInsert()
 	if err != nil {
 		log.Println(err)

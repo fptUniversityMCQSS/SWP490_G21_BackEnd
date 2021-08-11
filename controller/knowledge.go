@@ -243,8 +243,9 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: "please check format file it must pdf, doc, docx or txt",
 		})
 	}
-
+	placeToSaveFileTxt := createFolderOfTxtFile(file.Filename, extension, fileFolderPath, insert)
 	know.Status = "Encoding"
+	know.ParseTxt = placeToSaveFileTxt
 	_, err = utility.DB.Update(know)
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,
