@@ -314,6 +314,7 @@ func DeleteKnowledge(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
+	role := claims["role"].(string)
 
 	knowledgeId := c.Param("id")
 	var knowledge model.Knowledge
@@ -324,6 +325,11 @@ func DeleteKnowledge(c echo.Context) error {
 			Message: "query error",
 		})
 	}
+	if role != "admin" && knowledge.User.Username != userName {
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "no permission",
+		})
+	}
 	_, err := utility.DB.QueryTable("knowledge").Filter("id", intKnowledgeId).Delete()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -332,7 +338,6 @@ func DeleteKnowledge(c echo.Context) error {
 	}
 
 	err2 := os.RemoveAll(knowledge.Path)
-
 	if err2 != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "remove file error",

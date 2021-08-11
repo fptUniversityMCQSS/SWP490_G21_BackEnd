@@ -52,9 +52,9 @@ func main() {
 	user.GET("/history", controller.History)
 	user.GET("/history/:id", controller.GetExamById)
 	user.GET("/history/:id/download", controller.DownloadExam)
+	user.GET("/knowledge", controller.ListKnowledge)
 
 	staff := signedIn.Group("", staffPermission.Header)
-	staff.GET("/knowledge", controller.ListKnowledge)
 	staff.PUT("/knowledge", controller.KnowledgeUpload)
 	staff.GET("/knowledge/:id", controller.DownloadKnowledge)
 	staff.DELETE("/knowledge/:id", controller.DeleteKnowledge)
