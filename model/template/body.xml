@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:w16se="http://schemas.microsoft.com/office/word/2015/wordml/symex" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 w15 w16se wp14">
+    <w:body>
+        <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+            <w:r>
+                <w:t xml:space="preserve">Subject: </w:t>
+            </w:r>
+            <w:r w:rsidR="00982EC5">
+                <w:rPr>
+                    <w:rFonts w:ascii="Helvetica" w:hAnsi="Helvetica" w:cs="Helvetica"/>
+                    <w:color w:val="333333"/>
+                    <w:sz w:val="20"/>
+                    <w:szCs w:val="20"/>
+                    <w:shd w:val="clear" w:color="auto" w:fill="F5F5F5"/>
+                </w:rPr>
+                {{subject}}
+            </w:r>
+        </w:p>
+        <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+            <w:r>
+                <w:t xml:space="preserve">Number of question: </w:t>
+            </w:r>
+            <w:r w:rsidR="0022481F">
+                {{numberOfQuestions}}
+            </w:r>
+        </w:p>
+        <w:p w:rsidR="001E4B68" w:rsidRDefault="001E4B68"/>
+        <w:p w:rsidR="001E4B68" w:rsidRPr="001E4B68" w:rsidRDefault="001E4B68">
+            <w:pPr>
+                <w:rPr>
+                    <w:b/>
+                </w:rPr>
+            </w:pPr>
+            <w:r w:rsidRPr="001E4B68">
+                <w:rPr>
+                    <w:b/>
+                </w:rPr>
+                <w:t>Multiple choice question:</w:t>
+            </w:r>
+        </w:p>
+        <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4"/>
+
+               {{table}}
+
+        <w:p w:rsidR="004F56DA" w:rsidRDefault="004F56DA">
+            <w:r w:rsidRPr="004F56DA">
+                <w:rPr>
+                    <w:u w:val="single"/>
+                </w:rPr>
+                <w:t>Note</w:t>
+            </w:r>
+            <w:r>
+                <w:t xml:space="preserve">: </w:t>
+            </w:r>
+            <w:r w:rsidR="00C82C05">
+                <w:t>image</w:t>
+            </w:r>
+            <w:r>
+                <w:t xml:space="preserve"> file should be saved in the same folder with the question file.</w:t>
+            </w:r>
+        </w:p>
+        <w:p w:rsidR="00F53437" w:rsidRDefault="00F53437" w:rsidP="00F53437">
+            <w:r>
+                <w:t>MIX CHOICES:  The choices will be mixed when displays to student.</w:t>
+            </w:r>
+        </w:p>
+        <w:p w:rsidR="00F53437" w:rsidRDefault="00F53437"/>
+        <w:sectPr w:rsidR="00F53437">
+            <w:pgSz w:w="12240" w:h="15840"/>
+            <w:pgMar w:top="1440" w:right="1800" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>
+            <w:cols w:space="720"/>
+            <w:docGrid w:linePitch="360"/>
+        </w:sectPr>
+    </w:body>
+</w:document>

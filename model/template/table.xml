@@ -1,0 +1,319 @@
+<w:tbl>
+    <w:tblPr>
+        <w:tblW w:w="9400" w:type="dxa"/>
+        <w:tblBorders>
+            <w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+            <w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+            <w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+            <w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+            <w:insideH w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+            <w:insideV w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+        </w:tblBorders>
+        <w:tblLook w:val="01E0" w:firstRow="1" w:lastRow="1" w:firstColumn="1" w:lastColumn="1" w:noHBand="0" w:noVBand="0"/>
+    </w:tblPr>
+    <w:tblGrid>
+        <w:gridCol w:w="2077"/>
+        <w:gridCol w:w="7323"/>
+    </w:tblGrid>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="00C5346A">
+                <w:r>
+                    <w:t>QN=</w:t>
+                </w:r>
+                <w:r w:rsidR="00455383">
+                    {{numberOfQuestion}}
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004F56DA" w:rsidRDefault="009A4756">
+                <w:r>
+                    {{QuestionContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                    <w:t>a.</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="009A4756">
+                <w:r>
+                    <w:rPr>
+                        <w:rStyle w:val="termtext"/>
+                    </w:rPr>
+                    {{optionAContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                    <w:t>b.</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="009A4756" w:rsidP="004902E4">
+                <w:r>
+                    <w:rPr>
+                        <w:rStyle w:val="termtext"/>
+                    </w:rPr>
+                    {{optionBContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="00B3159E">
+        <w:trPr>
+            <w:trHeight w:val="143"/>
+        </w:trPr>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                    <w:t>c.</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="009A4756" w:rsidP="004902E4">
+                <w:r>
+                    <w:rPr>
+                        <w:rStyle w:val="termtext"/>
+                    </w:rPr>
+                    {{optionCContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                    <w:t>d.</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="009A4756" w:rsidP="004902E4">
+                <w:r>
+                    <w:rPr>
+                        <w:rStyle w:val="termtext"/>
+                    </w:rPr>
+                    {{optionDContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                    <w:t>e.</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4" w:rsidP="004902E4">
+                <w:r>
+                    <w:rPr>
+                        <w:rStyle w:val="termtext"/>
+                    </w:rPr>
+                    {{optionEContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                    <w:t>f.</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4" w:rsidP="004902E4">
+                <w:r>
+                    <w:rPr>
+                        <w:rStyle w:val="termtext"/>
+                    </w:rPr>
+                    {{optionFContent}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="00D558B9">
+                <w:r>
+                    <w:t>ANSWER</w:t>
+                </w:r>
+                <w:r w:rsidR="005B277C">
+                    <w:t>:</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+                <w:r>
+                   {{answers}}
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="00D558B9">
+                <w:r>
+                    <w:t>MARK</w:t>
+                </w:r>
+                <w:r w:rsidR="004902E4">
+                    <w:t>:</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="007F5FF2">
+                <w:r>
+                    <w:t>1</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="00D558B9">
+                <w:r>
+                    <w:t>UNIT</w:t>
+                </w:r>
+                <w:r w:rsidR="004902E4">
+                    <w:t>:</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="004902E4" w:rsidRDefault="00B3159E">
+                <w:r>
+                    <w:t>1</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="002E3D8B" w:rsidTr="007501FC">
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="2077" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="002E3D8B" w:rsidRDefault="002E3D8B">
+                <w:r>
+                    <w:t>MI</w:t>
+                </w:r>
+                <w:r w:rsidR="006A41BF">
+                    <w:t>X CHOICES:</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+        <w:tc>
+            <w:tcPr>
+                <w:tcW w:w="7323" w:type="dxa"/>
+                <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+            </w:tcPr>
+            <w:p w:rsidR="002E3D8B" w:rsidRDefault="007F5FF2">
+                <w:r>
+                    <w:t>no</w:t>
+                </w:r>
+            </w:p>
+        </w:tc>
+    </w:tr>
+</w:tbl>
+<w:p w:rsidR="004902E4" w:rsidRDefault="004902E4"/>

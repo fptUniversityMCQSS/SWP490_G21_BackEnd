@@ -4,7 +4,6 @@ import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
-	"encoding/json"
 	"encoding/xml"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
@@ -51,11 +50,40 @@ func QaResponse(c echo.Context) error {
 	}
 	defer src.Close()
 
+	var user = &model.User{
+		Id: intUserId,
+	}
+	var exam = &model.ExamTest{
+		User: user,
+		Name: file.Filename,
+		Date: time.Now(),
+	}
+
+	i, err := utility.DB.QueryTable("exam_test").PrepareInsert()
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Query table examtest failed",
+		})
+	}
+	insert, err := i.Insert(exam)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "insert exam error",
+		})
+	}
+	err2 := i.Close()
+	if err2 != nil {
+		log.Println(err2)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "Close connection error",
+		})
+	}
+
 	userPath := "examtest/" + userName
-	timeNow := time.Now()
-	re := regexp.MustCompile(":")
-	timeNowAfterRegex := re.ReplaceAllString(timeNow.String(), "-")
-	fileFolderPath := userPath + "/" + timeNowAfterRegex
+	stringIdInsert := strconv.Itoa(int(insert))
+	fileFolderPath := userPath + "/" + stringIdInsert
 	err = os.MkdirAll(fileFolderPath, os.ModePerm)
 	if err != nil {
 		log.Print(err)
@@ -65,7 +93,8 @@ func QaResponse(c echo.Context) error {
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
-
+	exam.Path = filePath
+	_, err = utility.DB.Update(exam)
 	dst, err := os.Create(filePath)
 	if err != nil {
 		log.Print(err)
@@ -142,16 +171,6 @@ func QaResponse(c echo.Context) error {
 			Message: "Parse xml false",
 		})
 	}
-
-	var user = &model.User{
-		Id: intUserId,
-	}
-	var exam = &model.ExamTest{
-		User: user,
-		Name: file.Filename,
-		Date: timeNow,
-		Path: filePath,
-	}
 	array := xmlDocument.XMLBody.XMLBodyPs
 	var Content string
 	for i := 0; i < 2; i++ {
@@ -166,27 +185,7 @@ func QaResponse(c echo.Context) error {
 		exam.NumberOfQuestions, _ = strconv.ParseInt(Content, 10, 64)
 	}
 
-	i, err := utility.DB.QueryTable("exam_test").PrepareInsert()
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Query table examtest failed",
-		})
-	}
-	insert, err := i.Insert(exam)
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "insert exam error",
-		})
-	}
-	err2 := i.Close()
-	if err2 != nil {
-		log.Println(err2)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Close connection error",
-		})
-	}
+	_, err = utility.DB.Update(exam)
 	tables := xmlDocument.XMLBody.XMLBodyTbls
 	if tables == nil {
 		err := src.Close()
@@ -249,10 +248,6 @@ func QaResponse(c echo.Context) error {
 								}
 								option.Content += content.QN
 							}
-						} else if x == 7 {
-							if y != 0 {
-								QuestionModel.Answer = content.QN
-							}
 						}
 					}
 					if y != 0 {
@@ -283,7 +278,6 @@ func QaResponse(c echo.Context) error {
 		QuestionModel.ExamTest = exam
 		Questions = append(Questions, &QuestionModel)
 	}
-
 	i2, err := utility.DB.QueryTable("question").PrepareInsert()
 	i3, err := utility.DB.QueryTable("option").PrepareInsert()
 	for _, question := range Questions {
@@ -322,33 +316,34 @@ func QaResponse(c echo.Context) error {
 	examResponse := response.HistoryResponse{
 		Id:   insert,
 		Name: exam.Name,
-		Date: timeNow,
+		Date: time.Now(),
 	}
 
-	reader, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{Message: "No data of question send"})
-	}
-	str := ""
-	enc := json.NewEncoder(c.Response())
-	for {
-		b, err := reader.ReadByte()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Fatal("Error reading HTTP response: ", err.Error())
-		}
-		str += string(b)
-
-		if reader.Buffered() <= 0 {
-			println(str)
-			enc.Encode(str)
-			c.Response().Flush()
-			str = ""
-		}
-	}
+	//reader, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
+	//if err != nil {
+	//	log.Println(err)
+	//	return c.JSON(http.StatusInternalServerError, response.Message{Message: "No data of question send"})
+	//}
+	//str := ""
+	//enc := json.NewEncoder(c.Response())
+	//for {
+	//	b, err := reader.ReadByte()
+	//	if err != nil {
+	//		if err == io.EOF {
+	//			break
+	//		}
+	//		log.Fatal("Error reading HTTP response: ", err.Error())
+	//	}
+	//	str += string(b)
+	//
+	//	if reader.Buffered() <= 0 {
+	//		println(str)
+	//		enc.Encode(str)
+	//
+	//		c.Response().Flush()
+	//		str = ""
+	//	}
+	//}
 
 	return c.JSON(http.StatusOK, examResponse)
 

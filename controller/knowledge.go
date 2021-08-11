@@ -204,8 +204,9 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: "please check format file it must pdf, doc, docx or txt",
 		})
 	}
-
+	placeToSaveFileTxt := createFolderOfTxtFile(file.Filename, extension, fileFolderPath, insert)
 	know.Status = "Encoding"
+	know.ParseTxt = placeToSaveFileTxt
 	_, err = utility.DB.Update(know)
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,
@@ -348,9 +349,11 @@ func parseTextFromDocorDocx(path string) (string, error) {
 func createFolderOfTxtFile(fileName string, extension string, fileFolderPath string, id int64) string {
 	stringId := strconv.Itoa(int(id))
 	extensionNewFormat := strings.ReplaceAll(fileName, extension, stringId+".txt")
+
 	placeToSaveFileTxt := fileFolderPath + "/" + extensionNewFormat
 	return placeToSaveFileTxt
 }
+
 func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, insert int64) error {
 	doc, err := fitz.New(filepath)
 	if err != nil {
