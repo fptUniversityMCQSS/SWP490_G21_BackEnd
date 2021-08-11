@@ -309,13 +309,14 @@ func QaResponse(c echo.Context) error {
 		})
 	}
 	for _, question := range Questions {
-		_, err := i2.Insert(question)
+		id, err := i2.Insert(question)
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: "Insert Option error",
 			})
 		}
+		question.Id = id
 		for _, option := range question.Options {
 			_, err2 := i3.Insert(option)
 			if err2 != nil {
@@ -403,6 +404,14 @@ func QaResponse(c echo.Context) error {
 				Options: optionsQAResponse,
 				Answer:  qaResponse.Answer,
 			}
+			questionsMap[qaResponse.Qn].Answer = qaResponse.Answer
+			_, err = utility.DB.Update(questionsMap[qaResponse.Qn], "answer")
+			if err != nil {
+				log.Println(err)
+				return c.JSON(http.StatusInternalServerError, response.Message{
+					Message: "update answer failed",
+				})
+			}
 			err = enc.Encode(questionsResponse)
 			if err != nil {
 				log.Println("json encoding for responding failed")
@@ -471,7 +480,3 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 	}
 	return open, nil
 }
-
-//func convertXmlToDocx(folderPath string, fileName string) (question []*model.Question) {
-//
-//}

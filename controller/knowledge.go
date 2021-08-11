@@ -243,7 +243,6 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: "please check format file it must pdf, doc, docx or txt",
 		})
 	}
-	placeToSaveFileTxt := createFolderOfTxtFile(file.Filename, extension, fileFolderPath, insert)
 	know.Status = "Encoding"
 	know.ParseTxt = placeToSaveFileTxt
 	_, err = utility.DB.Update(know)
@@ -264,7 +263,6 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 	c.Response().Flush()
 
-	//placeToSaveFileTxt := createFolderOfTxtFile(file.Filename,extension,fileFolderPath,insert)          //placeToSaveFileTxt get path of txt file
 	err = utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt)
 	if err != nil {
 		log.Print(err)
