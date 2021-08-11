@@ -244,7 +244,6 @@ func KnowledgeUpload(c echo.Context) error {
 		})
 	}
 	know.Status = "Encoding"
-	know.ParseTxt = placeToSaveFileTxt
 	_, err = utility.DB.Update(know)
 	knowledgeResponse = response.KnowledgResponse{
 		Id:       insert,
@@ -335,11 +334,17 @@ func DeleteKnowledge(c echo.Context) error {
 			Message: "query error",
 		})
 	}
-
 	err2 := os.RemoveAll(knowledge.Path)
 	if err2 != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: "remove file error",
+		})
+	}
+	err = utility.DeleteKnowledge(utility.ConfigData.AIServer, "DELETE", knowledge.Name)
+	if err != nil {
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: "fail to delete knowledge",
 		})
 	}
 	message := response.Message{
