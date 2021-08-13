@@ -10,16 +10,18 @@ import (
 )
 
 type Config struct {
-	DbServer     string
-	DBDriver     string
-	DbPort       string
-	DbUser       string
-	DbPassword   string
-	Database     string
-	Server       string
-	AIServer     string
-	PortBackend  string
-	PortFrontend string
+	DbServer         string
+	DBDriver         string
+	DbPort           string
+	DbUser           string
+	DbPassword       string
+	Database         string
+	Server           string
+	AIServer         string
+	PortBackend      string
+	PortFrontend     string
+	HttpsKey         string
+	HttpsCertificate string
 }
 
 var ConfigData = ReadConfig()

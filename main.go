@@ -22,7 +22,7 @@ import (
 func main() {
 	//start echo
 	e := echo.New()
-    e.Pre(middleware.HTTPSRedirect())
+	e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
@@ -44,19 +44,19 @@ func main() {
 	}
 
 	//api
-	e.GET("/", controller.Home)
-	e.GET("/api", controller.ApiWeb)
+	e.GET("/home", controller.Home)
+	//e.GET("/api", controller.ApiWeb)
 	e.POST("/login", Authenticate.LoginResponse)
 	e.POST("/register", Authenticate.Register)
 
-	user := signedIn.Group("", userPermission.Header)
+	user := signedIn.Group("/", userPermission.Header)
 	user.PUT("/qa", controller.QaResponse)
 	user.GET("/history", controller.History)
 	user.GET("/history/:id", controller.GetExamById)
 	user.GET("/history/:id/download", controller.DownloadExam)
 	user.GET("/knowledge", controller.ListKnowledge)
 
-	staff := signedIn.Group("", staffPermission.Header)
+	staff := signedIn.Group("/", staffPermission.Header)
 	staff.PUT("/knowledge", controller.KnowledgeUpload)
 	staff.GET("/knowledge/:id", controller.DownloadKnowledge)
 	staff.DELETE("/knowledge/:id", controller.DeleteKnowledge)
@@ -68,8 +68,7 @@ func main() {
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)
 
-	e.Logger.Fatal(e.StartTLS(":" + utility.ConfigData.PortBackend,"utility/configHttps/public.crt","utility/configHttps/private.key"))
-
+	e.Logger.Fatal(e.StartTLS(":"+utility.ConfigData.PortBackend, utility.ConfigData.HttpsCertificate, utility.ConfigData.HttpsKey))
 }
 
 type Role struct {
