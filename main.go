@@ -22,11 +22,13 @@ import (
 func main() {
 	//start echo
 	e := echo.New()
+    e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
 		AllowMethods: []string{"*"},
 	}))
+
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	signedIn := e.Group("", middleware.JWT([]byte(Authenticate.JwtSignature)))
@@ -66,7 +68,7 @@ func main() {
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)
 
-	e.Logger.Fatal(e.Start(":" + utility.ConfigData.PortBackend))
+	e.Logger.Fatal(e.StartTLS(":" + utility.ConfigData.PortBackend,"utility/configHttps/public.crt","utility/configHttps/private.key"))
 
 }
 
