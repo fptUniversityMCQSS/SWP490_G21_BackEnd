@@ -84,7 +84,7 @@ func (r *Role) Header(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(c)
 		} else {
 			return c.JSON(http.StatusForbidden, response.Message{
-				Message: "Access denied",
+				Message: utility.Error057AccessDenied,
 			})
 		}
 	}

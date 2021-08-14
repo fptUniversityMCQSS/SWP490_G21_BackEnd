@@ -22,14 +22,14 @@ func Register(c echo.Context) error {
 	if err == nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "User Existed",
+			Message: utility.Error003UserExisted,
 		})
 	}
 	i, err := utility.DB.QueryTable("user").PrepareInsert()
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "Query Error User",
+			Message: utility.Error004CantGetTableUser,
 		})
 	}
 	user.Password = Password
@@ -38,7 +38,7 @@ func Register(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "Insert fail user",
+			Message: utility.Error005InsertUserError,
 		})
 	}
 	fmt.Println(insert)
@@ -46,7 +46,7 @@ func Register(c echo.Context) error {
 	if err1 != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "Close Connection error",
+			Message: utility.Error022CloseConnectionError,
 		})
 	}
 

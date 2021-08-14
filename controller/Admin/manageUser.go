@@ -24,7 +24,7 @@ func ListUser(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "query error",
+			Message: utility.Error002ErrorQueryForGetAllUsers,
 		})
 	}
 
@@ -60,14 +60,14 @@ func AddUser(c echo.Context) error {
 		if err == nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "user existed",
+				Message: utility.Error003UserExisted,
 			})
 		}
 		i, err := utility.DB.QueryTable("user").PrepareInsert()
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "dont have table user",
+				Message: utility.Error004CantGetTableUser,
 			})
 		}
 		if utility.CheckRole(role) {
@@ -81,14 +81,14 @@ func AddUser(c echo.Context) error {
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Insert user error",
+				Message: utility.Error005InsertUserError,
 			})
 		}
 		err1 := i.Close()
 		if err1 != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Close connection error",
+				Message: utility.Error022CloseConnectionError,
 			})
 		}
 		userResponse := response.UserResponse{
@@ -101,24 +101,30 @@ func AddUser(c echo.Context) error {
 	} else {
 		log.Printf("Username empty")
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Username empty",
+			Message: utility.Error006UserNameEmpty,
 		})
 	}
 }
 
 func GetUserById(c echo.Context) error {
-	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error008UserIdInvalid,
+		})
+	}
 	var user model.User
 
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
 
-	err := utility.DB.QueryTable("user").Filter("id", id).One(&user)
+	err = utility.DB.QueryTable("user").Filter("id", id).One(&user)
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "dont have user",
+			Message: utility.Error007CantGetUser,
 		})
 	}
 
@@ -136,7 +142,7 @@ func DeleteUserById(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "user id invalid",
+			Message: utility.Error008UserIdInvalid,
 		})
 	}
 	user := &model.User{
@@ -146,7 +152,7 @@ func DeleteUserById(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Delete User Failed",
+			Message: utility.Error009DeleteUserFailed,
 		})
 	}
 	return c.JSON(http.StatusOK, response.Message{
@@ -164,7 +170,7 @@ func UpdateUser(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "user id invalid",
+			Message: utility.Error008UserIdInvalid,
 		})
 	}
 	user := &model.User{
@@ -176,7 +182,7 @@ func UpdateUser(c echo.Context) error {
 	} else {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "edit user failed",
+			Message: utility.Error010RoleOfUserIsInvalid,
 		})
 	}
 	if changePassword == "true" {
@@ -187,13 +193,13 @@ func UpdateUser(c echo.Context) error {
 			if err != nil {
 				log.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
-					Message: "edit user failed",
+					Message: utility.Error011UpdateUserFailed,
 				})
 			}
 		} else {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "edit user failed",
+				Message: utility.Error012PasswordEmpty,
 			})
 		}
 	} else {
@@ -201,7 +207,7 @@ func UpdateUser(c echo.Context) error {
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "edit user failed",
+				Message: utility.Error011UpdateUserFailed,
 			})
 		}
 	}

@@ -28,7 +28,7 @@ func LoginResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "Invalid User",
+			Message: utility.Error001InvalidUser,
 		})
 	}
 
@@ -45,7 +45,7 @@ func LoginResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "login fail",
+			Message: utility.Error013CreateTokenOfUserFailed,
 		})
 	}
 	log.Printf(Username + "login success")
