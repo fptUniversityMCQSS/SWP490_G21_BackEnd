@@ -10,16 +10,17 @@ import (
 )
 
 type Config struct {
-	DbServer     string
-	DBDriver     string
-	DbPort       string
-	DbUser       string
-	DbPassword   string
-	Database     string
-	Server       string
-	AIServer     string
-	PortBackend  string
-	PortFrontend string
+	DbServer         string
+	DBDriver         string
+	DbPort           string
+	DbUser           string
+	DbPassword       string
+	Database         string
+	AIServer         string
+	Port             string
+	StaticFolder     string
+	HttpsKey         string
+	HttpsCertificate string
 }
 
 var ConfigData = ReadConfig()
@@ -58,6 +59,21 @@ func init() {
 	err = os.MkdirAll("knowledge", os.ModePerm)
 	if err != nil {
 		log.Print(err)
+	}
+
+	_, err = os.Stat(ConfigData.HttpsKey)
+	if err != nil {
+		log.Fatal("missing \"" + ConfigData.HttpsKey + "\"")
+	}
+
+	_, err = os.Stat(ConfigData.HttpsCertificate)
+	if err != nil {
+		log.Fatal("missing \"" + ConfigData.HttpsCertificate + "\"")
+	}
+
+	_, err = os.Stat(ConfigData.StaticFolder)
+	if err != nil {
+		log.Fatal("missing \"" + ConfigData.StaticFolder + "\" folder for static html files")
 	}
 }
 

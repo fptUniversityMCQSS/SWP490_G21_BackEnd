@@ -22,6 +22,7 @@ import (
 func main() {
 	//start echo
 	e := echo.New()
+	e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
@@ -29,7 +30,9 @@ func main() {
 	}))
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
-	signedIn := e.Group("", middleware.JWT([]byte(Authenticate.JwtSignature)))
+	//-----Backend-----
+	backend := e.Group("/api")
+	signedIn := backend.Group("", middleware.JWT([]byte(Authenticate.JwtSignature)))
 
 	adminPermission := Role{
 		"-admin-",
@@ -41,11 +44,9 @@ func main() {
 		staffPermission.requirement + "-user-",
 	}
 
-	//api
-	e.GET("/", controller.Home)
-	e.GET("/api", controller.ApiWeb)
-	e.POST("/login", Authenticate.LoginResponse)
-	e.POST("/register", Authenticate.Register)
+	//backend.GET("/", controller.Home)
+	backend.POST("/login", Authenticate.LoginResponse)
+	backend.POST("/register", Authenticate.Register)
 
 	user := signedIn.Group("", userPermission.Header)
 	user.PUT("/qa", controller.QaResponse)
@@ -66,8 +67,13 @@ func main() {
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)
 
-	e.Logger.Fatal(e.Start(":" + utility.ConfigData.PortBackend))
+	//-------Frontend-------
+	e.Static("/", utility.ConfigData.StaticFolder)
+	e.HTTPErrorHandler = customHTTPErrorHandler
 
+	e.Logger.Fatal(e.StartTLS(":"+utility.ConfigData.Port,
+		utility.ConfigData.HttpsCertificate,
+		utility.ConfigData.HttpsKey))
 }
 
 type Role struct {
@@ -87,4 +93,12 @@ func (r *Role) Header(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 	}
+}
+
+func customHTTPErrorHandler(err error, c echo.Context) {
+	errorPage := utility.ConfigData.StaticFolder + "/index.html"
+	if err := c.File(errorPage); err != nil {
+		c.Logger().Error(err)
+	}
+	c.Logger().Error(err)
 }
