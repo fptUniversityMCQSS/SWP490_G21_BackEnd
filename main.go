@@ -71,7 +71,13 @@ func main() {
 	e.Static("/", utility.ConfigData.StaticFolder)
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
-	e.Logger.Fatal(e.StartTLS(":"+utility.ConfigData.Port,
+	go func() {
+		e2 := echo.New()
+		e2.Any("/*", redirect)
+		e2.Logger.Fatal(e2.Start(":" + utility.ConfigData.PortHttp))
+	}()
+
+	e.Logger.Fatal(e.StartTLS(":"+utility.ConfigData.PortHttps,
 		utility.ConfigData.HttpsCertificate,
 		utility.ConfigData.HttpsKey))
 }
@@ -101,4 +107,10 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)
 	}
 	c.Logger().Error(err)
+}
+
+func redirect(c echo.Context) error {
+	hostParts := strings.Split(c.Request().Host, ":")
+	url := "https://" + hostParts[0] + ":" + utility.ConfigData.PortHttps + c.Request().RequestURI
+	return c.Redirect(http.StatusMovedPermanently, url)
 }

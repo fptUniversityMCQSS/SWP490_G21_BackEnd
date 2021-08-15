@@ -17,7 +17,8 @@ type Config struct {
 	DbPassword       string
 	Database         string
 	AIServer         string
-	Port             string
+	PortHttps        string
+	PortHttp         string
 	StaticFolder     string
 	HttpsKey         string
 	HttpsCertificate string

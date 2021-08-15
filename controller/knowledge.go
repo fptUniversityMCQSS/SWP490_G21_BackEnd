@@ -54,6 +54,9 @@ func ListKnowledge(c echo.Context) error {
 		knowRs = append(knowRs, knowR)
 	}
 	log.Printf(userName + " get list knowledge")
+	if knowRs == nil {
+		knowRs = []*response.KnowledgResponse{}
+	}
 	return c.JSON(http.StatusOK, knowRs)
 
 }

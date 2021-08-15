@@ -48,6 +48,9 @@ func History(c echo.Context) error {
 		hist = append(hist, his)
 	}
 	log.Printf(userName + " get list history")
+	if hist == nil {
+		hist = []*response.HistoryResponse{}
+	}
 	return c.JSON(http.StatusOK, hist)
 
 }
