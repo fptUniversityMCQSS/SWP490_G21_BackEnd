@@ -80,6 +80,7 @@ const (
 	Error045CantGetResult               = "Error for get result"
 	Error046CantParseFileDocToDocx      = "Error for parse file from doc to docx"
 	Error048ParseFileXmlError           = "Error for parse xml file"
-	Error049ParseNumberOfQuestionsError = "Error for parse number of questions"
 	Error051ParseNumberOfQuestionError  = "Error for parse number of question"
+	Error058ParseNumberOfQuestionsError = "Error for parse number of questions"
+	Error059ReformatStringFalse         = "Missing ':' Subject or Number Of Question"
 )

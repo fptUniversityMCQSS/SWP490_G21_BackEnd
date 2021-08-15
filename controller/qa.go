@@ -194,24 +194,38 @@ func QaResponse(c echo.Context) error {
 		})
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
-	var Content string
-	for i := 0; i < 2; i++ {
-		exam.Subject = Content
-		NumberOfQuestions := ""
-		for j := 0; j < len(array[i].XMLBodyPr); j++ {
-			NumberOfQuestions += array[i].XMLBodyPr[j].Subject
-		}
-		re, _ := regexp.Compile("(.*)\\s")
-		NumberOfQuestions = re.ReplaceAllString(NumberOfQuestions, "")
-		Content = NumberOfQuestions
-		exam.NumberOfQuestions, err = strconv.ParseInt(Content, 10, 64)
-		if err != nil {
-			log.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error049ParseNumberOfQuestionsError,
-			})
-		}
+
+	content := ""
+	for i := 0; i < len(array[0].XMLBodyPr); i++ {
+		content += array[0].XMLBodyPr[i].Subject
 	}
+	content, err = reFormatStringToAdd(content)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error059ReformatStringFalse,
+		})
+	}
+	exam.Subject = content
+	content = ""
+	for j := 0; j < len(array[1].XMLBodyPr); j++ {
+		content += array[1].XMLBodyPr[j].Subject
+	}
+	content, err = reFormatStringToAdd(content)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error059ReformatStringFalse,
+		})
+	}
+	numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
+	if err != nil {
+		log.Print(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error058ParseNumberOfQuestionsError,
+		})
+	}
+	exam.NumberOfQuestions = numberOfQuestions
 
 	_, err = utility.DB.Update(exam)
 	tables := xmlDocument.XMLBody.XMLBodyTbls
@@ -497,4 +511,13 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 		return nil, err
 	}
 	return open, nil
+}
+
+func reFormatStringToAdd(s string) (string, error) {
+	re, err := regexp.Compile("(.*):")
+	if err != nil {
+		return "", err
+	}
+	stringAfterFormat := re.ReplaceAllString(s, "")
+	return strings.TrimSpace(stringAfterFormat), nil
 }
