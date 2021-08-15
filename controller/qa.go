@@ -43,14 +43,14 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "send file error",
+			Message: utility.Error020FileError,
 		})
 	}
 	src, err := file.Open()
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "open file error",
+			Message: utility.Error021OpenFileError,
 		})
 	}
 	defer func(src multipart.File) {
@@ -74,21 +74,21 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Query table examtest failed",
+			Message: utility.Error040CantPrepareStatementExamTest,
 		})
 	}
 	insert, err := i.Insert(exam)
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "insert exam error",
+			Message: utility.Error041InsertExamFailed,
 		})
 	}
 	err2 := i.Close()
 	if err2 != nil {
 		log.Println(err2)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Close connection error",
+			Message: utility.Error022CloseConnectionError,
 		})
 	}
 
@@ -99,18 +99,24 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Can't create directory",
+			Message: utility.Error025CreateDirectoryError,
 		})
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
 	exam.Path = filePath
 	_, err = utility.DB.Update(exam)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error042UpdateExamFailed,
+		})
+	}
 	dst, err := os.Create(filePath)
 	if err != nil {
 		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Can't create directory of file",
+			Message: utility.Error025CreateDirectoryError,
 		})
 	}
 	defer func(dst *os.File) {
@@ -124,7 +130,7 @@ func QaResponse(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		log.Print(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Copy file error",
+			Message: utility.Error027CopyFileError,
 		})
 	}
 
@@ -133,7 +139,7 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Can not parse file size",
+			Message: utility.Error043CantParseFileSize,
 		})
 	}
 
@@ -144,21 +150,21 @@ func QaResponse(c echo.Context) error {
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Can not get directory path",
+				Message: utility.Error044CantGetFilePath,
 			})
 		}
 		fileName, err := ToDocx(dir, file.Filename)
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Can not parse file",
+				Message: utility.Error046CantParseFileDocToDocx,
 			})
 		}
 		fi, err := fileName.Stat()
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Stat() file error",
+				Message: utility.Error047StatFileError,
 			})
 		}
 		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
@@ -166,14 +172,14 @@ func QaResponse(c echo.Context) error {
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Close file error",
+				Message: utility.Error033CloseFileError,
 			})
 		}
 		err3 := os.Remove(fileName.Name())
 		if err3 != nil {
 			log.Println(err3)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Remove file error",
+				Message: utility.Error038RemoveFileError,
 			})
 		}
 	}
@@ -184,7 +190,7 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Parse xml false",
+			Message: utility.Error048ParseFileXmlError,
 		})
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
@@ -198,7 +204,13 @@ func QaResponse(c echo.Context) error {
 		re, _ := regexp.Compile("(.*)\\s")
 		NumberOfQuestions = re.ReplaceAllString(NumberOfQuestions, "")
 		Content = NumberOfQuestions
-		exam.NumberOfQuestions, _ = strconv.ParseInt(Content, 10, 64)
+		exam.NumberOfQuestions, err = strconv.ParseInt(Content, 10, 64)
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: utility.Error049ParseNumberOfQuestionsError,
+			})
+		}
 	}
 
 	_, err = utility.DB.Update(exam)
@@ -208,32 +220,32 @@ func QaResponse(c echo.Context) error {
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Close src error",
+				Message: utility.Error033CloseFileError,
 			})
 		}
 		err2 := dst.Close()
 		if err2 != nil {
 			log.Println(err2)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Close dst error",
+				Message: utility.Error033CloseFileError,
 			})
 		}
 		dir, err := filepath.Abs("examtest/" + file.Filename)
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Can not get directory path",
+				Message: utility.Error044CantGetFilePath,
 			})
 		}
 		err3 := os.Remove(dir)
 		if err3 != nil {
 			log.Println(err3)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Romove file error",
+				Message: utility.Error038RemoveFileError,
 			})
 		}
 		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: "Cant not read file doc or docx please try again",
+			Message: utility.Error050ReadFileDocOrDocxError,
 		})
 	}
 	var Questions []*model.Question
@@ -288,7 +300,13 @@ func QaResponse(c echo.Context) error {
 		Question = RemoveEndChar(Question)
 		re, _ := regexp.Compile("(.*)=")
 		QN = re.ReplaceAllString(QN, "")
-		QuestionNumber, _ := strconv.ParseInt(QN, 10, 64)
+		QuestionNumber, err := strconv.ParseInt(QN, 10, 64)
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: utility.Error051ParseNumberOfQuestionError,
+			})
+		}
 		QuestionModel.Number = QuestionNumber
 		QuestionModel.Content = Question
 		QuestionModel.ExamTest = exam
@@ -298,14 +316,14 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Insert Question error",
+			Message: utility.Error053CantGetQuestion,
 		})
 	}
 	i3, err := utility.DB.QueryTable("option").PrepareInsert()
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Insert Option error",
+			Message: utility.Error054CantGetOption,
 		})
 	}
 	for _, question := range Questions {
@@ -313,7 +331,7 @@ func QaResponse(c echo.Context) error {
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: "Insert Option error",
+				Message: utility.Error052InsertQuestionError,
 			})
 		}
 		question.Id = id
@@ -322,7 +340,7 @@ func QaResponse(c echo.Context) error {
 			if err2 != nil {
 				log.Println(err2)
 				return c.JSON(http.StatusInternalServerError, response.Message{
-					Message: "Insert Option error",
+					Message: utility.Error053InsertOptionError,
 				})
 			}
 		}
@@ -331,14 +349,14 @@ func QaResponse(c echo.Context) error {
 	if err4 != nil {
 		log.Println(err4)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Close insert question error",
+			Message: utility.Error022CloseConnectionError,
 		})
 	}
 	err5 := i3.Close()
 	if err5 != nil {
 		log.Println(err5)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: "Close insert option error",
+			Message: utility.Error022CloseConnectionError,
 		})
 	}
 
@@ -361,7 +379,7 @@ func QaResponse(c echo.Context) error {
 	}
 	if err != nil {
 		log.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{Message: "Fail to receive response from AI server"})
+		return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -379,7 +397,7 @@ func QaResponse(c echo.Context) error {
 				break
 			}
 			log.Println("Error reading HTTP response: ", err.Error())
-			return c.JSON(http.StatusInternalServerError, response.Message{Message: "Fail to receive response from AI server"})
+			return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
 		}
 		str += string(b)
 
@@ -409,7 +427,7 @@ func QaResponse(c echo.Context) error {
 			if err != nil {
 				log.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
-					Message: "update answer failed",
+					Message: utility.Error056UpdateAnswerError,
 				})
 			}
 			err = enc.Encode(questionsResponse)
