@@ -22,7 +22,7 @@ func ListUser(c echo.Context) error {
 
 	//if has problem in connection
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error002ErrorQueryForGetAllUsers,
 		})
@@ -58,14 +58,14 @@ func AddUser(c echo.Context) error {
 		err := utility.DB.Read(user, "username")
 
 		if err == nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error003UserExisted,
 			})
 		}
 		i, err := utility.DB.QueryTable("user").PrepareInsert()
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error004CantGetTableUser,
 			})
@@ -79,14 +79,14 @@ func AddUser(c echo.Context) error {
 
 		insert, err := i.Insert(user)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error005InsertUserError,
 			})
 		}
 		err1 := i.Close()
 		if err1 != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error022CloseConnectionError,
 			})
@@ -109,7 +109,7 @@ func AddUser(c echo.Context) error {
 func GetUserById(c echo.Context) error {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error008UserIdInvalid,
 		})
@@ -122,7 +122,7 @@ func GetUserById(c echo.Context) error {
 
 	err = utility.DB.QueryTable("user").Filter("id", id).One(&user)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error007CantGetUser,
 		})
@@ -140,7 +140,7 @@ func GetUserById(c echo.Context) error {
 func DeleteUserById(c echo.Context) error {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error008UserIdInvalid,
 		})
@@ -150,7 +150,7 @@ func DeleteUserById(c echo.Context) error {
 	}
 	_, err = utility.DB.Delete(user)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error009DeleteUserFailed,
 		})
@@ -168,7 +168,7 @@ func UpdateUser(c echo.Context) error {
 	changePassword := c.FormValue("change_password")
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error008UserIdInvalid,
 		})
@@ -180,7 +180,7 @@ func UpdateUser(c echo.Context) error {
 	if utility.CheckRole(role) {
 		user.Role = role
 	} else {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error010RoleOfUserIsInvalid,
 		})
@@ -191,13 +191,13 @@ func UpdateUser(c echo.Context) error {
 			user.Password = password
 			_, err := utility.DB.Update(user, "role", "password")
 			if err != nil {
-				log.Println(err)
+				utility.FileLog.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
 					Message: utility.Error011UpdateUserFailed,
 				})
 			}
 		} else {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error012PasswordEmpty,
 			})
@@ -205,7 +205,7 @@ func UpdateUser(c echo.Context) error {
 	} else {
 		_, err := utility.DB.Update(user, "role")
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error011UpdateUserFailed,
 			})

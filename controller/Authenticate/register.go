@@ -6,7 +6,6 @@ import (
 	"SWP490_G21_Backend/utility"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
@@ -20,14 +19,14 @@ func Register(c echo.Context) error {
 	err := utility.DB.Read(user, "username")
 	user.Role = "user"
 	if err == nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error003UserExisted,
 		})
 	}
 	i, err := utility.DB.QueryTable("user").PrepareInsert()
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error004CantGetTableUser,
 		})
@@ -36,7 +35,7 @@ func Register(c echo.Context) error {
 	fmt.Println(i)
 	insert, err := i.Insert(user)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error005InsertUserError,
 		})
@@ -44,12 +43,11 @@ func Register(c echo.Context) error {
 	fmt.Println(insert)
 	err1 := i.Close()
 	if err1 != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error022CloseConnectionError,
 		})
 	}
-
-	log.Printf(Username + " register success")
+	utility.FileLog.Println(Username + " register success")
 	return c.String(http.StatusOK, fmt.Sprintf("Register success "))
 }

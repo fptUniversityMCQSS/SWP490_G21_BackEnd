@@ -6,7 +6,6 @@ import (
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 	"time"
 )
@@ -26,7 +25,7 @@ func LoginResponse(c echo.Context) error {
 	// Get a QuerySeter object. User is table name
 	err := utility.DB.Read(user, "username", "password")
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error001InvalidUser,
 		})
@@ -43,12 +42,12 @@ func LoginResponse(c echo.Context) error {
 
 	t, err := token.SignedString([]byte(JwtSignature))
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error013CreateTokenOfUserFailed,
 		})
 	}
-	log.Printf(Username + "login success")
+	utility.FileLog.Println(Username + " login success")
 	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
 
 }
