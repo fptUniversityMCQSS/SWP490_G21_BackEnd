@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/nguyenthenguyen/docx"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -28,7 +27,7 @@ func History(c echo.Context) error {
 	_, err := utility.DB.QueryTable("exam_test").Filter("user_id", userId).All(&history)
 
 	if err != nil {
-		log.Print(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error014ErrorQueryForGetAllExamTest,
 		})
@@ -47,7 +46,7 @@ func History(c echo.Context) error {
 
 		hist = append(hist, his)
 	}
-	log.Printf(userName + " get list history")
+	utility.FileLog.Println(userName + " get list history")
 	if hist == nil {
 		hist = []*response.HistoryResponse{}
 	}
@@ -61,7 +60,7 @@ func GetExamById(c echo.Context) error {
 	IntUserId := int64(userId)
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error008UserIdInvalid,
 		})
@@ -73,14 +72,14 @@ func GetExamById(c echo.Context) error {
 	var userResponse response.UserResponse
 	_, err = utility.DB.QueryTable("exam_test").Filter("id", id).All(&examTest)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error014ErrorQueryForGetAllExamTest,
 		})
 	}
 	_, err = utility.DB.QueryTable("user").Filter("id", IntUserId).All(&user)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error002ErrorQueryForGetAllUsers,
 		})
@@ -91,7 +90,7 @@ func GetExamById(c echo.Context) error {
 	if examTest.User.Id == IntUserId {
 		_, err := utility.DB.QueryTable("question").Filter("exam_test_id", id).RelatedSel().All(&questionAll)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error016ErrorQueryForGetAllQuestions,
 			})
@@ -108,7 +107,7 @@ func GetExamById(c echo.Context) error {
 			)
 			_, err := utility.DB.QueryTable("option").Filter("question_id_id", question.Id).All(&answerAll)
 			if err != nil {
-				log.Println(err)
+				utility.FileLog.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
 					Message: utility.Error017ErrorQueryForGetAllOptions,
 				})
@@ -132,7 +131,7 @@ func GetExamById(c echo.Context) error {
 			Subject:           examTest.Subject,
 			Questions:         questionsResponse,
 		}
-		log.Printf(user.Username + " get exam by id :" + examTest.Name)
+		utility.FileLog.Println(user.Username + " get exam by id :" + examTest.Name)
 		return c.JSON(http.StatusOK, customExamTestResponse)
 	} else {
 		return c.JSON(http.StatusUnauthorized, response.Message{
@@ -148,7 +147,7 @@ func DownloadExam(c echo.Context) error {
 	QaId := c.Param("id")
 	intQaId, err := strconv.ParseInt(QaId, 10, 64)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error008UserIdInvalid,
 		})
@@ -158,15 +157,15 @@ func DownloadExam(c echo.Context) error {
 	err = utility.DB.QueryTable("exam_test").Filter("id", intQaId).One(&examTest)
 
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error015CantGetExamTest,
 		})
 	}
-	log.Printf(userName + " download " + examTest.Name)
+	utility.FileLog.Println(userName + " download " + examTest.Name)
 	formatFile, err := formatDocxFileResult(examTest)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error045CantGetResult,
 		})
@@ -201,14 +200,14 @@ func formatDocxFileResult(exam model.ExamTest) (string, error) {
 	var OptionsAll []*model.Option
 	_, err = utility.DB.QueryTable("question").Filter("exam_test_id", exam.Id).All(&Questions)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	exam.Questions = Questions
 	for _, question := range Questions {
 		_, err := utility.DB.QueryTable("option").Filter("question_id_id", question.Id).All(&OptionsAll)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return err.Error(), err
 		}
 		question.Options = OptionsAll
@@ -216,12 +215,12 @@ func formatDocxFileResult(exam model.ExamTest) (string, error) {
 
 	table, err := ioutil.ReadFile("template/table.xml")
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	body, err := ioutil.ReadFile("template/body.xml")
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	tableContent := ""
@@ -249,7 +248,7 @@ func formatDocxFileResult(exam model.ExamTest) (string, error) {
 	f, err := os.Create(newFormatFile)
 	err = editFile.WriteToFile(f.Name())
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	return newFormatFile, nil

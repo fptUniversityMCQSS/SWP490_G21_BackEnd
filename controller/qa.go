@@ -15,7 +15,6 @@ import (
 	"github.com/nguyenthenguyen/docx"
 	"io"
 	_ "io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	_ "net/http"
@@ -41,14 +40,14 @@ func QaResponse(c echo.Context) error {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error020FileError,
 		})
 	}
 	src, err := file.Open()
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error021OpenFileError,
 		})
@@ -72,21 +71,21 @@ func QaResponse(c echo.Context) error {
 
 	i, err := utility.DB.QueryTable("exam_test").PrepareInsert()
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error040CantPrepareStatementExamTest,
 		})
 	}
 	insert, err := i.Insert(exam)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error041InsertExamFailed,
 		})
 	}
 	err2 := i.Close()
 	if err2 != nil {
-		log.Println(err2)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error022CloseConnectionError,
 		})
@@ -97,7 +96,7 @@ func QaResponse(c echo.Context) error {
 	fileFolderPath := userPath + "/" + stringIdInsert
 	err = os.MkdirAll(fileFolderPath, os.ModePerm)
 	if err != nil {
-		log.Print(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error025CreateDirectoryError,
 		})
@@ -107,14 +106,14 @@ func QaResponse(c echo.Context) error {
 	exam.Path = filePath
 	_, err = utility.DB.Update(exam)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error042UpdateExamFailed,
 		})
 	}
 	dst, err := os.Create(filePath)
 	if err != nil {
-		log.Print(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error025CreateDirectoryError,
 		})
@@ -128,7 +127,7 @@ func QaResponse(c echo.Context) error {
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
-		log.Print(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error027CopyFileError,
 		})
@@ -137,7 +136,7 @@ func QaResponse(c echo.Context) error {
 	FileInt := c.Request().Header.Get("Content-Length")
 	size, err := strconv.ParseInt(FileInt, 10, 64)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error043CantParseFileSize,
 		})
@@ -148,21 +147,21 @@ func QaResponse(c echo.Context) error {
 	if err != nil {
 		dir, err := filepath.Abs(fileFolderPath)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error044CantGetFilePath,
 			})
 		}
 		fileName, err := ToDocx(dir, file.Filename)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error046CantParseFileDocToDocx,
 			})
 		}
 		fi, err := fileName.Stat()
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error047StatFileError,
 			})
@@ -170,14 +169,14 @@ func QaResponse(c echo.Context) error {
 		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
 		err = fileName.Close()
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error033CloseFileError,
 			})
 		}
 		err3 := os.Remove(fileName.Name())
 		if err3 != nil {
-			log.Println(err3)
+			utility.FileLog.Println(err3)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error038RemoveFileError,
 			})
@@ -188,7 +187,7 @@ func QaResponse(c echo.Context) error {
 
 	err = xml.Unmarshal([]byte(r.Editable().GetContent()), &xmlDocument)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error048ParseFileXmlError,
 		})
@@ -201,7 +200,7 @@ func QaResponse(c echo.Context) error {
 	}
 	content, err = reFormatStringToAdd(content)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error059ReformatStringFalse,
 		})
@@ -213,14 +212,14 @@ func QaResponse(c echo.Context) error {
 	}
 	content, err = reFormatStringToAdd(content)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error059ReformatStringFalse,
 		})
 	}
 	numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
 	if err != nil {
-		log.Print(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error058ParseNumberOfQuestionsError,
 		})
@@ -232,28 +231,28 @@ func QaResponse(c echo.Context) error {
 	if tables == nil {
 		err := src.Close()
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error033CloseFileError,
 			})
 		}
 		err2 := dst.Close()
 		if err2 != nil {
-			log.Println(err2)
+			utility.FileLog.Println(err2)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error033CloseFileError,
 			})
 		}
 		dir, err := filepath.Abs("examtest/" + file.Filename)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error044CantGetFilePath,
 			})
 		}
 		err3 := os.Remove(dir)
 		if err3 != nil {
-			log.Println(err3)
+			utility.FileLog.Println(err3)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error038RemoveFileError,
 			})
@@ -316,7 +315,7 @@ func QaResponse(c echo.Context) error {
 		QN = re.ReplaceAllString(QN, "")
 		QuestionNumber, err := strconv.ParseInt(QN, 10, 64)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error051ParseNumberOfQuestionError,
 			})
@@ -328,14 +327,14 @@ func QaResponse(c echo.Context) error {
 	}
 	i2, err := utility.DB.QueryTable("question").PrepareInsert()
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error053CantGetQuestion,
 		})
 	}
 	i3, err := utility.DB.QueryTable("option").PrepareInsert()
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error054CantGetOption,
 		})
@@ -343,7 +342,7 @@ func QaResponse(c echo.Context) error {
 	for _, question := range Questions {
 		id, err := i2.Insert(question)
 		if err != nil {
-			log.Println(err)
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error052InsertQuestionError,
 			})
@@ -352,7 +351,7 @@ func QaResponse(c echo.Context) error {
 		for _, option := range question.Options {
 			_, err2 := i3.Insert(option)
 			if err2 != nil {
-				log.Println(err2)
+				utility.FileLog.Println(err2)
 				return c.JSON(http.StatusInternalServerError, response.Message{
 					Message: utility.Error053InsertOptionError,
 				})
@@ -361,14 +360,14 @@ func QaResponse(c echo.Context) error {
 	}
 	err4 := i2.Close()
 	if err4 != nil {
-		log.Println(err4)
+		utility.FileLog.Println(err4)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error022CloseConnectionError,
 		})
 	}
 	err5 := i3.Close()
 	if err5 != nil {
-		log.Println(err5)
+		utility.FileLog.Println(err5)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error022CloseConnectionError,
 		})
@@ -392,7 +391,7 @@ func QaResponse(c echo.Context) error {
 		questionsMap[question.Number] = question
 	}
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
 	}
 	defer func(Body io.ReadCloser) {
@@ -410,7 +409,7 @@ func QaResponse(c echo.Context) error {
 			if err == io.EOF {
 				break
 			}
-			log.Println("Error reading HTTP response: ", err.Error())
+			utility.FileLog.Println("Error reading HTTP response: ", err.Error())
 			return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
 		}
 		str += string(b)
@@ -420,7 +419,7 @@ func QaResponse(c echo.Context) error {
 			var qaResponse response.QuestionAnswerResponse
 			err := json.Unmarshal([]byte(str), &qaResponse)
 			if err != nil {
-				log.Println("json unmarshal from AI server failed")
+				utility.FileLog.Println("json unmarshal from AI server failed")
 				continue
 			}
 			var optionsQAResponse []response.OptionResponse
@@ -439,14 +438,14 @@ func QaResponse(c echo.Context) error {
 			questionsMap[qaResponse.Qn].Answer = qaResponse.Answer
 			_, err = utility.DB.Update(questionsMap[qaResponse.Qn], "answer")
 			if err != nil {
-				log.Println(err)
+				utility.FileLog.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
 					Message: utility.Error056UpdateAnswerError,
 				})
 			}
 			err = enc.Encode(questionsResponse)
 			if err != nil {
-				log.Println("json encoding for responding failed")
+				utility.FileLog.Println("json encoding for responding failed")
 				continue
 			}
 			c.Response().Flush()
@@ -480,19 +479,22 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 
 	err := ole.CoInitialize(0)
 	if err != nil {
-		log.Println(err)
+		utility.FileLog.Println(err)
 		return nil, err
 	}
 	unknown, err := oleutil.CreateObject("Word.Application")
 	if err != nil {
+		utility.FileLog.Println(err)
 		return nil, err
 	}
 	word, err := unknown.QueryInterface(ole.IID_IDispatch)
 	if err != nil {
+		utility.FileLog.Println(err)
 		return nil, err
 	}
 	_, err = oleutil.PutProperty(word, "Visible", true)
 	if err != nil {
+		utility.FileLog.Println(err)
 		return nil, err
 	}
 	documents := oleutil.MustGetProperty(word, "Documents").ToIDispatch()
@@ -502,12 +504,14 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 	oleutil.MustCallMethod(document, "SaveAs", outPutDocx, 16).ToIDispatch()
 	_, err = oleutil.CallMethod(word, "Quit")
 	if err != nil {
+		utility.FileLog.Println(err)
 		return nil, err
 	}
 	word.Release()
 	ole.CoUninitialize()
 	open, err := os.Open(outPutDocx)
 	if err != nil {
+		utility.FileLog.Println(err)
 		return nil, err
 	}
 	return open, nil
@@ -516,6 +520,7 @@ func ToDocx(folderPath string, fileName string) (*os.File, error) {
 func reFormatStringToAdd(s string) (string, error) {
 	re, err := regexp.Compile("(.*):")
 	if err != nil {
+		utility.FileLog.Println(err)
 		return "", err
 	}
 	stringAfterFormat := re.ReplaceAllString(s, "")
