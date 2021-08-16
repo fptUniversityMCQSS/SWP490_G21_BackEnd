@@ -5,6 +5,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/natefinch/lumberjack"
 	"log"
 	"os"
 )
@@ -26,6 +27,7 @@ type Config struct {
 
 var ConfigData = ReadConfig()
 var DB orm.Ormer
+var FileLog *log.Logger
 
 func init() {
 	stringConfig := ConfigData.DbUser + ":" +
@@ -42,12 +44,12 @@ func init() {
 	)
 	err := orm.RegisterDriver(ConfigData.DBDriver, orm.DRMySQL)
 	if err != nil {
-		return
+		log.Fatal("Fail to register driver \"" + ConfigData.DBDriver + "\"")
 	}
 
 	err = orm.RegisterDataBase("default", ConfigData.DBDriver, stringConfig)
 	if err != nil {
-		log.Print(err)
+		log.Fatal("missing \"" + ConfigData.HttpsKey + "\"")
 	}
 
 	DB = orm.NewOrm()
@@ -58,6 +60,11 @@ func init() {
 	}
 
 	err = os.MkdirAll("knowledge", os.ModePerm)
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = os.MkdirAll("log", os.ModePerm)
 	if err != nil {
 		log.Print(err)
 	}
@@ -76,6 +83,24 @@ func init() {
 	if err != nil {
 		log.Fatal("missing \"" + ConfigData.StaticFolder + "\" folder for static html files")
 	}
+
+	_, err = os.Stat("template")
+	if err != nil {
+		log.Fatal("missing \"template\" folder")
+	}
+
+	logFile, err := os.OpenFile("log/file.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+
+	if err != nil {
+		log.Fatal("Can not open or create log/file.log")
+	}
+	FileLog = log.New(logFile, "", log.Ldate|log.Ltime)
+	FileLog.SetOutput(&lumberjack.Logger{
+		Filename:   "log/file.log",
+		MaxSize:    1,  // megabytes after which new file is created
+		MaxBackups: 3,  // number of backups
+		MaxAge:     28, //days
+	})
 }
 
 func ReadConfig() Config {

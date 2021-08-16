@@ -196,7 +196,7 @@ func writeStringDocx(str string) string {
 }
 
 func formatDocxFileResult(exam model.ExamTest) (string, error) {
-	r, err := docx.ReadDocxFile("model/template/TestFormat.docx")
+	r, err := docx.ReadDocxFile("template/TestFormat.docx")
 	var Questions []*model.Question
 	var OptionsAll []*model.Option
 	_, err = utility.DB.QueryTable("question").Filter("exam_test_id", exam.Id).All(&Questions)
@@ -214,12 +214,12 @@ func formatDocxFileResult(exam model.ExamTest) (string, error) {
 		question.Options = OptionsAll
 	}
 
-	table, err := ioutil.ReadFile("model/template/table.xml")
+	table, err := ioutil.ReadFile("template/table.xml")
 	if err != nil {
 		log.Println(err)
 		return err.Error(), err
 	}
-	body, err := ioutil.ReadFile("model/template/body.xml")
+	body, err := ioutil.ReadFile("template/body.xml")
 	if err != nil {
 		log.Println(err)
 		return err.Error(), err

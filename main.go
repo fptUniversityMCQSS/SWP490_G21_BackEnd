@@ -91,11 +91,13 @@ func (r *Role) Header(next echo.HandlerFunc) echo.HandlerFunc {
 		token := c.Get("user").(*jwt.Token)
 		claims := token.Claims.(jwt.MapClaims)
 		role := claims["role"].(string)
+		username := claims["username"].(string)
 		if strings.Contains(r.requirement, role) {
 			return next(c)
 		} else {
+			utility.FileLog.Println(username + "(role: " + role + ")" + "tried to access " + c.Path() + " . Access denied")
 			return c.JSON(http.StatusForbidden, response.Message{
-				Message: "Access denied",
+				Message: utility.Error057AccessDenied,
 			})
 		}
 	}
@@ -104,9 +106,8 @@ func (r *Role) Header(next echo.HandlerFunc) echo.HandlerFunc {
 func customHTTPErrorHandler(err error, c echo.Context) {
 	errorPage := utility.ConfigData.StaticFolder + "/index.html"
 	if err := c.File(errorPage); err != nil {
-		c.Logger().Error(err)
+		utility.FileLog.Println("static/index.html not found")
 	}
-	c.Logger().Error(err)
 }
 
 func redirect(c echo.Context) error {

@@ -14,5 +14,6 @@ require (
 	github.com/labstack/echo-contrib v0.11.0
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/labstack/gommon v0.3.0
+	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
 	github.com/nguyenthenguyen/docx v0.0.0-20210714134305-d2271ea4db67
 )
