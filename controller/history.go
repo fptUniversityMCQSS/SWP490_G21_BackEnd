@@ -70,14 +70,14 @@ func GetExamById(c echo.Context) error {
 	var questionAll []*model.Question
 	var answerAll []*model.Option
 	var userResponse response.UserResponse
-	_, err = utility.DB.QueryTable("exam_test").Filter("id", id).All(&examTest)
+	err = utility.DB.QueryTable("exam_test").Filter("id", id).One(&examTest)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error014ErrorQueryForGetAllExamTest,
 		})
 	}
-	_, err = utility.DB.QueryTable("user").Filter("id", IntUserId).All(&user)
+	err = utility.DB.QueryTable("user").Filter("id", IntUserId).One(&user)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
