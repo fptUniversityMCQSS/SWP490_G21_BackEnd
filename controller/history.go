@@ -173,6 +173,53 @@ func DownloadExam(c echo.Context) error {
 	return c.Attachment(formatFile, examTest.Name)
 }
 
+func DeleteExam(c echo.Context) error {
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
+	userId := claims["userId"].(float64)
+	IntUserId := int64(userId)
+	ExamId := c.Param("id")
+	var examTest model.ExamTest
+	intExamId, err := strconv.ParseInt(ExamId, 10, 64)
+	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error061ExamIdInvalid,
+		})
+	}
+	err3 := utility.DB.QueryTable("exam_test").Filter("id", intExamId).One(&examTest)
+	if err3 != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error015CantGetExamTest,
+		})
+	}
+	if IntUserId == examTest.User.Id {
+		_, err = utility.DB.QueryTable("exam_test").Filter("id", intExamId).Delete()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: utility.Error062DeleteExamFailed,
+			})
+		}
+		err2 := os.RemoveAll(examTest.Path)
+		if err2 != nil {
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: utility.Error038RemoveFileError,
+			})
+		}
+		message := response.Message{
+			Message: "Delete exam successfully",
+		}
+		utility.FileLog.Println(userName + " delete file " + examTest.Name)
+		return c.JSON(http.StatusOK, message)
+	} else {
+		return c.JSON(http.StatusUnauthorized, response.Message{
+			Message: utility.Error018DontHavePermission,
+		})
+	}
+}
+
 var (
 	specialCharacters = map[string]string{
 		"&":  "&amp;",
