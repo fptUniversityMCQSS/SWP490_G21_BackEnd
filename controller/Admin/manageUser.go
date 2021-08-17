@@ -6,7 +6,6 @@ import (
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -36,7 +35,7 @@ func ListUser(c echo.Context) error {
 		us.Role = u.Role
 		lists = append(lists, us)
 	}
-	log.Printf(userName + " get list user ")
+	utility.FileLog.Println(userName + " get list user ")
 	return c.JSON(http.StatusOK, lists)
 
 }
@@ -96,10 +95,10 @@ func AddUser(c echo.Context) error {
 			Username: username,
 			Role:     role,
 		}
-		log.Printf(userName + " add new user has id: ")
+		utility.FileLog.Println(userName + " add new user has id: " + strconv.Itoa(int(insert)))
 		return c.JSON(http.StatusOK, userResponse)
 	} else {
-		log.Printf("Username empty")
+		utility.FileLog.Println("Username empty")
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error006UserNameEmpty,
 		})
@@ -133,7 +132,7 @@ func GetUserById(c echo.Context) error {
 		Username: user.Username,
 		Role:     user.Role,
 	}
-	log.Printf(userName + " get user " + user.Username)
+	utility.FileLog.Println(userName + " get user " + user.Username)
 	return c.JSON(http.StatusOK, userResponse)
 }
 
@@ -211,7 +210,7 @@ func UpdateUser(c echo.Context) error {
 			})
 		}
 	}
-	log.Printf(userName + "edit user: " + user.Username)
+	utility.FileLog.Println(userName + "edit user: " + user.Username)
 	return c.JSON(http.StatusOK, response.Message{
 		Message: "edit user successfully",
 	})

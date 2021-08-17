@@ -7,5 +7,5 @@ type Question struct {
 	Content  string    `json:"question_content" form:"question_content"`
 	Options  []*Option `orm:"reverse(many)"`
 	Answer   string    `json:"answer" form:"answer"`
-	ExamTest *ExamTest `orm:"rel(fk)"`
+	ExamTest *ExamTest `orm:"rel(fk);on_delete(cascade)"`
 }

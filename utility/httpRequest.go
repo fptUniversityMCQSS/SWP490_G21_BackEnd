@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -103,21 +102,24 @@ func SendQuestions(url string, method string, questions []*model.Question) (*htt
 	}
 	jsonQuestions, err := json.Marshal(questionRequests)
 	if err != nil {
+
 		return nil, err
 	}
-	log.Println(string(jsonQuestions))
+	FileLog.Println(string(jsonQuestions))
 	payload := strings.NewReader(string(jsonQuestions))
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
+
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
+
 		return nil, err
 	}
 	return res, nil
@@ -152,6 +154,6 @@ func DeleteKnowledge(url string, method string, name string) error {
 	if err != nil {
 		return err
 	}
-	log.Println(string(body))
+	FileLog.Println(string(body))
 	return nil
 }

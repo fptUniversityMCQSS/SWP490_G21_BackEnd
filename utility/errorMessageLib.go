@@ -15,6 +15,7 @@ const (
 	Error011UpdateUserFailed         = "Can't update user"
 	Error012PasswordEmpty            = "Password is empty"
 	Error013CreateTokenOfUserFailed  = "Can't create token of user"
+	Error060CurrentPasswordInvalid   = "Current Password isn't correct"
 
 	//exam error
 	Error014ErrorQueryForGetAllExamTest  = "Can't get all exam tests with your id"
@@ -22,6 +23,8 @@ const (
 	Error040CantPrepareStatementExamTest = "Can't Prepare Statement ExamTest"
 	Error042UpdateExamFailed             = "Can't update exam"
 	Error041InsertExamFailed             = "Can't insert exam"
+	Error061ExamIdInvalid                = "Exam id is invalid"
+	Error062DeleteExamFailed             = "Can't delete exam"
 
 	//questions error
 	Error016ErrorQueryForGetAllQuestions = "Can't get all questions with your id"

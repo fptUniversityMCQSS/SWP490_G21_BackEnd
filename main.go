@@ -3,6 +3,7 @@ package main
 import (
 	"SWP490_G21_Backend/controller"
 	"SWP490_G21_Backend/controller/Admin"
+	"SWP490_G21_Backend/controller/User"
 	"SWP490_G21_Backend/controller/Authenticate"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
@@ -45,6 +46,7 @@ func main() {
 	}
 
 	//backend.GET("/", controller.Home)
+
 	backend.POST("/login", Authenticate.LoginResponse)
 	backend.POST("/register", Authenticate.Register)
 
@@ -54,6 +56,8 @@ func main() {
 	user.GET("/history/:id", controller.GetExamById)
 	user.GET("/history/:id/download", controller.DownloadExam)
 	user.GET("/knowledge", controller.ListKnowledge)
+	user.POST("/changePassword", User.ChangePassword)
+    user.DELETE("/exam/:id", controller.DeleteExam)
 
 	staff := signedIn.Group("", staffPermission.Header)
 	staff.PUT("/knowledge", controller.KnowledgeUpload)

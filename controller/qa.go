@@ -103,7 +103,7 @@ func QaResponse(c echo.Context) error {
 	}
 
 	filePath := fileFolderPath + "/" + file.Filename
-	exam.Path = filePath
+	exam.Path = fileFolderPath
 	_, err = utility.DB.Update(exam)
 	if err != nil {
 		utility.FileLog.Println(err)
