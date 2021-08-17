@@ -2,17 +2,16 @@ package utility
 
 import (
 	"regexp"
-	"strings"
 )
 
 func CheckUsername(username string) bool {
-	IsUserName := regexForAll("(\\w){8,}", username)
-	return IsUserName
+	re, _ := regexp.MatchString("^(\\w){8,30}$", username)
+	return re
 }
 
 func CheckPassword(password string) bool {
-	IsPassword := regexForAll("[^(.\\s)]{8,}", password)
-	return IsPassword
+	re, _ := regexp.MatchString("^\\S{8,30}$", password)
+	return re
 }
 
 func CheckRole(role string) bool {
@@ -27,28 +26,15 @@ func CheckRole(role string) bool {
 	}
 }
 func CheckEmail(email string) bool {
-	IsEmail := regexForAll("\\w+@\\w+\\.\\w+(\\.\\w+)?", email)
-	return IsEmail
+	re, _ := regexp.MatchString("^\\w+@\\w+\\.\\w+(\\.\\w+)?$", email)
+	return re
 }
 func CheckPhone(phone string) bool {
-	IsPhone := regexForAll("(\\d){10}", phone)
-	return IsPhone
+	re, _ := regexp.MatchString("^(\\d){10}$", phone)
+	return re
 }
 
-func CheckFullName(fullname string) bool {
-	isFullName := regexForAll("(\\w){8,30}", fullname)
-	return isFullName
-}
-
-func regexForAll(regex string, param string) bool {
-	ModifyRg := regexp.MustCompile(regex)
-	if len(ModifyRg.FindAllString(param, -1)) > 1 {
-		return false
-	} else {
-		if strings.Contains(param, " ") || len(ModifyRg.FindString(param)) < len(param) {
-			return false
-		} else {
-			return true
-		}
-	}
+func CheckFullName(fullName string) bool {
+	re, _ := regexp.MatchString("^(.)+${8,50}", fullName)
+	return re
 }
