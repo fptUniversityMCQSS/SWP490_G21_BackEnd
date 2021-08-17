@@ -41,3 +41,26 @@ func ChangePassword(c echo.Context) error {
 		Message: "Change Password Successfully",
 	})
 }
+
+func GetUserInfo(c echo.Context) error {
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
+	user := &model.User{
+		Username: userName,
+	}
+	err := utility.DB.Read(user, "username")
+	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error001InvalidUser,
+		})
+	}
+	userResponse := response.UserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Role:     user.Role,
+	}
+	utility.FileLog.Println(userName + " get userinfo")
+	return c.JSON(http.StatusOK, userResponse)
+}

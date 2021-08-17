@@ -57,8 +57,8 @@ func main() {
 	user.DELETE("/history/:id", controller.DeleteExam)
 	user.GET("/history/:id/download", controller.DownloadExam)
 	user.GET("/knowledge", controller.ListKnowledge)
-	user.GET("/user", User.ChangePassword)
-	user.POST("/user", User.ChangePassword)
+	user.GET("/user", User.GetUserInfo)
+	user.PATCH("/user", User.ChangePassword)
 
 	staff := signedIn.Group("", staffPermission.Header)
 	staff.PUT("/knowledge", controller.KnowledgeUpload)
