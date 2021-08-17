@@ -39,15 +39,6 @@ CREATE TABLE `exam_test` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `exam_test`
---
-
-LOCK TABLES `exam_test` WRITE;
-/*!40000 ALTER TABLE `exam_test` DISABLE KEYS */;
-/*!40000 ALTER TABLE `exam_test` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `knowledge`
 --
 
@@ -67,15 +58,6 @@ CREATE TABLE `knowledge` (
                              CONSTRAINT `FK_UserId` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `knowledge`
---
-
-LOCK TABLES `knowledge` WRITE;
-/*!40000 ALTER TABLE `knowledge` DISABLE KEYS */;
-/*!40000 ALTER TABLE `knowledge` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `option`
@@ -98,15 +80,6 @@ CREATE TABLE `option` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `option`
---
-
-LOCK TABLES `option` WRITE;
-/*!40000 ALTER TABLE `option` DISABLE KEYS */;
-/*!40000 ALTER TABLE `option` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `question`
 --
 
@@ -127,15 +100,6 @@ CREATE TABLE `question` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `question`
---
-
-LOCK TABLES `question` WRITE;
-/*!40000 ALTER TABLE `question` DISABLE KEYS */;
-/*!40000 ALTER TABLE `question` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user`
 --
 
@@ -147,19 +111,12 @@ CREATE TABLE `user` (
                         `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                         `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                         `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                        `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                        `phone` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                        `full_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                         PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (10,'khailq','1234','admin');
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -170,4 +127,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-17 13:36:37
+-- Dump completed on 2021-08-17 22:04:50

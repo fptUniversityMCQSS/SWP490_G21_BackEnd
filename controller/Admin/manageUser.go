@@ -33,6 +33,9 @@ func ListUser(c echo.Context) error {
 		us.Id = u.Id
 		us.Username = u.Username
 		us.Role = u.Role
+		us.Email = u.Email
+		us.Phone = u.Phone
+		us.FullName = u.FullName
 		lists = append(lists, us)
 	}
 	utility.FileLog.Println(userName + " get list user ")
@@ -43,6 +46,9 @@ func ListUser(c echo.Context) error {
 func AddUser(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
+	FullName := c.FormValue("fullName")
+	Email := c.FormValue("email")
+	Phone := c.FormValue("phone")
 	role := c.FormValue("role")
 
 	token := c.Get("user").(*jwt.Token)
@@ -71,11 +77,44 @@ func AddUser(c echo.Context) error {
 		}
 		if utility.CheckRole(role) {
 			user.Role = role
+		} else {
+			utility.FileLog.Println("Role of user invalid")
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error063RoleOfUserIsInvalid,
+			})
 		}
 		if utility.CheckPassword(password) {
 			user.Password = password
+		} else {
+			utility.FileLog.Println("Password has at least 8 character")
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error064PasswordOfUserIsInvalid,
+			})
 		}
-
+		if utility.CheckEmail(Email) {
+			user.Email = Email
+		} else {
+			utility.FileLog.Println("Email has a form xxx@xxx.xxx")
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error065EmailInvalid,
+			})
+		}
+		if utility.CheckPhone(Phone) {
+			user.Phone = Phone
+		} else {
+			utility.FileLog.Println("Phone must be 10 digit")
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error066PhoneInvalid,
+			})
+		}
+		if utility.CheckFullName(FullName) {
+			user.FullName = FullName
+		} else {
+			utility.FileLog.Println("Full Name has 8 to 30 characters")
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error067FullNameInvalid,
+			})
+		}
 		insert, err := i.Insert(user)
 		if err != nil {
 			utility.FileLog.Println(err)
@@ -93,14 +132,17 @@ func AddUser(c echo.Context) error {
 		userResponse := response.UserResponse{
 			Id:       insert,
 			Username: username,
+			FullName: FullName,
 			Role:     role,
+			Email:    Email,
+			Phone:    Phone,
 		}
 		utility.FileLog.Println(userName + " add new user has id: " + strconv.Itoa(int(insert)))
 		return c.JSON(http.StatusOK, userResponse)
 	} else {
-		utility.FileLog.Println("Username empty")
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error006UserNameEmpty,
+		utility.FileLog.Println("Username must not contains special characters and has length at least 8 characters")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error006UserNameModified,
 		})
 	}
 }
@@ -130,7 +172,10 @@ func GetUserById(c echo.Context) error {
 	userResponse := response.UserResponse{
 		Id:       user.Id,
 		Username: user.Username,
+		FullName: user.FullName,
 		Role:     user.Role,
+		Email:    user.Email,
+		Phone:    user.Phone,
 	}
 	utility.FileLog.Println(userName + " get user " + user.Username)
 	return c.JSON(http.StatusOK, userResponse)
@@ -180,7 +225,7 @@ func UpdateUser(c echo.Context) error {
 		user.Role = role
 	} else {
 		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
+		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error010RoleOfUserIsInvalid,
 		})
 	}
@@ -197,8 +242,8 @@ func UpdateUser(c echo.Context) error {
 			}
 		} else {
 			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error012PasswordEmpty,
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error064PasswordOfUserIsInvalid,
 			})
 		}
 	} else {

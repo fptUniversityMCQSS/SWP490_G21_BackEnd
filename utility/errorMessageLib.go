@@ -7,7 +7,7 @@ const (
 	Error003UserExisted              = "User already exists"
 	Error004CantGetTableUser         = "Can't get table user"
 	Error005InsertUserError          = "Add user error"
-	Error006UserNameEmpty            = "User name is empty"
+	Error006UserNameModified         = "Username must not contains special characters and has length at least 8 characters"
 	Error007CantGetUser              = "Can't get user with your id"
 	Error008UserIdInvalid            = "User id is invalid"
 	Error009DeleteUserFailed         = "Can't delete user"
@@ -16,7 +16,11 @@ const (
 	Error012PasswordEmpty            = "Password is empty"
 	Error013CreateTokenOfUserFailed  = "Can't create token of user"
 	Error060CurrentPasswordInvalid   = "Current Password isn't correct"
-
+	Error063RoleOfUserIsInvalid      = "Role of user is invalid"
+	Error064PasswordOfUserIsInvalid  = "Password has at least 8 character"
+	Error065EmailInvalid             = "Email has a form xxx@xxx.xxx"
+	Error066PhoneInvalid             = "Phone must be 10 digit"
+	Error067FullNameInvalid          = "Full Name has 8 to 30 characters"
 	//exam error
 	Error014ErrorQueryForGetAllExamTest  = "Can't get all exam tests with your id"
 	Error015CantGetExamTest              = "Can't get exam with your id"

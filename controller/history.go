@@ -87,6 +87,9 @@ func GetExamById(c echo.Context) error {
 	userResponse.Id = user.Id
 	userResponse.Username = user.Username
 	userResponse.Role = user.Role
+	userResponse.Email = user.Email
+	userResponse.Phone = user.Phone
+	userResponse.FullName = user.FullName
 	if examTest.User.Id == IntUserId {
 		_, err := utility.DB.QueryTable("question").Filter("exam_test_id", id).RelatedSel().All(&questionAll)
 		if err != nil {

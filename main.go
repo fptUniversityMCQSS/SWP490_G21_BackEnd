@@ -58,7 +58,7 @@ func main() {
 	user.GET("/history/:id/download", controller.DownloadExam)
 	user.GET("/knowledge", controller.ListKnowledge)
 	user.GET("/user", User.GetUserInfo)
-	user.PATCH("/user", User.ChangePassword)
+	user.PATCH("/user", User.ChangeProfile)
 
 	staff := signedIn.Group("", staffPermission.Header)
 	staff.PUT("/knowledge", controller.KnowledgeUpload)

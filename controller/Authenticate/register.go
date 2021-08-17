@@ -4,14 +4,17 @@ import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 )
 
 func Register(c echo.Context) error {
 	Username := c.FormValue("username")
 	Password := c.FormValue("password")
+	FullName := c.FormValue("fullName")
+	Email := c.FormValue("email")
+	Phone := c.FormValue("phone")
 	user := &model.User{
 		Username: Username,
 	}
@@ -31,8 +34,47 @@ func Register(c echo.Context) error {
 			Message: utility.Error004CantGetTableUser,
 		})
 	}
-	user.Password = Password
-	fmt.Println(i)
+
+	if utility.CheckUsername(Username) {
+		user.Role = Username
+	} else {
+		utility.FileLog.Println("Username must not contains special characters and has length at least 8 characters")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error006UserNameModified,
+		})
+	}
+	if utility.CheckPassword(Password) {
+		user.Password = Password
+	} else {
+		utility.FileLog.Println("Password has at least 8 character")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error064PasswordOfUserIsInvalid,
+		})
+	}
+	if utility.CheckEmail(Email) {
+		user.Email = Email
+	} else {
+		utility.FileLog.Println("Email has a form xxx@xxx.xxx")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error065EmailInvalid,
+		})
+	}
+	if utility.CheckPhone(Phone) {
+		user.Phone = Phone
+	} else {
+		utility.FileLog.Println("Phone must be 10 digit")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error066PhoneInvalid,
+		})
+	}
+	if utility.CheckFullName(FullName) {
+		user.FullName = FullName
+	} else {
+		utility.FileLog.Println("Full Name has 8 to 30 characters")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error067FullNameInvalid,
+		})
+	}
 	insert, err := i.Insert(user)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -40,7 +82,6 @@ func Register(c echo.Context) error {
 			Message: utility.Error005InsertUserError,
 		})
 	}
-	fmt.Println(insert)
 	err1 := i.Close()
 	if err1 != nil {
 		utility.FileLog.Println(err)
@@ -48,6 +89,14 @@ func Register(c echo.Context) error {
 			Message: utility.Error022CloseConnectionError,
 		})
 	}
-	utility.FileLog.Println(Username + " register success")
-	return c.String(http.StatusOK, fmt.Sprintf("Register success "))
+	utility.FileLog.Println(Username + " register success with id: " + strconv.Itoa(int(insert)))
+	var userResponse = response.UserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Role:     user.Role,
+		Email:    user.Email,
+		Phone:    user.Phone,
+		FullName: user.FullName,
+	}
+	return c.JSON(http.StatusOK, userResponse)
 }
