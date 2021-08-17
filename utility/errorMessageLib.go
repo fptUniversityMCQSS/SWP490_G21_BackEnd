@@ -68,6 +68,8 @@ const (
 	Error044CantGetFilePath        = "Can't get file path"
 	Error047StatFileError          = "Stat file error"
 	Error050ReadFileDocOrDocxError = "Read file doc or docx error"
+	Error063ReadLogError           = "Can not read log file"
+	Error064WriteError             = "Fail to write response"
 
 	//connection error
 	Error022CloseConnectionError = "Close connection error"

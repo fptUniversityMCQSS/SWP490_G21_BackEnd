@@ -9,8 +9,6 @@ import (
 	"SWP490_G21_Backend/utility"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -29,7 +27,7 @@ func main() {
 		AllowHeaders: []string{"*"},
 		AllowMethods: []string{"*"},
 	}))
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+	//e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	//-----Backend-----
 	backend := e.Group("/api")
@@ -71,6 +69,7 @@ func main() {
 	admin.GET("/user/:id", Admin.GetUserById)
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)
+	admin.GET("/log", Admin.StreamLogFile)
 
 	//-------Frontend-------
 	e.Static("/", utility.ConfigData.StaticFolder)
