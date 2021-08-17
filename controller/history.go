@@ -152,7 +152,7 @@ func DownloadExam(c echo.Context) error {
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error008UserIdInvalid,
+			Message: utility.Error061ExamIdInvalid,
 		})
 	}
 	var examTest model.ExamTest
