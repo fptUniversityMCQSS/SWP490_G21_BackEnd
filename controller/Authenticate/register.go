@@ -34,15 +34,6 @@ func Register(c echo.Context) error {
 			Message: utility.Error004CantGetTableUser,
 		})
 	}
-
-	if utility.CheckUsername(Username) {
-		user.Role = Username
-	} else {
-		utility.FileLog.Println("Username must not contains special characters and has length at least 8 characters")
-		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: utility.Error006UserNameModified,
-		})
-	}
 	if utility.CheckPassword(Password) {
 		user.Password = Password
 	} else {
