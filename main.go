@@ -3,14 +3,12 @@ package main
 import (
 	"SWP490_G21_Backend/controller"
 	"SWP490_G21_Backend/controller/Admin"
-	"SWP490_G21_Backend/controller/User"
 	"SWP490_G21_Backend/controller/Authenticate"
+	"SWP490_G21_Backend/controller/User"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -29,7 +27,7 @@ func main() {
 		AllowHeaders: []string{"*"},
 		AllowMethods: []string{"*"},
 	}))
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+	//e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	//-----Backend-----
 	backend := e.Group("/api")
@@ -54,10 +52,11 @@ func main() {
 	user.PUT("/qa", controller.QaResponse)
 	user.GET("/history", controller.History)
 	user.GET("/history/:id", controller.GetExamById)
+	user.DELETE("/history/:id", controller.DeleteExam)
 	user.GET("/history/:id/download", controller.DownloadExam)
 	user.GET("/knowledge", controller.ListKnowledge)
-	user.POST("/changePassword", User.ChangePassword)
-    user.DELETE("/exam/:id", controller.DeleteExam)
+	user.GET("/user", User.GetUserInfo)
+	user.PATCH("/user", User.ChangeProfile)
 
 	staff := signedIn.Group("", staffPermission.Header)
 	staff.PUT("/knowledge", controller.KnowledgeUpload)
@@ -70,6 +69,7 @@ func main() {
 	admin.GET("/user/:id", Admin.GetUserById)
 	admin.DELETE("/user/:id", Admin.DeleteUserById)
 	admin.PATCH("/user/:id", Admin.UpdateUser)
+	admin.GET("/log", Admin.StreamLogFile)
 
 	//-------Frontend-------
 	e.Static("/", utility.ConfigData.StaticFolder)

@@ -48,6 +48,6 @@ func LoginResponse(c echo.Context) error {
 		})
 	}
 	utility.FileLog.Println(Username + " login success")
-	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, Role: user.Role, Token: t})
+	return c.JSON(http.StatusOK, &response.LoginResponse{Username: user.Username, FullName: user.FullName, Role: user.Role, Email: user.Email, Phone: user.Phone, Token: t})
 
 }
