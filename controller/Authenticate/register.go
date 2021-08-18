@@ -19,6 +19,12 @@ func Register(c echo.Context) error {
 		Username: Username,
 	}
 	// Get a QuerySeter object. User is table name
+	if !utility.CheckPassword(Username) {
+		utility.FileLog.Println(utility.Error006UserNameModified)
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error006UserNameModified,
+		})
+	}
 	err := utility.DB.Read(user, "username")
 	user.Role = "user"
 	if err == nil {
@@ -37,7 +43,7 @@ func Register(c echo.Context) error {
 	if utility.CheckPassword(Password) {
 		user.Password = Password
 	} else {
-		utility.FileLog.Println("Password has at least 8 character")
+		utility.FileLog.Println(utility.Error064PasswordOfUserIsInvalid)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error064PasswordOfUserIsInvalid,
 		})
