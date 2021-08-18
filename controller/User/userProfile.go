@@ -13,31 +13,19 @@ func ChangeProfile(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
+	userId := claims["userId"].(float64)
 	presentPassword := c.FormValue("password")
 	newPassword := c.FormValue("newPassword")
+	changePassword := c.FormValue("change_password")
 	FullName := c.FormValue("fullName")
 	Email := c.FormValue("email")
 	Phone := c.FormValue("phone")
+
+	IntUserId := int64(userId)
 	user := &model.User{
-		Username: userName,
-		Password: presentPassword,
+		Id: IntUserId,
 	}
-	// Get a QuerySeter object. User is table name
-	err := utility.DB.Read(user, "username", "password")
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: utility.Error060CurrentPasswordInvalid,
-		})
-	}
-	if utility.CheckPassword(newPassword) {
-		user.Password = newPassword
-	} else {
-		utility.FileLog.Println("Password has at least 8 character")
-		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: utility.Error064PasswordOfUserIsInvalid,
-		})
-	}
+
 	if utility.CheckEmail(Email) {
 		user.Email = Email
 	} else {
@@ -62,17 +50,45 @@ func ChangeProfile(c echo.Context) error {
 			Message: utility.Error067FullNameInvalid,
 		})
 	}
-	_, err = utility.DB.Update(user)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error011UpdateUserFailed,
-		})
-	}
 
-	utility.FileLog.Println(userName + " changed password")
+	if changePassword == "true" {
+		user.Username = userName
+		user.Password = presentPassword
+		err := utility.DB.Read(user, "username", "password")
+		if err != nil {
+			utility.FileLog.Println(err)
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error060CurrentPasswordInvalid,
+			})
+		}
+		if utility.CheckPassword(newPassword) {
+			user.Password = newPassword
+			_, err := utility.DB.Update(user, "email", "phone", "full_name", "password")
+			if err != nil {
+				utility.FileLog.Println(err)
+				return c.JSON(http.StatusInternalServerError, response.Message{
+					Message: utility.Error011UpdateUserFailed,
+				})
+			}
+		} else {
+			utility.FileLog.Println("Password has at least 8 character")
+			return c.JSON(http.StatusBadRequest, response.Message{
+				Message: utility.Error064PasswordOfUserIsInvalid,
+			})
+		}
+
+	} else {
+		_, err := utility.DB.Update(user, "email", "phone", "full_name")
+		if err != nil {
+			utility.FileLog.Println(err)
+			return c.JSON(http.StatusInternalServerError, response.Message{
+				Message: utility.Error011UpdateUserFailed,
+			})
+		}
+	}
+	utility.FileLog.Println(userName + " changed Profile")
 	return c.JSON(http.StatusOK, response.Message{
-		Message: "Change Password Successfully",
+		Message: "Change Profile Successfully",
 	})
 }
 

@@ -189,10 +189,14 @@ func DeleteUserById(c echo.Context) error {
 			Message: utility.Error008UserIdInvalid,
 		})
 	}
-	user := &model.User{
-		Id: id,
+	userExited := utility.DB.QueryTable("user").Filter("id", id).Exist()
+	if userExited == false {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error068UserDoesNotExist,
+		})
 	}
-	_, err = utility.DB.Delete(user)
+	_, err = utility.DB.QueryTable("user").Filter("id", id).Delete()
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -208,7 +212,6 @@ func UpdateUser(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
-
 	changePassword := c.FormValue("change_password")
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -220,6 +223,7 @@ func UpdateUser(c echo.Context) error {
 	user := &model.User{
 		Id: id,
 	}
+
 	role := c.FormValue("role")
 	if utility.CheckRole(role) {
 		user.Role = role
