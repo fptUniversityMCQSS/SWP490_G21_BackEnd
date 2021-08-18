@@ -45,31 +45,31 @@ func main() {
 
 	//backend.GET("/", controller.Home)
 
-	backend.POST("/login", Authenticate.LoginResponse)
-	backend.POST("/register", Authenticate.Register)
+	backend.POST("/login", (DebugHandler{Authenticate.LoginResponse}).debug)
+	backend.POST("/register", (DebugHandler{Authenticate.Register}).debug)
 
 	user := signedIn.Group("", userPermission.Header)
-	user.PUT("/qa", controller.QaResponse)
-	user.GET("/history", controller.History)
-	user.GET("/history/:id", controller.GetExamById)
-	user.DELETE("/history/:id", controller.DeleteExam)
-	user.GET("/history/:id/download", controller.DownloadExam)
-	user.GET("/knowledge", controller.ListKnowledge)
-	user.GET("/user", User.GetUserInfo)
-	user.PATCH("/user", User.ChangeProfile)
+	user.PUT("/qa", (DebugHandler{controller.QaResponse}).debug)
+	user.GET("/history", (DebugHandler{controller.History}).debug)
+	user.GET("/history/:id", (DebugHandler{controller.GetExamById}).debug)
+	user.DELETE("/history/:id", (DebugHandler{controller.DeleteExam}).debug)
+	user.GET("/history/:id/download", (DebugHandler{controller.DownloadExam}).debug)
+	user.GET("/knowledge", (DebugHandler{controller.ListKnowledge}).debug)
+	user.GET("/user", (DebugHandler{User.GetUserInfo}).debug)
+	user.PATCH("/user", (DebugHandler{User.ChangeProfile}).debug)
 
 	staff := signedIn.Group("", staffPermission.Header)
-	staff.PUT("/knowledge", controller.KnowledgeUpload)
-	staff.GET("/knowledge/:id", controller.DownloadKnowledge)
-	staff.DELETE("/knowledge/:id", controller.DeleteKnowledge)
+	staff.PUT("/knowledge", (DebugHandler{controller.KnowledgeUpload}).debug)
+	staff.GET("/knowledge/:id", (DebugHandler{controller.DownloadKnowledge}).debug)
+	staff.DELETE("/knowledge/:id", (DebugHandler{controller.DeleteKnowledge}).debug)
 
 	admin := signedIn.Group("/admin", adminPermission.Header)
-	admin.GET("/user", Admin.ListUser)
-	admin.POST("/user", Admin.AddUser)
-	admin.GET("/user/:id", Admin.GetUserById)
-	admin.DELETE("/user/:id", Admin.DeleteUserById)
-	admin.PATCH("/user/:id", Admin.UpdateUser)
-	admin.GET("/log", Admin.StreamLogFile)
+	admin.GET("/user", (DebugHandler{Admin.ListUser}).debug)
+	admin.POST("/user", (DebugHandler{Admin.AddUser}).debug)
+	admin.GET("/user/:id", (DebugHandler{Admin.GetUserById}).debug)
+	admin.DELETE("/user/:id", (DebugHandler{Admin.DeleteUserById}).debug)
+	admin.PATCH("/user/:id", (DebugHandler{Admin.UpdateUser}).debug)
+	admin.GET("/log", (DebugHandler{Admin.StreamLogFile}).debug)
 
 	//-------Frontend-------
 	e.Static("/", utility.ConfigData.StaticFolder)
@@ -118,4 +118,15 @@ func redirect(c echo.Context) error {
 	hostParts := strings.Split(c.Request().Host, ":")
 	url := "https://" + hostParts[0] + ":" + utility.ConfigData.PortHttps + c.Request().RequestURI
 	return c.Redirect(http.StatusMovedPermanently, url)
+}
+
+type DebugHandler struct {
+	handler echo.HandlerFunc
+}
+
+func (dHandler DebugHandler) debug(c echo.Context) error {
+	DID := utility.DebugLog.Print(c.Request().Method+" "+c.Path(), false, 0)
+	err := dHandler.handler(c)
+	utility.DebugLog.Print(c.Request().Method+" "+c.Path(), true, DID)
+	return err
 }
