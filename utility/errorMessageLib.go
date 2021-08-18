@@ -20,7 +20,9 @@ const (
 	Error064PasswordOfUserIsInvalid  = "Password must be from 8 to 30 characters"
 	Error065EmailInvalid             = "Email has a form xxx@xxx.xxx"
 	Error066PhoneInvalid             = "Phone must be 10 digit"
-	Error067FullNameInvalid          = "Full Name must be from 8 to 50 characters and does not contain special characters or numbers"
+	Error067FullNameInvalid          = "Full Name has 8 to 30 characters"
+	Error068UserDoesNotExist         = "User does not exist"
+
 	//exam error
 	Error014ErrorQueryForGetAllExamTest  = "Can't get all exam tests with your id"
 	Error015CantGetExamTest              = "Can't get exam with your id"
