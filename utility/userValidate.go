@@ -35,6 +35,6 @@ func CheckPhone(phone string) bool {
 }
 
 func CheckFullName(fullName string) bool {
-	re, _ := regexp.MatchString("^(.)+${8,50}", fullName)
+	re, _ := regexp.MatchString("/^(.){8,50}$/gu", fullName)
 	return re
 }
