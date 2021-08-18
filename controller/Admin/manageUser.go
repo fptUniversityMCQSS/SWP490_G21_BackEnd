@@ -189,10 +189,14 @@ func DeleteUserById(c echo.Context) error {
 			Message: utility.Error008UserIdInvalid,
 		})
 	}
-	user := &model.User{
-		Id: id,
+	userExited := utility.DB.QueryTable("user").Filter("id", id).Exist()
+	if userExited == false {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error068UserDoesNotExist,
+		})
 	}
-	_, err = utility.DB.Delete(user)
+	_, err = utility.DB.QueryTable("user").Filter("id", id).Delete()
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
