@@ -5,6 +5,6 @@ type LoginResponse struct {
 	Role     string `json:"role"`
 	Email    string `json:"email"`
 	Phone    string `json:"phone"`
-	FullName string `json:"full name"`
+	FullName string `json:"fullName"`
 	Token    string `json:"token"`
 }
