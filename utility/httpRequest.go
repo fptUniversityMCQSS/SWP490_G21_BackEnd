@@ -75,6 +75,7 @@ type QuestionRequest struct {
 	Qn      int64           `json:"qn"`
 	Content string          `json:"content"`
 	Options []OptionRequest `json:"options"`
+	//Answer  string          `json:"answer"`
 }
 
 type OptionRequest struct {
@@ -97,6 +98,7 @@ func SendQuestions(url string, method string, questions []*model.Question) (*htt
 			Qn:      question.Number,
 			Content: question.Content,
 			Options: optionRequests,
+			//Answer: question.Answer,
 		}
 		questionRequests = append(questionRequests, q)
 	}
@@ -105,7 +107,7 @@ func SendQuestions(url string, method string, questions []*model.Question) (*htt
 
 		return nil, err
 	}
-	FileLog.Println(string(jsonQuestions))
+	//FileLog.Println(string(jsonQuestions))
 	payload := strings.NewReader(string(jsonQuestions))
 
 	client := &http.Client{}

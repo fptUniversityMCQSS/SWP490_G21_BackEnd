@@ -289,6 +289,13 @@ func QaResponse(c echo.Context) error {
 								}
 								option.Content += content.QN
 							}
+						} else if x == 7 {
+							//if y != 0 {
+							//	if content.Br.Local != "" {
+							//		QuestionModel.Answer += "\n"
+							//	}
+							//	QuestionModel.Answer += content.QN
+							//}
 						}
 					}
 					if y != 0 {
@@ -315,10 +322,11 @@ func QaResponse(c echo.Context) error {
 		QN = re.ReplaceAllString(QN, "")
 		QuestionNumber, err := strconv.ParseInt(QN, 10, 64)
 		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error051ParseNumberOfQuestionError,
-			})
+			//utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error051ParseNumberOfQuestionError,
+			//})
+			continue
 		}
 		QuestionModel.Number = QuestionNumber
 		QuestionModel.Content = Question
@@ -415,7 +423,6 @@ func QaResponse(c echo.Context) error {
 		str += string(b)
 
 		if reader.Buffered() <= 0 {
-			println(str)
 			var qaResponse response.QuestionAnswerResponse
 			err := json.Unmarshal([]byte(str), &qaResponse)
 			if err != nil {
