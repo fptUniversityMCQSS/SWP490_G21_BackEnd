@@ -74,7 +74,7 @@ func GetExamById(c echo.Context) error {
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error014ErrorQueryForGetAllExamTest,
+			Message: utility.Error015CantGetExamTest,
 		})
 	}
 	err = utility.DB.QueryTable("user").Filter("id", IntUserId).One(&user)
