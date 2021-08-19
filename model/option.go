@@ -5,5 +5,4 @@ type Option struct {
 	QuestionId *Question `orm:"rel(fk);on_delete(cascade)"`
 	Key        string    `json:"OptionKey" form:"OptionKey"`
 	Content    string    `json:"OptionContent" form:"OptionContent"`
-	Paragraph  string    `json:"OptionParagraph" form:"OptionParagraph"`
 }

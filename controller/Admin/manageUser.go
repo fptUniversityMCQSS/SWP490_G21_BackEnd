@@ -161,6 +161,13 @@ func GetUserById(c echo.Context) error {
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
 
+	userExited := utility.DB.QueryTable("user").Filter("id", id).Exist()
+	if userExited == false {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error068UserDoesNotExist,
+		})
+	}
 	err = utility.DB.QueryTable("user").Filter("id", id).One(&user)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -212,12 +219,22 @@ func UpdateUser(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
+	FullName := c.FormValue("fullName")
+	Email := c.FormValue("email")
+	Phone := c.FormValue("phone")
 	changePassword := c.FormValue("change_password")
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error008UserIdInvalid,
+		})
+	}
+	userExited := utility.DB.QueryTable("user").Filter("id", id).Exist()
+	if userExited == false {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error068UserDoesNotExist,
 		})
 	}
 	user := &model.User{
@@ -233,11 +250,35 @@ func UpdateUser(c echo.Context) error {
 			Message: utility.Error010RoleOfUserIsInvalid,
 		})
 	}
+	if utility.CheckEmail(Email) {
+		user.Email = Email
+	} else {
+		utility.FileLog.Println("Email has a form xxx@xxx.xxx")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error065EmailInvalid,
+		})
+	}
+	if utility.CheckPhone(Phone) {
+		user.Phone = Phone
+	} else {
+		utility.FileLog.Println("Phone must be 10 digit")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error066PhoneInvalid,
+		})
+	}
+	if utility.CheckFullName(FullName) {
+		user.FullName = FullName
+	} else {
+		utility.FileLog.Println("Full Name has 8 to 30 characters")
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error067FullNameInvalid,
+		})
+	}
 	if changePassword == "true" {
 		password := c.FormValue("password")
 		if utility.CheckPassword(password) {
 			user.Password = password
-			_, err := utility.DB.Update(user, "role", "password")
+			_, err := utility.DB.Update(user, "role", "password", "email", "phone", "full_name")
 			if err != nil {
 				utility.FileLog.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
@@ -251,7 +292,7 @@ func UpdateUser(c echo.Context) error {
 			})
 		}
 	} else {
-		_, err := utility.DB.Update(user, "role")
+		_, err := utility.DB.Update(user, "role", "email", "phone", "full_name")
 		if err != nil {
 			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
