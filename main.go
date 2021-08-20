@@ -2,10 +2,10 @@ package main
 
 import (
 	"SWP490_G21_Backend/controller/Authenticate"
-	"SWP490_G21_Backend/controller/User"
-	"SWP490_G21_Backend/controller/QA"
 	"SWP490_G21_Backend/controller/Knowledge"
 	"SWP490_G21_Backend/controller/Log"
+	"SWP490_G21_Backend/controller/QA"
+	"SWP490_G21_Backend/controller/User"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	_ "github.com/go-sql-driver/mysql"
@@ -60,7 +60,7 @@ func main() {
 	user.PATCH("/user", (DebugHandler{User.ChangeProfile}).debug)
 
 	staff := signedIn.Group("", staffPermission.Header)
-	staff.PUT("/knowledge", (DebugHandler{Knowledge.KnowledgeUpload}).debug)
+	staff.PUT("/knowledge", (DebugHandler{Knowledge.UploadKnowledge}).debug)
 	staff.GET("/knowledge/:id", (DebugHandler{Knowledge.DownloadKnowledge}).debug)
 	staff.DELETE("/knowledge/:id", (DebugHandler{Knowledge.DeleteKnowledge}).debug)
 

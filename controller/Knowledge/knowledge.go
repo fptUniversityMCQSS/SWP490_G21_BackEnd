@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -22,6 +21,8 @@ import (
 	"strings"
 	"time"
 )
+
+var RequestingKnowledge = make(map[int64]chan error)
 
 func ListKnowledge(c echo.Context) error {
 
@@ -60,7 +61,7 @@ func ListKnowledge(c echo.Context) error {
 
 }
 
-func KnowledgeUpload(c echo.Context) error {
+func UploadKnowledge(c echo.Context) error {
 	//WARNING: missing delete knowledge if uploading failed
 
 	token := c.Get("user").(*jwt.Token)
@@ -83,13 +84,6 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: utility.Error021OpenFileError,
 		})
 	}
-	defer func(src multipart.File) {
-		err := src.Close()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return
-		}
-	}(src)
 
 	user := &entity.User{
 		Id:       IntUserId,
@@ -108,7 +102,6 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: utility.Error023CantGetKnowledge,
 		})
 	}
-	//fmt.Println(i)
 	insert, err := i.Insert(know)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -116,7 +109,6 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: utility.Error024InsertKnowledgeError,
 		})
 	}
-	//fmt.Println(insert)
 	err1 := i.Close()
 	if err1 != nil {
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -152,13 +144,6 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: utility.Error025CreateDirectoryError,
 		})
 	}
-	defer func(dst *os.File) {
-		err := dst.Close()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return
-		}
-	}(dst)
 
 	// Copy
 	if _, err = io.Copy(dst, src); err != nil {
@@ -228,20 +213,6 @@ func KnowledgeUpload(c echo.Context) error {
 			})
 		}
 	default:
-		err = src.Close()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error033CloseFileError,
-			})
-		}
-		err = dst.Close()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error033CloseFileError,
-			})
-		}
 		err = os.RemoveAll(fileFolderPath)
 		if err != nil {
 			utility.FileLog.Println(err)
@@ -251,6 +222,22 @@ func KnowledgeUpload(c echo.Context) error {
 			Message: utility.Error034CheckFormatFile,
 		})
 	}
+
+	err = src.Close()
+	//if err != nil {
+	//	utility.FileLog.Println(err)
+	//	return c.JSON(http.StatusInternalServerError, response.Message{
+	//		Message: utility.Error033CloseFileError,
+	//	})
+	//}
+	err = dst.Close()
+	//if err != nil {
+	//	utility.FileLog.Println(err)
+	//	return c.JSON(http.StatusInternalServerError, response.Message{
+	//		Message: utility.Error033CloseFileError,
+	//	})
+	//}
+
 	know.Status = "Encoding"
 	_, err = utility.DB.Update(know)
 	if err != nil {
@@ -276,7 +263,9 @@ func KnowledgeUpload(c echo.Context) error {
 	}
 	c.Response().Flush()
 
-	err = utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt)
+	RequestingKnowledge[know.Id] = make(chan error)
+	err = utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt, RequestingKnowledge[know.Id])
+	delete(RequestingKnowledge, know.Id)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -364,13 +353,18 @@ func DeleteKnowledge(c echo.Context) error {
 			Message: utility.Error037DeleteKnowledgeFailed,
 		})
 	}
+	_, exist := RequestingKnowledge[intKnowledgeId]
+	if exist {
+		RequestingKnowledge[intKnowledgeId] <- response.Message{Message: utility.Error069UploadingCancel}
+	}
 	err2 := os.RemoveAll(knowledge.Path)
 	if err2 != nil {
+		utility.FileLog.Println(err2)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error038RemoveFileError,
 		})
 	}
-	err = utility.DeleteKnowledge(utility.ConfigData.AIServer, "DELETE", knowledge.Name)
+	err = utility.DeleteKnowledge(utility.ConfigData.AIServer+"/knowledge", "DELETE", knowledge.Name)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -384,7 +378,7 @@ func DeleteKnowledge(c echo.Context) error {
 	return c.JSON(http.StatusOK, message)
 }
 
-func toDocx(folderPath string, fileName string) (*os.File, error) {
+func toDocx(folderPath string, fileName string) (string, error) {
 	inputDoc := folderPath + "/" + fileName
 	splitPath := strings.Split(fileName, ".")
 
@@ -399,22 +393,22 @@ func toDocx(folderPath string, fileName string) (*os.File, error) {
 	err := ole.CoInitialize(0)
 	if err != nil {
 		utility.FileLog.Println(err)
-		return nil, err
+		return "", err
 	}
 	unknown, err := oleutil.CreateObject("Word.Application")
 	if err != nil {
 		utility.FileLog.Println(err)
-		return nil, err
+		return "", err
 	}
 	word, err := unknown.QueryInterface(ole.IID_IDispatch)
 	if err != nil {
 		utility.FileLog.Println(err)
-		return nil, err
+		return "", err
 	}
 	_, err = oleutil.PutProperty(word, "Visible", true)
 	if err != nil {
 		utility.FileLog.Println(err)
-		return nil, err
+		return "", err
 	}
 	documents := oleutil.MustGetProperty(word, "Documents").ToIDispatch()
 	defer documents.Release()
@@ -425,16 +419,11 @@ func toDocx(folderPath string, fileName string) (*os.File, error) {
 	_, err = oleutil.CallMethod(word, "Quit")
 	if err != nil {
 		utility.FileLog.Println(err)
-		return nil, err
+		return "", err
 	}
 	word.Release()
 	ole.CoUninitialize()
-	open, err := os.Open(outPutDocx)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return nil, err
-	}
-	return open, nil
+	return outPutDocx, nil
 }
 func parseTextFromDocorDocx(path string) (string, error) {
 	text, err := goword.ParseText(path)
@@ -465,6 +454,12 @@ func convertPdfToTxt(filepath, fileFileName, extension, fileFolderPath string, i
 		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			return
+		}
+	}(f)
 	for n := 0; n < doc.NumPage(); n++ {
 		text, err := doc.Text(n)
 		if err != nil {
@@ -490,7 +485,7 @@ func convertDocToText(fileFolderPath, fileFileName, extension string, insert int
 		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
-	text, err := parseTextFromDocorDocx(fileName.Name())
+	text, err := parseTextFromDocorDocx(fileName)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return err.Error(), err
@@ -501,17 +496,18 @@ func convertDocToText(fileFolderPath, fileFileName, extension string, insert int
 		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			return
+		}
+	}(f)
 	_, err = f.WriteString(text)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
-	err = fileName.Close()
-	if err != nil {
-		utility.FileLog.Println(err)
-		return err.Error(), err
-	}
-	err = os.Remove(fileName.Name())
+	err = os.Remove(fileName)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return err.Error(), err
@@ -531,6 +527,12 @@ func convertDocxToText(filePath, fileFileName, extension, fileFolderPath string,
 		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			return
+		}
+	}(f)
 	_, err = f.WriteString(text)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -551,6 +553,12 @@ func modifyTxtFile(filePath, fileFileName, extension, fileFolderPath string, ins
 		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			return
+		}
+	}(f)
 	_, err = f.WriteString(text)
 	if err != nil {
 		utility.FileLog.Println(err)

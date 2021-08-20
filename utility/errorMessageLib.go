@@ -20,7 +20,7 @@ const (
 	Error064PasswordOfUserIsInvalid  = "Password must be from 8 to 30 characters"
 	Error065EmailInvalid             = "Email has a form xxx@xxx.xxx"
 	Error066PhoneInvalid             = "Phone must be 10 digit"
-	Error067FullNameInvalid          = "Full Name has 8 to 30 characters"
+	Error067FullNameInvalid          = "Full Name must be from 8 to 50 characters and does not contain special characters or numbers"
 	Error068UserDoesNotExist         = "User does not exist"
 
 	//exam error
@@ -54,6 +54,7 @@ const (
 	Error026UpdateKnowledgeFailed        = "Can't update knowledge"
 	Error036KnowIdInvalid                = "Knowledge id is invalid"
 	Error037DeleteKnowledgeFailed        = "Can't delete knowledge"
+	Error069UploadingCancel              = "Uploading knowledge has been canceled"
 
 	//file error
 	Error020FileError              = "File not found please try again"
@@ -94,4 +95,4 @@ const (
 	Error051ParseNumberOfQuestionError  = "Error for parse question number"
 	Error058ParseNumberOfQuestionsError = "Error for parse number of questions"
 	Error059ReformatStringFalse         = "Missing ':' Subject or Number Of Question"
-)
+) //Total messages: 69

@@ -29,7 +29,6 @@ func ChangeProfile(c echo.Context) error {
 	if utility.CheckEmail(Email) {
 		user.Email = Email
 	} else {
-		utility.FileLog.Println("Email has a form xxx@xxx.xxx")
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error065EmailInvalid,
 		})
@@ -37,7 +36,6 @@ func ChangeProfile(c echo.Context) error {
 	if utility.CheckPhone(Phone) {
 		user.Phone = Phone
 	} else {
-		utility.FileLog.Println("Phone must be 10 digit")
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error066PhoneInvalid,
 		})
@@ -45,7 +43,6 @@ func ChangeProfile(c echo.Context) error {
 	if utility.CheckFullName(FullName) {
 		user.FullName = FullName
 	} else {
-		utility.FileLog.Println("Full Name has 8 to 30 characters")
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error067FullNameInvalid,
 		})
@@ -71,7 +68,6 @@ func ChangeProfile(c echo.Context) error {
 				})
 			}
 		} else {
-			utility.FileLog.Println("Password has at least 8 character")
 			return c.JSON(http.StatusBadRequest, response.Message{
 				Message: utility.Error064PasswordOfUserIsInvalid,
 			})

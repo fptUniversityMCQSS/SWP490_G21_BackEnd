@@ -2,8 +2,9 @@ package utility
 
 import (
 	"SWP490_G21_Backend/model/entity"
-	"bufio"
+	"SWP490_G21_Backend/model/response"
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -14,16 +15,13 @@ import (
 	"strings"
 )
 
-func SendFileRequest(url string, method string, path string) error {
+func SendFileRequest(url string, method string, path string, done chan error) error {
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
 	file, err := os.Open(path)
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			return
-		}
-	}(file)
+	if err != nil {
+		return err
+	}
 	part1, err := writer.CreateFormFile("file", filepath.Base(path))
 	_, err = io.Copy(part1, file)
 	if err != nil {
@@ -33,42 +31,81 @@ func SendFileRequest(url string, method string, path string) error {
 	if err != nil {
 		return err
 	}
+	err = file.Close()
 
+	cx, cancel := context.WithCancel(context.Background())
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
-
+	req, err := http.NewRequestWithContext(cx, method, url, payload)
 	if err != nil {
+		cancel()
 		return err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+
+	//done := make(chan error)
+	go func() {
+		res, err := client.Do(req)
 		if err != nil {
+			done <- err
 			return
 		}
-	}(res.Body)
-
-	reader := bufio.NewReader(res.Body)
-	str := ""
-	for {
-		b, err := reader.ReadByte()
-		if err != nil {
-			if err == io.EOF {
-				break
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				return
 			}
-			return err
+		}(res.Body)
+
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			var message response.Message
+			_ = json.Unmarshal(body, &message)
+			//if err2 != nil {
+			//	//FileLog.Println(err)
+			//	done <- err
+			//	return
+			//}
+			FileLog.Println(message.Message)
+			done <- err
+			return
 		}
-		str += string(b)
-		if reader.Buffered() <= 0 {
-			println(str)
-			str = ""
+		var message response.Message
+		err2 := json.Unmarshal(body, &message)
+		if err2 != nil {
+			//FileLog.Println(err2)
+			done <- err2
+			return
 		}
+		FileLog.Println(message.Message)
+		done <- nil
+	}()
+
+	select {
+	case <-cx.Done():
+		cancel()
+		return nil
+
+	case err := <-done:
+		cancel()
+		return err
 	}
-	return nil
+	//reader := bufio.NewReader(res.Body)
+	//str := ""
+	//for {
+	//	b, err := reader.ReadByte()
+	//	if err != nil {
+	//		if err == io.EOF {
+	//			break
+	//		}
+	//		return err
+	//	}
+	//	str += string(b)
+	//	if reader.Buffered() <= 0 {
+	//		println(str)
+	//		str = ""
+	//	}
+	//}
+
 }
 
 type QuestionRequest struct {
