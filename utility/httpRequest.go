@@ -1,7 +1,7 @@
 package utility
 
 import (
-	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/entity"
 	"bufio"
 	"bytes"
 	"encoding/json"
@@ -83,7 +83,7 @@ type OptionRequest struct {
 	Content string `json:"content"`
 }
 
-func SendQuestions(url string, method string, questions []*model.Question) (*http.Response, error) {
+func SendQuestions(url string, method string, questions []*entity.Question) (*http.Response, error) {
 	var questionRequests []QuestionRequest
 	for _, question := range questions {
 		var optionRequests []OptionRequest

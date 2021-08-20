@@ -1,4 +1,4 @@
-package Admin
+package Log
 
 import (
 	"SWP490_G21_Backend/model/response"

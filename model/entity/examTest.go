@@ -1,4 +1,4 @@
-package model
+package entity
 
 import "time"
 
@@ -11,4 +11,5 @@ type ExamTest struct {
 	Questions         []*Question `orm:"reverse(many)"`
 	Subject           string
 	NumberOfQuestions int64
+	Status            string
 }

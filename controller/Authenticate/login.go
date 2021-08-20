@@ -1,7 +1,7 @@
 package Authenticate
 
 import (
-	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
@@ -18,7 +18,7 @@ func LoginResponse(c echo.Context) error {
 
 	Username := c.FormValue("username")
 	Password := c.FormValue("password")
-	user := &model.User{
+	user := &entity.User{
 		Username: Username,
 		Password: Password,
 	}

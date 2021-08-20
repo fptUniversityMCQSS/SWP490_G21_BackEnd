@@ -1,7 +1,7 @@
 package Authenticate
 
 import (
-	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	"github.com/labstack/echo/v4"
@@ -15,7 +15,7 @@ func Register(c echo.Context) error {
 	FullName := c.FormValue("fullName")
 	Email := c.FormValue("email")
 	Phone := c.FormValue("phone")
-	user := &model.User{
+	user := &entity.User{
 		Username: Username,
 	}
 	// Get a QuerySeter object. User is table name

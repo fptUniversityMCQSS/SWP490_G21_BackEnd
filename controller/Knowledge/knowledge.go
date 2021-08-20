@@ -1,7 +1,7 @@
-package controller
+package Knowledge
 
 import (
-	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	"encoding/json"
@@ -31,7 +31,7 @@ func ListKnowledge(c echo.Context) error {
 
 	//userId := claims["userId"].(float64)
 
-	var knows []*model.Knowledge
+	var knows []*entity.Knowledge
 	var knowRs []*response.KnowledgResponse
 	// Get a QuerySeter object. User is table name
 	_, err := utility.DB.QueryTable("knowledge").OrderBy("-id").RelatedSel().All(&knows)
@@ -91,12 +91,12 @@ func KnowledgeUpload(c echo.Context) error {
 		}
 	}(src)
 
-	user := &model.User{
+	user := &entity.User{
 		Id:       IntUserId,
 		Username: userName,
 	}
 
-	know := &model.Knowledge{
+	know := &entity.Knowledge{
 		Name:   file.Filename,
 		User:   user,
 		Status: "Processing",
@@ -316,7 +316,7 @@ func DownloadKnowledge(c echo.Context) error {
 			Message: utility.Error036KnowIdInvalid,
 		})
 	}
-	var knowledge model.Knowledge
+	var knowledge entity.Knowledge
 
 	err = utility.DB.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
 
@@ -339,7 +339,7 @@ func DeleteKnowledge(c echo.Context) error {
 	role := claims["role"].(string)
 
 	knowledgeId := c.Param("id")
-	var knowledge model.Knowledge
+	var knowledge entity.Knowledge
 	intKnowledgeId, err := strconv.ParseInt(knowledgeId, 10, 64)
 	if err != nil {
 		utility.FileLog.Println(err)

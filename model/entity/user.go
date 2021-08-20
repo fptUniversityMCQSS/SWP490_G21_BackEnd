@@ -1,4 +1,4 @@
-package model
+package entity
 
 type User struct {
 	Id        int64        `orm:"pk;auto" json:"id" form:"id"`
