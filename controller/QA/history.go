@@ -1,8 +1,8 @@
 package QA
 
 import (
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/model/unity"
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -16,7 +16,7 @@ import (
 )
 
 func History(c echo.Context) error {
-	var history []*unity.ExamTest
+	var history []*entity.ExamTest
 	var hist []*response.HistoryResponse
 
 	token := c.Get("user").(*jwt.Token)
@@ -65,10 +65,10 @@ func GetExamById(c echo.Context) error {
 			Message: utility.Error008UserIdInvalid,
 		})
 	}
-	var examTest unity.ExamTest
-	var user unity.User
-	var questionAll []*unity.Question
-	var answerAll []*unity.Option
+	var examTest entity.ExamTest
+	var user entity.User
+	var questionAll []*entity.Question
+	var answerAll []*entity.Option
 	var userResponse response.UserResponse
 	err = utility.DB.QueryTable("exam_test").Filter("id", id).One(&examTest)
 	if err != nil {
@@ -155,7 +155,7 @@ func DownloadExam(c echo.Context) error {
 			Message: utility.Error061ExamIdInvalid,
 		})
 	}
-	var examTest unity.ExamTest
+	var examTest entity.ExamTest
 
 	err = utility.DB.QueryTable("exam_test").Filter("id", intQaId).One(&examTest)
 
@@ -183,7 +183,7 @@ func DeleteExam(c echo.Context) error {
 	userId := claims["userId"].(float64)
 	IntUserId := int64(userId)
 	ExamId := c.Param("id")
-	var examTest unity.ExamTest
+	var examTest entity.ExamTest
 	intExamId, err := strconv.ParseInt(ExamId, 10, 64)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -244,10 +244,10 @@ func writeStringDocx(str string) string {
 	return output[:len(output)-7]
 }
 
-func formatDocxFileResult(exam unity.ExamTest) (string, error) {
+func formatDocxFileResult(exam entity.ExamTest) (string, error) {
 	r, err := docx.ReadDocxFile("template/TestFormat.docx")
-	var Questions []*unity.Question
-	var OptionsAll []*unity.Option
+	var Questions []*entity.Question
+	var OptionsAll []*entity.Option
 	_, err = utility.DB.QueryTable("question").Filter("exam_test_id", exam.Id).All(&Questions)
 	if err != nil {
 		utility.FileLog.Println(err)

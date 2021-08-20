@@ -1,4 +1,4 @@
-package unity
+package entity
 
 import "time"
 

@@ -1,8 +1,8 @@
 package User
 
 import (
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/model/unity"
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -22,7 +22,7 @@ func ChangeProfile(c echo.Context) error {
 	Phone := c.FormValue("phone")
 
 	IntUserId := int64(userId)
-	user := &unity.User{
+	user := &entity.User{
 		Id: IntUserId,
 	}
 
@@ -96,7 +96,7 @@ func GetUserInfo(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
-	user := &unity.User{
+	user := &entity.User{
 		Username: userName,
 	}
 	err := utility.DB.Read(user, "username")

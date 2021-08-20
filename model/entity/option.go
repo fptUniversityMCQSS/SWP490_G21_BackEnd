@@ -1,4 +1,4 @@
-package unity
+package entity
 
 type Option struct {
 	Id         int64     `orm:"pk;auto"`

@@ -1,4 +1,4 @@
-package unity
+package entity
 
 type Question struct {
 	Id       int64 `orm:"pk;auto"`

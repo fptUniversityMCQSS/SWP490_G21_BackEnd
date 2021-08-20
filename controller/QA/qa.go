@@ -2,8 +2,8 @@ package QA
 
 import (
 	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
-	"SWP490_G21_Backend/model/unity"
 	"SWP490_G21_Backend/utility"
 	"bufio"
 	"encoding/json"
@@ -61,10 +61,10 @@ func QaResponse(c echo.Context) error {
 	}(src)
 
 	timeNow := time.Now()
-	var user = &unity.User{
+	var user = &entity.User{
 		Id: intUserId,
 	}
-	var exam = &unity.ExamTest{
+	var exam = &entity.ExamTest{
 		User: user,
 		Name: file.Filename,
 		Date: timeNow,
@@ -261,15 +261,15 @@ func QaResponse(c echo.Context) error {
 			Message: utility.Error050ReadFileDocOrDocxError,
 		})
 	}
-	var Questions []*unity.Question
+	var Questions []*entity.Question
 	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
 	for _, table := range tables {
-		var QuestionModel unity.Question
+		var QuestionModel entity.Question
 		QN := ""
 		Question := ""
-		QuestionModel.Options = []*unity.Option{}
+		QuestionModel.Options = []*entity.Option{}
 		for x, row := range table.XMLBodyTblR {
-			var option unity.Option
+			var option entity.Option
 			for y, column := range row.XMLBodyTblRC {
 				for _, paragraph := range column.XMLBodyTblRCP {
 					for _, content := range paragraph.XMLBodyTblRCPR {
@@ -394,7 +394,7 @@ func QaResponse(c echo.Context) error {
 	c.Response().Flush()
 
 	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
-	questionsMap := make(map[int64]*unity.Question)
+	questionsMap := make(map[int64]*entity.Question)
 	for _, question := range Questions {
 		questionsMap[question.Number] = question
 	}
