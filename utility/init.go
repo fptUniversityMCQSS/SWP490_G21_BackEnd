@@ -1,7 +1,7 @@
 package utility
 
 import (
-	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/unity"
 	"github.com/BurntSushi/toml"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
@@ -36,11 +36,11 @@ func init() {
 		ConfigData.DbPort + ")/" +
 		ConfigData.Database + "?charset=utf8"
 	orm.RegisterModel(
-		new(model.Knowledge),
-		new(model.Option),
-		new(model.Question),
-		new(model.User),
-		new(model.ExamTest),
+		new(unity.Knowledge),
+		new(unity.Option),
+		new(unity.Question),
+		new(unity.User),
+		new(unity.ExamTest),
 	)
 	err := orm.RegisterDriver(ConfigData.DBDriver, orm.DRMySQL)
 	if err != nil {

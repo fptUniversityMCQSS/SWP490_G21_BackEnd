@@ -1,8 +1,8 @@
-package Admin
+package User
 
 import (
-	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/model/unity"
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -14,7 +14,7 @@ func ListUser(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
-	var user []*model.User
+	var user []*unity.User
 	var lists []*response.UserResponse
 
 	_, err := utility.DB.QueryTable("user").All(&user)
@@ -55,7 +55,7 @@ func AddUser(c echo.Context) error {
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
 
-	user := &model.User{
+	user := &unity.User{
 		Username: username,
 	}
 
@@ -155,7 +155,7 @@ func GetUserById(c echo.Context) error {
 			Message: utility.Error008UserIdInvalid,
 		})
 	}
-	var user model.User
+	var user unity.User
 
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
@@ -237,7 +237,7 @@ func UpdateUser(c echo.Context) error {
 			Message: utility.Error068UserDoesNotExist,
 		})
 	}
-	user := &model.User{
+	user := &unity.User{
 		Id: id,
 	}
 

@@ -1,8 +1,9 @@
-package controller
+package QA
 
 import (
 	"SWP490_G21_Backend/model"
 	"SWP490_G21_Backend/model/response"
+	"SWP490_G21_Backend/model/unity"
 	"SWP490_G21_Backend/utility"
 	"bufio"
 	"encoding/json"
@@ -60,10 +61,10 @@ func QaResponse(c echo.Context) error {
 	}(src)
 
 	timeNow := time.Now()
-	var user = &model.User{
+	var user = &unity.User{
 		Id: intUserId,
 	}
-	var exam = &model.ExamTest{
+	var exam = &unity.ExamTest{
 		User: user,
 		Name: file.Filename,
 		Date: timeNow,
@@ -143,7 +144,6 @@ func QaResponse(c echo.Context) error {
 	}
 
 	r, err := docx.ReadDocxFromMemory(src, size)
-
 	if err != nil {
 		dir, err := filepath.Abs(fileFolderPath)
 		if err != nil {
@@ -261,15 +261,15 @@ func QaResponse(c echo.Context) error {
 			Message: utility.Error050ReadFileDocOrDocxError,
 		})
 	}
-	var Questions []*model.Question
+	var Questions []*unity.Question
 	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
 	for _, table := range tables {
-		var QuestionModel model.Question
+		var QuestionModel unity.Question
 		QN := ""
 		Question := ""
-		QuestionModel.Options = []*model.Option{}
+		QuestionModel.Options = []*unity.Option{}
 		for x, row := range table.XMLBodyTblR {
-			var option model.Option
+			var option unity.Option
 			for y, column := range row.XMLBodyTblRC {
 				for _, paragraph := range column.XMLBodyTblRCP {
 					for _, content := range paragraph.XMLBodyTblRCPR {
@@ -372,7 +372,14 @@ func QaResponse(c echo.Context) error {
 			Message: utility.Error022CloseConnectionError,
 		})
 	}
-
+	exam.Status = "processing"
+	_, err = utility.DB.Update(exam)
+	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error042UpdateExamFailed,
+		})
+	}
 	examResponse := response.HistoryResponse{
 		Id:                insert,
 		Date:              timeNow,
@@ -380,13 +387,14 @@ func QaResponse(c echo.Context) error {
 		User:              userName,
 		Subject:           exam.Subject,
 		NumberOfQuestions: exam.NumberOfQuestions,
+		Status:            exam.Status,
 	}
 	enc := json.NewEncoder(c.Response())
 	err = enc.Encode(examResponse)
 	c.Response().Flush()
 
 	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
-	questionsMap := make(map[int64]*model.Question)
+	questionsMap := make(map[int64]*unity.Question)
 	for _, question := range Questions {
 		questionsMap[question.Number] = question
 	}
@@ -452,7 +460,25 @@ func QaResponse(c echo.Context) error {
 			str = ""
 		}
 	}
-
+	exam.Status = "finished"
+	_, err = utility.DB.Update(exam)
+	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error042UpdateExamFailed,
+		})
+	}
+	examResponse = response.HistoryResponse{
+		Id:                insert,
+		Date:              timeNow,
+		Name:              exam.Name,
+		User:              userName,
+		Subject:           exam.Subject,
+		NumberOfQuestions: exam.NumberOfQuestions,
+		Status:            exam.Status,
+	}
+	err = enc.Encode(examResponse)
+	c.Response().Flush()
 	return c.JSON(http.StatusOK, response.Message{Message: "DONE"})
 
 }
