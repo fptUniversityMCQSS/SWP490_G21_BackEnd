@@ -19,7 +19,7 @@ func Register(c echo.Context) error {
 		Username: Username,
 	}
 	// Get a QuerySeter object. User is table name
-	if !utility.CheckPassword(Username) {
+	if !utility.CheckUsername(Username) {
 		utility.FileLog.Println(utility.Error006UserNameModified)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error006UserNameModified,
