@@ -42,6 +42,7 @@ func History(c echo.Context) error {
 			User:              h.User.Username,
 			Subject:           h.Subject,
 			NumberOfQuestions: h.NumberOfQuestions,
+			Status:            h.Status,
 		}
 
 		hist = append(hist, his)
