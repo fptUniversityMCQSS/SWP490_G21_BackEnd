@@ -1,7 +1,7 @@
-package controller
+package QA
 
 import (
-	"SWP490_G21_Backend/model"
+	"SWP490_G21_Backend/model/entity"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	"github.com/golang-jwt/jwt"
@@ -16,7 +16,7 @@ import (
 )
 
 func History(c echo.Context) error {
-	var history []*model.ExamTest
+	var history []*entity.ExamTest
 	var hist []*response.HistoryResponse
 
 	token := c.Get("user").(*jwt.Token)
@@ -42,6 +42,7 @@ func History(c echo.Context) error {
 			User:              h.User.Username,
 			Subject:           h.Subject,
 			NumberOfQuestions: h.NumberOfQuestions,
+			Status:            h.Status,
 		}
 
 		hist = append(hist, his)
@@ -65,16 +66,16 @@ func GetExamById(c echo.Context) error {
 			Message: utility.Error008UserIdInvalid,
 		})
 	}
-	var examTest model.ExamTest
-	var user model.User
-	var questionAll []*model.Question
-	var answerAll []*model.Option
+	var examTest entity.ExamTest
+	var user entity.User
+	var questionAll []*entity.Question
+	var answerAll []*entity.Option
 	var userResponse response.UserResponse
 	err = utility.DB.QueryTable("exam_test").Filter("id", id).One(&examTest)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error014ErrorQueryForGetAllExamTest,
+			Message: utility.Error015CantGetExamTest,
 		})
 	}
 	err = utility.DB.QueryTable("user").Filter("id", IntUserId).One(&user)
@@ -155,7 +156,7 @@ func DownloadExam(c echo.Context) error {
 			Message: utility.Error061ExamIdInvalid,
 		})
 	}
-	var examTest model.ExamTest
+	var examTest entity.ExamTest
 
 	err = utility.DB.QueryTable("exam_test").Filter("id", intQaId).One(&examTest)
 
@@ -183,7 +184,7 @@ func DeleteExam(c echo.Context) error {
 	userId := claims["userId"].(float64)
 	IntUserId := int64(userId)
 	ExamId := c.Param("id")
-	var examTest model.ExamTest
+	var examTest entity.ExamTest
 	intExamId, err := strconv.ParseInt(ExamId, 10, 64)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -244,20 +245,18 @@ func writeStringDocx(str string) string {
 	return output[:len(output)-7]
 }
 
-func formatDocxFileResult(exam model.ExamTest) (string, error) {
+func formatDocxFileResult(exam entity.ExamTest) (string, error) {
 	r, err := docx.ReadDocxFile("template/TestFormat.docx")
-	var Questions []*model.Question
-	var OptionsAll []*model.Option
+	var Questions []*entity.Question
+	var OptionsAll []*entity.Option
 	_, err = utility.DB.QueryTable("question").Filter("exam_test_id", exam.Id).All(&Questions)
 	if err != nil {
-		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	exam.Questions = Questions
 	for _, question := range Questions {
 		_, err := utility.DB.QueryTable("option").Filter("question_id_id", question.Id).All(&OptionsAll)
 		if err != nil {
-			utility.FileLog.Println(err)
 			return err.Error(), err
 		}
 		question.Options = OptionsAll
@@ -265,41 +264,42 @@ func formatDocxFileResult(exam model.ExamTest) (string, error) {
 
 	table, err := ioutil.ReadFile("template/table.xml")
 	if err != nil {
-		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	body, err := ioutil.ReadFile("template/body.xml")
 	if err != nil {
-		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
 	tableContent := ""
 	key := []string{"optionAContent", "optionBContent", "optionCContent", "optionDContent", "optionEContent", "optionFContent"}
 	for num, question := range Questions {
-		newtable := strings.ReplaceAll(string(table), "{{numberOfQuestion}}", writeStringDocx(strconv.Itoa(num+1)))
-		newtable = strings.ReplaceAll(newtable, "{{QuestionContent}}", writeStringDocx(question.Content))
+		newTable := strings.ReplaceAll(string(table), "{{numberOfQuestion}}", writeStringDocx(strconv.Itoa(num+1)))
+		newTable = strings.ReplaceAll(newTable, "{{QuestionContent}}", writeStringDocx(question.Content))
 		for i := 0; i < 6; i++ {
 			if i < len(question.Options) {
-				newtable = strings.ReplaceAll(newtable, "{{"+key[i]+"}}", writeStringDocx(question.Options[i].Content))
+				newTable = strings.ReplaceAll(newTable, "{{"+key[i]+"}}", writeStringDocx(question.Options[i].Content))
 			} else {
-				newtable = strings.ReplaceAll(newtable, "{{"+key[i]+"}}", writeStringDocx(""))
+				newTable = strings.ReplaceAll(newTable, "{{"+key[i]+"}}", writeStringDocx(""))
 			}
 		}
-		newtable = strings.ReplaceAll(newtable, "{{answers}}", writeStringDocx(question.Answer))
-		tableContent += newtable
+		newTable = strings.ReplaceAll(newTable, "{{answers}}", writeStringDocx(question.Answer))
+		tableContent += newTable
 	}
 	bodyContent := strings.ReplaceAll(string(body), "{{subject}}", writeStringDocx(exam.Subject))
 	bodyContent = strings.ReplaceAll(bodyContent, "{{numberOfQuestions}}", writeStringDocx(strconv.Itoa(int(exam.NumberOfQuestions))))
 	bodyContent = strings.ReplaceAll(bodyContent, "{{table}}", tableContent)
 	editFile := r.Editable()
 	editFile.SetContent(bodyContent)
-	extension := filepath.Ext(exam.Path)
-	newFormatFile := strings.ReplaceAll(exam.Path, extension, "-"+strconv.Itoa(int(exam.Id))+".docx")
-	f, err := os.Create(newFormatFile)
-	err = editFile.WriteToFile(f.Name())
+	newName := exam.Path + "/" + exam.Name
+	extension := filepath.Ext(newName)
+	newName = strings.ReplaceAll(newName, extension, "-"+strconv.Itoa(int(exam.Id))+".docx")
+	_, err = os.Create(newName)
 	if err != nil {
-		utility.FileLog.Println(err)
 		return err.Error(), err
 	}
-	return newFormatFile, nil
+	err = editFile.WriteToFile(newName)
+	if err != nil {
+		return err.Error(), err
+	}
+	return newName, nil
 }

@@ -32,11 +32,21 @@ CREATE TABLE `exam_test` (
                              `subject` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                              `number_of_questions` bigint NOT NULL DEFAULT '0',
                              `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                             `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                              PRIMARY KEY (`id`),
                              KEY `FK_UserIdExamTest_idx` (`user_id`),
                              CONSTRAINT `FK_UserIdExamTest` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `exam_test`
+--
+
+LOCK TABLES `exam_test` WRITE;
+/*!40000 ALTER TABLE `exam_test` DISABLE KEYS */;
+/*!40000 ALTER TABLE `exam_test` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `knowledge`
@@ -48,16 +58,24 @@ DROP TABLE IF EXISTS `knowledge`;
 CREATE TABLE `knowledge` (
                              `id` bigint NOT NULL AUTO_INCREMENT,
                              `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                             `date` datetime DEFAULT NULL,
+                             `date` datetime NOT NULL,
                              `user_id` bigint NOT NULL,
                              `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                              `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                             `parse_txt` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                              PRIMARY KEY (`id`),
                              KEY `FK_UserId_idx` (`user_id`),
                              CONSTRAINT `FK_UserId` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `knowledge`
+--
+
+LOCK TABLES `knowledge` WRITE;
+/*!40000 ALTER TABLE `knowledge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `knowledge` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `option`
@@ -71,13 +89,21 @@ CREATE TABLE `option` (
                           `question_id_id` bigint NOT NULL,
                           `key` char(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                           `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                          `paragraph` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                           PRIMARY KEY (`id`),
                           UNIQUE KEY `id_UNIQUE` (`id`),
                           KEY `FK_QuestionId_idx` (`question_id_id`),
                           CONSTRAINT `FK_QuestionId` FOREIGN KEY (`question_id_id`) REFERENCES `question` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5390 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5750 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `option`
+--
+
+LOCK TABLES `option` WRITE;
+/*!40000 ALTER TABLE `option` DISABLE KEYS */;
+/*!40000 ALTER TABLE `option` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `question`
@@ -96,8 +122,17 @@ CREATE TABLE `question` (
                             PRIMARY KEY (`id`),
                             KEY `FK_ExamTestId_idx` (`exam_test_id`),
                             CONSTRAINT `FK_ExamTestId` FOREIGN KEY (`exam_test_id`) REFERENCES `exam_test` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1353 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1443 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `question`
+--
+
+LOCK TABLES `question` WRITE;
+/*!40000 ALTER TABLE `question` DISABLE KEYS */;
+/*!40000 ALTER TABLE `question` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -111,12 +146,22 @@ CREATE TABLE `user` (
                         `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                         `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                         `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                        `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                        `phone` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                        `full_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                        `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                        `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+                        `full_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                         PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (17,'khailq','1234','admin','khailq@gmail.com','0934123552','Lang Quoc Khai');
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -127,4 +172,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-17 22:04:50
+-- Dump completed on 2021-08-20 16:41:05

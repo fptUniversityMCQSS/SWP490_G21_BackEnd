@@ -1,9 +1,10 @@
 package main
 
 import (
-	"SWP490_G21_Backend/controller"
-	"SWP490_G21_Backend/controller/Admin"
 	"SWP490_G21_Backend/controller/Authenticate"
+	"SWP490_G21_Backend/controller/Knowledge"
+	"SWP490_G21_Backend/controller/Log"
+	"SWP490_G21_Backend/controller/QA"
 	"SWP490_G21_Backend/controller/User"
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
@@ -49,27 +50,27 @@ func main() {
 	backend.POST("/register", (DebugHandler{Authenticate.Register}).debug)
 
 	user := signedIn.Group("", userPermission.Header)
-	user.PUT("/qa", (DebugHandler{controller.QaResponse}).debug)
-	user.GET("/history", (DebugHandler{controller.History}).debug)
-	user.GET("/history/:id", (DebugHandler{controller.GetExamById}).debug)
-	user.DELETE("/history/:id", (DebugHandler{controller.DeleteExam}).debug)
-	user.GET("/history/:id/download", (DebugHandler{controller.DownloadExam}).debug)
-	user.GET("/knowledge", (DebugHandler{controller.ListKnowledge}).debug)
+	user.PUT("/qa", (DebugHandler{QA.QaResponse}).debug)
+	user.GET("/history", (DebugHandler{QA.History}).debug)
+	user.GET("/history/:id", (DebugHandler{QA.GetExamById}).debug)
+	user.DELETE("/history/:id", (DebugHandler{QA.DeleteExam}).debug)
+	user.GET("/history/:id/download", (DebugHandler{QA.DownloadExam}).debug)
+	user.GET("/knowledge", (DebugHandler{Knowledge.ListKnowledge}).debug)
 	user.GET("/user", (DebugHandler{User.GetUserInfo}).debug)
 	user.PATCH("/user", (DebugHandler{User.ChangeProfile}).debug)
 
 	staff := signedIn.Group("", staffPermission.Header)
-	staff.PUT("/knowledge", (DebugHandler{controller.KnowledgeUpload}).debug)
-	staff.GET("/knowledge/:id", (DebugHandler{controller.DownloadKnowledge}).debug)
-	staff.DELETE("/knowledge/:id", (DebugHandler{controller.DeleteKnowledge}).debug)
+	staff.PUT("/knowledge", (DebugHandler{Knowledge.UploadKnowledge}).debug)
+	staff.GET("/knowledge/:id", (DebugHandler{Knowledge.DownloadKnowledge}).debug)
+	staff.DELETE("/knowledge/:id", (DebugHandler{Knowledge.DeleteKnowledge}).debug)
 
 	admin := signedIn.Group("/admin", adminPermission.Header)
-	admin.GET("/user", (DebugHandler{Admin.ListUser}).debug)
-	admin.POST("/user", (DebugHandler{Admin.AddUser}).debug)
-	admin.GET("/user/:id", (DebugHandler{Admin.GetUserById}).debug)
-	admin.DELETE("/user/:id", (DebugHandler{Admin.DeleteUserById}).debug)
-	admin.PATCH("/user/:id", (DebugHandler{Admin.UpdateUser}).debug)
-	admin.GET("/log", (DebugHandler{Admin.StreamLogFile}).debug)
+	admin.GET("/user", (DebugHandler{User.ListUser}).debug)
+	admin.POST("/user", (DebugHandler{User.AddUser}).debug)
+	admin.GET("/user/:id", (DebugHandler{User.GetUserById}).debug)
+	admin.DELETE("/user/:id", (DebugHandler{User.DeleteUserById}).debug)
+	admin.PATCH("/user/:id", (DebugHandler{User.UpdateUser}).debug)
+	admin.GET("/log", (DebugHandler{Log.StreamLogFile}).debug)
 
 	//-------Frontend-------
 	e.Static("/", utility.ConfigData.StaticFolder)

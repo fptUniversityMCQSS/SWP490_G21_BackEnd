@@ -9,4 +9,5 @@ type HistoryResponse struct {
 	User              string    `json:"user"`
 	Subject           string    `json:"subject"`
 	NumberOfQuestions int64     `json:"questions_number"`
+	Status            string    `json:"status"`
 }
