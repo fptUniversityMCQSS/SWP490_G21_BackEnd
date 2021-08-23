@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -122,6 +123,7 @@ type OptionRequest struct {
 
 func SendQuestions(url string, method string, questions []*entity.Question) (*http.Response, error) {
 	var questionRequests []QuestionRequest
+	debugStr := ""
 	for _, question := range questions {
 		var optionRequests []OptionRequest
 		for _, option := range question.Options {
@@ -130,6 +132,7 @@ func SendQuestions(url string, method string, questions []*entity.Question) (*ht
 				Content: option.Content,
 			}
 			optionRequests = append(optionRequests, o)
+			debugStr += "option(" + o.Key + "," + o.Content + ");"
 		}
 		q := QuestionRequest{
 			Qn:      question.Number,
@@ -138,13 +141,15 @@ func SendQuestions(url string, method string, questions []*entity.Question) (*ht
 			//Answer: question.Answer,
 		}
 		questionRequests = append(questionRequests, q)
+		debugStr = "question(" + strconv.Itoa(int(q.Qn)) + "," + q.Content + ");"
 	}
+	FileLog.Println(debugStr)
 	jsonQuestions, err := json.Marshal(questionRequests)
 	if err != nil {
 
 		return nil, err
 	}
-	//FileLog.Println(string(jsonQuestions))
+	FileLog.Println(string(jsonQuestions))
 	payload := strings.NewReader(string(jsonQuestions))
 
 	client := &http.Client{}

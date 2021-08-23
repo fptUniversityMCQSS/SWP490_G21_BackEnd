@@ -432,6 +432,7 @@ func QaResponse(c echo.Context) error {
 
 		if reader.Buffered() <= 0 {
 			var qaResponse response.QuestionAnswerResponse
+			utility.FileLog.Println(str)
 			err := json.Unmarshal([]byte(str), &qaResponse)
 			if err != nil {
 				utility.FileLog.Println("json unmarshal from AI server failed")
