@@ -58,11 +58,10 @@ func main() {
 	user.GET("/knowledge", (DebugHandler{Knowledge.ListKnowledge}).debug)
 	user.GET("/user", (DebugHandler{User.GetUserInfo}).debug)
 	user.PATCH("/user", (DebugHandler{User.ChangeProfile}).debug)
+	user.GET("/knowledge/:id", (DebugHandler{Knowledge.DownloadKnowledge}).debug)
 
 	staff := signedIn.Group("", staffPermission.Header)
 	staff.PUT("/knowledge", (DebugHandler{Knowledge.UploadKnowledge}).debug)
-	staff.GET("/knowledge/:id", (DebugHandler{Knowledge.DownloadKnowledge}).debug)
-	staff.GET("/knowledge/:id/download", (DebugHandler{Knowledge.DownloadKnowledgeTxt}).debug)
 	staff.DELETE("/knowledge/:id", (DebugHandler{Knowledge.DeleteKnowledge}).debug)
 
 	admin := signedIn.Group("/admin", adminPermission.Header)

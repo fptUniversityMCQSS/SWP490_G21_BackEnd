@@ -287,36 +287,6 @@ func DownloadKnowledge(c echo.Context) error {
 	return c.Attachment(knowledge.Path+"/"+knowledge.Name, knowledge.Name)
 }
 
-func DownloadKnowledgeTxt(c echo.Context) error {
-	token := c.Get("user").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	userName := claims["username"].(string)
-
-	knowledgeId := c.Param("id")
-	intKnowledgeId, err := strconv.ParseInt(knowledgeId, 10, 64)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error036KnowIdInvalid,
-		})
-	}
-	var knowledge entity.Knowledge
-
-	err = utility.DB.QueryTable("knowledge").Filter("id", intKnowledgeId).One(&knowledge)
-
-	//if has problem in connection
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error023CantGetKnowledge,
-		})
-	}
-	extension := filepath.Ext(knowledge.Name)
-	txtPath := knowledge.Name[:(len(knowledge.Name)-len(extension))] + ".txt"
-	utility.FileLog.Println(userName + " downloaded " + txtPath)
-
-	return c.Attachment(knowledge.Path+"/"+txtPath, txtPath)
-}
-
 func DeleteKnowledge(c echo.Context) error {
 
 	token := c.Get("user").(*jwt.Token)
