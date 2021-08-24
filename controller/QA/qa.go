@@ -28,6 +28,8 @@ import (
 	_ "unsafe"
 )
 
+var RequestingQA = make(map[int64]chan error)
+
 func QaResponse(c echo.Context) error {
 	// sending file with the wrong format doesn't return error
 	// not deleting if fail
@@ -225,11 +227,9 @@ func QaResponse(c echo.Context) error {
 	err = enc.Encode(examResponse)
 	c.Response().Flush()
 
+	RequestingQA[exam.Id] = make(chan error)
 	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", exam.Questions)
-	questionsMap := make(map[int64]*entity.Question)
-	for _, question := range exam.Questions {
-		questionsMap[question.Number] = question
-	}
+	delete(RequestingQA, exam.Id)
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
@@ -240,6 +240,11 @@ func QaResponse(c echo.Context) error {
 			return
 		}
 	}(res.Body)
+
+	questionsMap := make(map[int64]*entity.Question)
+	for _, question := range exam.Questions {
+		questionsMap[question.Number] = question
+	}
 
 	reader := bufio.NewReader(res.Body)
 	str := ""
