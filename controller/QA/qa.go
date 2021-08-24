@@ -142,196 +142,20 @@ func QaResponse(c echo.Context) error {
 			Message: utility.Error043CantParseFileSize,
 		})
 	}
-
-	r, err := docx.ReadDocxFromMemory(src, size)
-	if err != nil {
-		dir, err := filepath.Abs(fileFolderPath)
+	resultError := ""
+	exam.Questions, resultError = processQuestion(exam, size, dst, src, fileFolderPath, file)
+	if resultError != "" {
+		_, err = utility.DB.Delete(exam)
 		if err != nil {
 			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error044CantGetFilePath,
+				Message: utility.Error062DeleteExamFailed,
 			})
 		}
-		fileName, err := ToDocx(dir, file.Filename)
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error046CantParseFileDocToDocx,
-			})
-		}
-		fi, err := fileName.Stat()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error047StatFileError,
-			})
-		}
-		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
-		err = fileName.Close()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error033CloseFileError,
-			})
-		}
-		err3 := os.Remove(fileName.Name())
-		if err3 != nil {
-			utility.FileLog.Println(err3)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error038RemoveFileError,
-			})
-		}
-	}
-
-	var xmlDocument model.XMLDocument
-
-	err = xml.Unmarshal([]byte(r.Editable().GetContent()), &xmlDocument)
-	if err != nil {
-		utility.FileLog.Println(err)
+		utility.FileLog.Println(resultError)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error048ParseFileXmlError,
+			Message: resultError,
 		})
-	}
-	array := xmlDocument.XMLBody.XMLBodyPs
-
-	content := ""
-	for i := 0; i < len(array[0].XMLBodyPr); i++ {
-		content += array[0].XMLBodyPr[i].Subject
-	}
-	content, err = reFormatStringToAdd(content)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error059ReformatStringFalse,
-		})
-	}
-	exam.Subject = content
-	content = ""
-	for j := 0; j < len(array[1].XMLBodyPr); j++ {
-		content += array[1].XMLBodyPr[j].Subject
-	}
-	content, err = reFormatStringToAdd(content)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error059ReformatStringFalse,
-		})
-	}
-	numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error058ParseNumberOfQuestionsError,
-		})
-	}
-	exam.NumberOfQuestions = numberOfQuestions
-
-	_, err = utility.DB.Update(exam)
-	tables := xmlDocument.XMLBody.XMLBodyTbls
-	if tables == nil {
-		err := src.Close()
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error033CloseFileError,
-			})
-		}
-		err2 := dst.Close()
-		if err2 != nil {
-			utility.FileLog.Println(err2)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error033CloseFileError,
-			})
-		}
-		dir, err := filepath.Abs("examtest/" + file.Filename)
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error044CantGetFilePath,
-			})
-		}
-		err3 := os.Remove(dir)
-		if err3 != nil {
-			utility.FileLog.Println(err3)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error038RemoveFileError,
-			})
-		}
-		return c.JSON(http.StatusBadRequest, response.Message{
-			Message: utility.Error050ReadFileDocOrDocxError,
-		})
-	}
-	var Questions []*entity.Question
-	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
-	for _, table := range tables {
-		var QuestionModel entity.Question
-		QN := ""
-		Question := ""
-		QuestionModel.Options = []*entity.Option{}
-		for x, row := range table.XMLBodyTblR {
-			var option entity.Option
-			for y, column := range row.XMLBodyTblRC {
-				for _, paragraph := range column.XMLBodyTblRCP {
-					for _, content := range paragraph.XMLBodyTblRCPR {
-						if x == 0 {
-							if y == 0 {
-								QN += content.QN
-							} else {
-								if content.Br.Local != "" {
-									Question += "\n"
-								}
-								Question += content.QN
-							}
-						} else if x <= 6 {
-							if y != 0 {
-								if content.Br.Local != "" {
-									option.Content += "\n"
-								}
-								option.Content += content.QN
-							}
-						} else if x == 7 {
-							//if y != 0 {
-							//	if content.Br.Local != "" {
-							//		QuestionModel.Answer += "\n"
-							//	}
-							//	QuestionModel.Answer += content.QN
-							//}
-						}
-					}
-					if y != 0 {
-						if x == 0 {
-							Question += "\n"
-						} else if x <= 6 {
-							option.Content += "\n"
-						}
-					}
-				}
-			}
-			if x > 0 && x <= 6 {
-				option.Content = RemoveEndChar(option.Content)
-				option.Content = strings.TrimSpace(option.Content)
-				if option.Content != "" {
-					option.Key = keyIndex[x]
-					option.QuestionId = &QuestionModel
-					QuestionModel.Options = append(QuestionModel.Options, &option)
-				}
-			}
-		}
-		Question = RemoveEndChar(Question)
-		re, _ := regexp.Compile("(.*)=")
-		QN = re.ReplaceAllString(QN, "")
-		QuestionNumber, err := strconv.ParseInt(QN, 10, 64)
-		if err != nil {
-			//utility.FileLog.Println(err)
-			//return c.JSON(http.StatusInternalServerError, response.Message{
-			//	Message: utility.Error051ParseNumberOfQuestionError,
-			//})
-			continue
-		}
-		QuestionModel.Number = QuestionNumber
-		QuestionModel.Content = Question
-		QuestionModel.ExamTest = exam
-		Questions = append(Questions, &QuestionModel)
 	}
 	i2, err := utility.DB.QueryTable("question").PrepareInsert()
 	if err != nil {
@@ -347,7 +171,7 @@ func QaResponse(c echo.Context) error {
 			Message: utility.Error054CantGetOption,
 		})
 	}
-	for _, question := range Questions {
+	for _, question := range exam.Questions {
 		id, err := i2.Insert(question)
 		if err != nil {
 			utility.FileLog.Println(err)
@@ -401,9 +225,9 @@ func QaResponse(c echo.Context) error {
 	err = enc.Encode(examResponse)
 	c.Response().Flush()
 
-	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", Questions)
+	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", exam.Questions)
 	questionsMap := make(map[int64]*entity.Question)
-	for _, question := range Questions {
+	for _, question := range exam.Questions {
 		questionsMap[question.Number] = question
 	}
 	if err != nil {
@@ -470,29 +294,11 @@ func QaResponse(c echo.Context) error {
 	}
 	exam.Status = "finished"
 	_, err = utility.DB.Update(exam)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error042UpdateExamFailed,
-		})
-	}
-	examResponse = response.HistoryResponse{
-		Id:                insert,
-		Date:              timeNow,
-		Name:              exam.Name,
-		User:              userName,
-		Subject:           exam.Subject,
-		NumberOfQuestions: exam.NumberOfQuestions,
-		Status:            exam.Status,
-	}
-	err = enc.Encode(examResponse)
-	c.Response().Flush()
 	return c.JSON(http.StatusOK, response.Message{Message: "DONE"})
 
 }
 func RemoveEndChar(s string) string {
 	sizeQuestion := len(s)
-
 	if sizeQuestion > 0 && s[sizeQuestion-1] == '\n' {
 		s = s[:sizeQuestion-1]
 	}
@@ -559,4 +365,214 @@ func reFormatStringToAdd(s string) (string, error) {
 	}
 	stringAfterFormat := re.ReplaceAllString(s, "")
 	return strings.TrimSpace(stringAfterFormat), nil
+}
+func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multipart.File, fileFolderPath string, file *multipart.FileHeader) ([]*entity.Question, string) {
+
+	r, err := docx.ReadDocxFromMemory(src, size)
+	if err != nil {
+		dir, err := filepath.Abs(fileFolderPath)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error044CantGetFilePath,
+			//})
+			return nil, utility.Error044CantGetFilePath
+		}
+		fileName, err := ToDocx(dir, file.Filename)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error046CantParseFileDocToDocx,
+			//})
+			return nil, utility.Error046CantParseFileDocToDocx
+		}
+		fi, err := fileName.Stat()
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error047StatFileError,
+			//})
+			return nil, utility.Error047StatFileError
+		}
+		r, err = docx.ReadDocxFromMemory(fileName, fi.Size())
+		err = fileName.Close()
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error033CloseFileError,
+			//})
+			return nil, utility.Error033CloseFileError
+		}
+		err3 := os.Remove(fileName.Name())
+		if err3 != nil {
+			utility.FileLog.Println(err3)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error038RemoveFileError,
+			//})
+			return nil, utility.Error038RemoveFileError
+		}
+	}
+
+	var xmlDocument model.XMLDocument
+
+	err = xml.Unmarshal([]byte(r.Editable().GetContent()), &xmlDocument)
+	if err != nil {
+		utility.FileLog.Println(err)
+		//return c.JSON(http.StatusInternalServerError, response.Message{
+		//	Message: utility.Error048ParseFileXmlError,
+		//})
+		return nil, utility.Error048ParseFileXmlError
+	}
+	array := xmlDocument.XMLBody.XMLBodyPs
+
+	content := ""
+	for i := 0; i < len(array[0].XMLBodyPr); i++ {
+		content += array[0].XMLBodyPr[i].Subject
+	}
+	content, err = reFormatStringToAdd(content)
+	if err != nil {
+		//utility.FileLog.Println(err)
+		//return c.JSON(http.StatusInternalServerError, response.Message{
+		//	Message: utility.Error059ReformatStringFalse,
+		//})
+		return nil, utility.Error059ReformatStringFalse
+	}
+	exam.Subject = content
+	content = ""
+	for j := 0; j < len(array[1].XMLBodyPr); j++ {
+		content += array[1].XMLBodyPr[j].Subject
+	}
+	content, err = reFormatStringToAdd(content)
+	if err != nil {
+		utility.FileLog.Println(err)
+		//return c.JSON(http.StatusInternalServerError, response.Message{
+		//	Message: utility.Error059ReformatStringFalse,
+		//})
+		return nil, utility.Error059ReformatStringFalse
+	}
+	numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
+	if err != nil {
+		utility.FileLog.Println(err)
+		//return c.JSON(http.StatusInternalServerError, response.Message{
+		//	Message: utility.Error058ParseNumberOfQuestionsError,
+		//})
+		return nil, utility.Error058ParseNumberOfQuestionsError
+	}
+	exam.NumberOfQuestions = numberOfQuestions
+
+	_, err = utility.DB.Update(exam)
+	tables := xmlDocument.XMLBody.XMLBodyTbls
+	if tables == nil {
+		err := src.Close()
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error033CloseFileError,
+			//})
+			return nil, utility.Error033CloseFileError
+		}
+		err2 := dst.Close()
+		if err2 != nil {
+			utility.FileLog.Println(err2)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error033CloseFileError,
+			//})
+			return nil, utility.Error033CloseFileError
+		}
+		dir, err := filepath.Abs("examtest/" + file.Filename)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error044CantGetFilePath,
+			//})
+			return nil, utility.Error044CantGetFilePath
+		}
+		err3 := os.Remove(dir)
+		if err3 != nil {
+			utility.FileLog.Println(err3)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error038RemoveFileError,
+			//})
+			return nil, utility.Error038RemoveFileError
+		}
+		_, err = utility.DB.Delete(exam)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error062DeleteExamFailed,
+			//})
+			return nil, utility.Error062DeleteExamFailed
+		}
+		//return c.JSON(http.StatusBadRequest, response.Message{
+		//	Message: utility.Error050ReadFileDocOrDocxError,
+		//})
+		return nil, utility.Error050ReadFileDocOrDocxError
+	}
+	var Questions []*entity.Question
+	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
+	for _, table := range tables {
+		var QuestionModel entity.Question
+		QN := ""
+		Question := ""
+		QuestionModel.Options = []*entity.Option{}
+		for x, row := range table.XMLBodyTblR {
+			var option entity.Option
+			for y, column := range row.XMLBodyTblRC {
+				for _, paragraph := range column.XMLBodyTblRCP {
+					for _, content := range paragraph.XMLBodyTblRCPR {
+						if x == 0 {
+							if y == 0 {
+								QN += content.QN
+							} else {
+								if content.Br.Local != "" {
+									Question += "\n"
+								}
+								Question += content.QN
+							}
+						} else if x <= 6 {
+							if y != 0 {
+								if content.Br.Local != "" {
+									option.Content += "\n"
+								}
+								option.Content += content.QN
+							}
+						}
+					}
+					if y != 0 {
+						if x == 0 {
+							Question += "\n"
+						} else if x <= 6 {
+							option.Content += "\n"
+						}
+					}
+				}
+			}
+			if x > 0 && x <= 6 {
+				option.Content = RemoveEndChar(option.Content)
+				option.Content = strings.TrimSpace(option.Content)
+				if option.Content != "" {
+					option.Key = keyIndex[x]
+					option.QuestionId = &QuestionModel
+					QuestionModel.Options = append(QuestionModel.Options, &option)
+				}
+			}
+		}
+		Question = RemoveEndChar(Question)
+		re, _ := regexp.Compile("(.*)=")
+		QN = re.ReplaceAllString(QN, "")
+		QuestionNumber, err := strconv.ParseInt(QN, 10, 64)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: ,
+			//})
+			return nil, utility.Error051ParseNumberOfQuestionError
+		}
+		QuestionModel.Number = QuestionNumber
+		QuestionModel.Content = Question
+		QuestionModel.ExamTest = exam
+		Questions = append(Questions, &QuestionModel)
+	}
+
+	return Questions, ""
 }
