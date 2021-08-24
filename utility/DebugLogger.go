@@ -29,10 +29,14 @@ func (logger *DebugLogger) Print(path string, end bool, id int64) int64 {
 }
 
 func init() {
+	err := os.MkdirAll("log", os.ModePerm)
+	if err != nil {
+		log.Print(err)
+	}
 	logFile, err := os.OpenFile("log/debug.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 
 	if err != nil {
-		log.Print("Can not open or create log/debug.log")
+		log.Print("Can not open or create log/debug.log: " + err.Error())
 	}
 	DebugLog.Logger = log.New(logFile, "", log.Ldate|log.Ltime)
 	DebugLog.Logger.SetOutput(&lumberjack.Logger{
