@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -171,55 +172,21 @@ func UploadKnowledge(c echo.Context) error {
 	}
 	c.Response().Flush()
 
-	extension := filepath.Ext(file.Filename)
-
-	var placeToSaveFileTxt string
-
-	switch extension {
-
-	case ".pdf":
-		placeToSaveFileTxt, err = convertPdfToTxt(filePath, file.Filename, extension, fileFolderPath, insert)
+	placeToSaveFileTxt, resultError := convertFieToTxt(know,file,fileFolderPath,filePath,insert,dst,src)
+	if resultError != "" {
+		_, err = utility.DB.Delete(know)
 		if err != nil {
 			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error062DeleteExamFailed,
+			//})
 			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error029ReadFilePdfError,
+				Message: utility.Error037DeleteKnowledgeFailed,
 			})
 		}
-
-	case ".doc":
-		placeToSaveFileTxt, err = convertDocToText(fileFolderPath, file.Filename, extension, insert)
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error030ReadFileDocError,
-			})
-		}
-
-	case ".docx":
-		placeToSaveFileTxt, err = convertDocxToText(filePath, file.Filename, extension, fileFolderPath, insert)
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error031ReadFileDocxError,
-			})
-		}
-
-	case ".txt":
-		placeToSaveFileTxt, err = modifyTxtFile(filePath, file.Filename, extension, fileFolderPath, insert)
-		if err != nil {
-			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error032ReadFileTxtError,
-			})
-		}
-	default:
-		err = os.RemoveAll(fileFolderPath)
-		if err != nil {
-			utility.FileLog.Println(err)
-			return err
-		}
+		utility.FileLog.Println(resultError)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error034CheckFormatFile,
+			Message: resultError,
 		})
 	}
 
@@ -237,6 +204,7 @@ func UploadKnowledge(c echo.Context) error {
 	//		Message: utility.Error033CloseFileError,
 	//	})
 	//}
+
 
 	know.Status = "Encoding"
 	_, err = utility.DB.Update(know)
@@ -565,4 +533,87 @@ func modifyTxtFile(filePath, fileFileName, extension, fileFolderPath string, ins
 		return err.Error(), err
 	}
 	return placeToSaveFileTxt, nil
+}
+func convertFieToTxt(know *entity.Knowledge,file *multipart.FileHeader,fileFolderPath,filePath string,insert int64,dst *os.File, src multipart.File) (string,string) {
+	extension := filepath.Ext(file.Filename)
+
+	var placeToSaveFileTxt string
+
+	switch extension {
+
+	case ".pdf":
+		TxtOfPdf, err := convertPdfToTxt(filePath, file.Filename, extension, fileFolderPath, insert)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error029ReadFilePdfError,
+			//})
+			return  "",utility.Error029ReadFilePdfError
+		}
+		placeToSaveFileTxt = TxtOfPdf
+
+	case ".doc":
+		TxtOfDoc, err := convertDocToText(fileFolderPath, file.Filename, extension, insert)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error030ReadFileDocError,
+			//})
+			return  "",utility.Error030ReadFileDocError
+		}
+		placeToSaveFileTxt = TxtOfDoc
+	case ".docx":
+		TxtOfDocx, err := convertDocxToText(filePath, file.Filename, extension, fileFolderPath, insert)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error031ReadFileDocxError,
+			//})
+			return  "",utility.Error031ReadFileDocxError
+		}
+		placeToSaveFileTxt = TxtOfDocx
+	case ".txt":
+		ModifyTxt, err := modifyTxtFile(filePath, file.Filename, extension, fileFolderPath, insert)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error032ReadFileTxtError,
+			//})
+			return  "",utility.Error032ReadFileTxtError
+		}
+		placeToSaveFileTxt = ModifyTxt
+	default:
+		err := src.Close()
+		if err != nil {
+			utility.FileLog.Println(err)
+			return  "",utility.Error033CloseFileError
+		}
+		err = dst.Close()
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error033CloseFileError,
+			//})
+			return  "",utility.Error033CloseFileError
+		}
+		err = os.RemoveAll(fileFolderPath)
+
+		if err != nil {
+			utility.FileLog.Println(err)
+			return "",utility.Error038RemoveFileError
+		}
+		_, err = utility.DB.Delete(know)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error062DeleteExamFailed,
+			//})
+			return "",utility.Error037DeleteKnowledgeFailed
+		}
+		//return c.JSON(http.StatusInternalServerError, response.Message{
+		//	Message: utility.Error034CheckFormatFile,
+		//})
+		return "",utility.Error034CheckFormatFile
+	}
+	return placeToSaveFileTxt,""
 }
