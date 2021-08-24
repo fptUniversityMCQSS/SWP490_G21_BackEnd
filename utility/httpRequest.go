@@ -78,7 +78,11 @@ func SendFileRequest(url string, method string, path string, done chan error) er
 			return
 		}
 		FileLog.Println(message.Message)
-		done <- nil
+		if res.StatusCode == 200 {
+			done <- nil
+		} else {
+			done <- response.Message{Message: message.Message}
+		}
 	}()
 
 	select {

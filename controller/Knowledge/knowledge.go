@@ -177,12 +177,6 @@ func UploadKnowledge(c echo.Context) error {
 		_, err = utility.DB.Delete(know)
 		if err != nil {
 			utility.FileLog.Println(err)
-			//return c.JSON(http.StatusInternalServerError, response.Message{
-			//	Message: utility.Error062DeleteExamFailed,
-			//})
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error037DeleteKnowledgeFailed,
-			})
 		}
 		utility.FileLog.Println(resultError)
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -234,6 +228,10 @@ func UploadKnowledge(c echo.Context) error {
 	err = utility.SendFileRequest(utility.ConfigData.AIServer+"/knowledge", "POST", placeToSaveFileTxt, RequestingKnowledge[know.Id])
 	delete(RequestingKnowledge, know.Id)
 	if err != nil {
+		_, err = utility.DB.Delete(know)
+		if err != nil {
+			utility.FileLog.Println(err)
+		}
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error035RequestModelAI,
@@ -292,6 +290,7 @@ func DeleteKnowledge(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
+	userId := int64(claims["userId"].(float64))
 	role := claims["role"].(string)
 
 	knowledgeId := c.Param("id")
@@ -309,7 +308,7 @@ func DeleteKnowledge(c echo.Context) error {
 			Message: utility.Error023CantGetKnowledge,
 		})
 	}
-	if role != "admin" && knowledge.User.Username != userName {
+	if role != "admin" && knowledge.User.Id != userId {
 		return c.JSON(http.StatusInternalServerError, response.Message{
 			Message: utility.Error018DontHavePermission,
 		})
