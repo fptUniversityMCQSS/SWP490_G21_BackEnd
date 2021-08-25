@@ -125,7 +125,7 @@ type OptionRequest struct {
 	Content string `json:"content"`
 }
 
-func SendQuestions(url string, method string, questions []*entity.Question) (*http.Response, error) {
+func SendQuestions(url string, method string, questions []*entity.Question, ctx *context.Context) (*http.Response, error) {
 	var questionRequests []QuestionRequest
 	debugStr := ""
 	for _, question := range questions {
@@ -157,7 +157,7 @@ func SendQuestions(url string, method string, questions []*entity.Question) (*ht
 	payload := strings.NewReader(string(jsonQuestions))
 
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	req, err := http.NewRequestWithContext(*ctx, method, url, payload)
 
 	if err != nil {
 

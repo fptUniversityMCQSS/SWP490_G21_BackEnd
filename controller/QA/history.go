@@ -206,6 +206,10 @@ func DeleteExam(c echo.Context) error {
 				Message: utility.Error062DeleteExamFailed,
 			})
 		}
+		_, exist := RequestingQA[intExamId]
+		if exist {
+			RequestingQA[intExamId] <- response.Message{Message: utility.Error069UploadingCancel}
+		}
 		err2 := os.RemoveAll(examTest.Path)
 		if err2 != nil {
 			return c.JSON(http.StatusInternalServerError, response.Message{

@@ -54,7 +54,7 @@ const (
 	Error026UpdateKnowledgeFailed        = "Can't update knowledge"
 	Error036KnowIdInvalid                = "Knowledge id is invalid"
 	Error037DeleteKnowledgeFailed        = "Can't delete knowledge"
-	Error069UploadingCancel              = "Uploading knowledge has been canceled"
+	Error069UploadingCancel              = "Uploading has been canceled"
 
 	//file error
 	Error020FileError              = "File not found please try again"

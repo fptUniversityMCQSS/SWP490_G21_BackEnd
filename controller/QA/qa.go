@@ -6,6 +6,7 @@ import (
 	"SWP490_G21_Backend/model/response"
 	"SWP490_G21_Backend/utility"
 	"bufio"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"github.com/go-ole/go-ole"
@@ -227,80 +228,115 @@ func QaResponse(c echo.Context) error {
 	err = enc.Encode(examResponse)
 	c.Response().Flush()
 
-	RequestingQA[exam.Id] = make(chan error)
-	res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", exam.Questions)
-	delete(RequestingQA, exam.Id)
-	if err != nil {
-		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+	done := make(chan error)
+	RequestingQA[exam.Id] = done
+	cx, cancel := context.WithCancel(context.Background())
+	messageChan := make(chan string)
+	go func() {
+		res, err := utility.SendQuestions(utility.ConfigData.AIServer+"/qa", "POST", exam.Questions, &cx)
 		if err != nil {
-			return
+			cancel()
+			delete(RequestingQA, exam.Id)
+			utility.FileLog.Println(err)
+			done <- response.Message{Message: utility.Error055CantGetResponseModelAI}
 		}
-	}(res.Body)
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				return
+			}
+		}(res.Body)
+		reader := bufio.NewReader(res.Body)
+		str := ""
+		for {
+			b, err := reader.ReadByte()
+			if err != nil {
+				if err == io.EOF {
+					done <- nil
+					return
+				}
+				utility.FileLog.Println("Error reading HTTP response: ", err.Error())
+				done <- response.Message{Message: utility.Error055CantGetResponseModelAI}
+				return
+			}
+			str += string(b)
 
+			if reader.Buffered() <= 0 {
+				messageChan <- str
+				str = ""
+			}
+		}
+	}()
 	questionsMap := make(map[int64]*entity.Question)
 	for _, question := range exam.Questions {
 		questionsMap[question.Number] = question
 	}
-
-	reader := bufio.NewReader(res.Body)
-	str := ""
+	err = nil
 	for {
-		b, err := reader.ReadByte()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			utility.FileLog.Println("Error reading HTTP response: ", err.Error())
-			return c.JSON(http.StatusInternalServerError, response.Message{Message: utility.Error055CantGetResponseModelAI})
-		}
-		str += string(b)
-
-		if reader.Buffered() <= 0 {
-			var qaResponse response.QuestionAnswerResponse
-			utility.FileLog.Println(str)
-			err := json.Unmarshal([]byte(str), &qaResponse)
+		flag := false
+		select {
+		case <-cx.Done():
+			flag = true
+			//break
+		case err = <-done:
+			flag = true
+			//break
+		case str := <-messageChan:
+			err := func() error {
+				var qaResponse response.QuestionAnswerResponse
+				err := json.Unmarshal([]byte(str), &qaResponse)
+				if err != nil {
+					utility.FileLog.Println("json unmarshal from AI server failed")
+					return nil
+				}
+				var optionsQAResponse []response.OptionResponse
+				for _, option := range questionsMap[qaResponse.Qn].Options {
+					optionsQAResponse = append(optionsQAResponse, response.OptionResponse{
+						Key:     option.Key,
+						Content: option.Content,
+					})
+				}
+				var questionsResponse = response.QuestionResponse{
+					Number:  qaResponse.Qn,
+					Content: questionsMap[qaResponse.Qn].Content,
+					Options: optionsQAResponse,
+					Answer:  qaResponse.Answer,
+				}
+				questionsMap[qaResponse.Qn].Answer = qaResponse.Answer
+				_, err = utility.DB.Update(questionsMap[qaResponse.Qn], "answer")
+				if err != nil {
+					return err
+				}
+				err = enc.Encode(questionsResponse)
+				if err != nil {
+					utility.FileLog.Println("json encoding for responding failed")
+					return nil
+				}
+				c.Response().Flush()
+				return nil
+			}()
 			if err != nil {
-				utility.FileLog.Println("json unmarshal from AI server failed")
-				continue
-			}
-			var optionsQAResponse []response.OptionResponse
-			for _, option := range questionsMap[qaResponse.Qn].Options {
-				optionsQAResponse = append(optionsQAResponse, response.OptionResponse{
-					Key:     option.Key,
-					Content: option.Content,
-				})
-			}
-			var questionsResponse = response.QuestionResponse{
-				Number:  qaResponse.Qn,
-				Content: questionsMap[qaResponse.Qn].Content,
-				Options: optionsQAResponse,
-				Answer:  qaResponse.Answer,
-			}
-			questionsMap[qaResponse.Qn].Answer = qaResponse.Answer
-			_, err = utility.DB.Update(questionsMap[qaResponse.Qn], "answer")
-			if err != nil {
+				cancel()
+				delete(RequestingQA, exam.Id)
 				utility.FileLog.Println(err)
 				return c.JSON(http.StatusInternalServerError, response.Message{
 					Message: utility.Error056UpdateAnswerError,
 				})
 			}
-			err = enc.Encode(questionsResponse)
-			if err != nil {
-				utility.FileLog.Println("json encoding for responding failed")
-				continue
-			}
-			c.Response().Flush()
-			str = ""
+			//break
 		}
+		if flag {
+			break
+		}
+	}
+	cancel()
+	delete(RequestingQA, exam.Id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Message{Message: err.Error()})
 	}
 	exam.Status = "finished"
 	_, err = utility.DB.Update(exam)
 	return c.JSON(http.StatusOK, response.Message{Message: "DONE"})
-
 }
 func RemoveEndChar(s string) string {
 	sizeQuestion := len(s)
