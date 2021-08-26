@@ -2,7 +2,8 @@ package utility
 
 const (
 	//user error
-	Error001InvalidUser              = "Invalid user"
+	Error001InvalidUser              = "Wrong password. Try again"
+	Error070NotFoundUserName         = "Couldn't find your account"
 	Error002ErrorQueryForGetAllUsers = "Can't get all users"
 	Error003UserExisted              = "User already exists"
 	Error004CantGetTableUser         = "Can't get table user"
@@ -95,4 +96,4 @@ const (
 	Error051ParseNumberOfQuestionError  = "Error for parse question number"
 	Error058ParseNumberOfQuestionsError = "Error for parse number of questions"
 	Error059ReformatStringFalse         = "Missing ':' Subject or Number Of Question"
-) //Total messages: 69
+) //Total messages: 70

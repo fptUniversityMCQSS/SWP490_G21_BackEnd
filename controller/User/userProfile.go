@@ -99,7 +99,7 @@ func GetUserInfo(c echo.Context) error {
 	if err != nil {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error001InvalidUser,
+			Message: utility.Error070NotFoundUserName,
 		})
 	}
 	userResponse := response.UserResponse{

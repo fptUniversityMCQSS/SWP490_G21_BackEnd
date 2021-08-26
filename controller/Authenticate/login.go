@@ -20,12 +20,17 @@ func LoginResponse(c echo.Context) error {
 	Password := c.FormValue("password")
 	user := &entity.User{
 		Username: Username,
-		Password: Password,
 	}
-
-	// Get a QuerySeter object. User is table name
-	err := utility.DB.Read(user, "username", "password")
+	err := utility.DB.Read(user, "username")
 	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusBadRequest, response.Message{
+			Message: utility.Error070NotFoundUserName,
+		})
+	}
+	// Get a QuerySeter object. User is table name
+
+	if user.Password != Password {
 		utility.FileLog.Println(err)
 		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error001InvalidUser,
