@@ -152,9 +152,9 @@ func QaResponse(c echo.Context) error {
 		_, err = utility.DB.Delete(exam)
 		if err != nil {
 			utility.FileLog.Println(err)
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error062DeleteExamFailed,
-			})
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error062DeleteExamFailed,
+			//})
 		}
 		utility.FileLog.Println(resultError)
 		return c.JSON(http.StatusInternalServerError, response.Message{
@@ -287,7 +287,7 @@ func QaResponse(c echo.Context) error {
 				var qaResponse response.QuestionAnswerResponse
 				err := json.Unmarshal([]byte(str), &qaResponse)
 				if err != nil {
-					utility.FileLog.Println("json unmarshal from AI server failed")
+					utility.FileLog.Println("json unmarshal from AI server failed: " + err.Error())
 					return nil
 				}
 				var optionsQAResponse []response.OptionResponse
@@ -327,6 +327,7 @@ func QaResponse(c echo.Context) error {
 			//break
 		}
 		if flag {
+			utility.FileLog.Println(err)
 			break
 		}
 	}
@@ -630,6 +631,12 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 		QuestionModel.Number = QuestionNumber
 		QuestionModel.Content = Question
 		QuestionModel.ExamTest = exam
+		if strings.TrimSpace(QuestionModel.Content) == "" {
+			continue
+		}
+		if QuestionModel.Options == nil || len(QuestionModel.Options) == 0 {
+			continue
+		}
 		Questions = append(Questions, &QuestionModel)
 	}
 
