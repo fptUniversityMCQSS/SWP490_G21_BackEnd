@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
 	"github.com/golang-jwt/jwt"
@@ -465,42 +466,44 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 		return nil, utility.Error048ParseFileXmlError
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
+	if len(array) >= 2 {
+		fmt.Println(len(array))
+		content := ""
+		for i := 0; i < len(array[0].XMLBodyPr); i++ {
+			content += array[0].XMLBodyPr[i].Subject
+		}
+		content, err = reFormatStringToAdd(content)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error059ReformatStringFalse,
+			//})
+			//return nil, utility.Error059ReformatStringFalse
+		}
+		exam.Subject = content
+		content = ""
+		for j := 0; j < len(array[1].XMLBodyPr); j++ {
 
-	content := ""
-	for i := 0; i < len(array[0].XMLBodyPr); i++ {
-		content += array[0].XMLBodyPr[i].Subject
+			content += array[1].XMLBodyPr[j].Subject
+		}
+		content, err = reFormatStringToAdd(content)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error059ReformatStringFalse,
+			//})
+			//return nil, utility.Error059ReformatStringFalse
+		}
+		numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
+		if err != nil {
+			utility.FileLog.Println(err)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error058ParseNumberOfQuestionsError,
+			//})
+			//return nil, utility.Error058ParseNumberOfQuestionsError
+		}
+		exam.NumberOfQuestions = numberOfQuestions
 	}
-	content, err = reFormatStringToAdd(content)
-	if err != nil {
-		//utility.FileLog.Println(err)
-		//return c.JSON(http.StatusInternalServerError, response.Message{
-		//	Message: utility.Error059ReformatStringFalse,
-		//})
-		return nil, utility.Error059ReformatStringFalse
-	}
-	exam.Subject = content
-	content = ""
-	for j := 0; j < len(array[1].XMLBodyPr); j++ {
-		content += array[1].XMLBodyPr[j].Subject
-	}
-	content, err = reFormatStringToAdd(content)
-	if err != nil {
-		utility.FileLog.Println(err)
-		//return c.JSON(http.StatusInternalServerError, response.Message{
-		//	Message: utility.Error059ReformatStringFalse,
-		//})
-		return nil, utility.Error059ReformatStringFalse
-	}
-	numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
-	if err != nil {
-		utility.FileLog.Println(err)
-		//return c.JSON(http.StatusInternalServerError, response.Message{
-		//	Message: utility.Error058ParseNumberOfQuestionsError,
-		//})
-		return nil, utility.Error058ParseNumberOfQuestionsError
-	}
-	exam.NumberOfQuestions = numberOfQuestions
-
 	_, err = utility.DB.Update(exam)
 	tables := xmlDocument.XMLBody.XMLBodyTbls
 	if tables == nil {
@@ -552,6 +555,7 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 	var Questions []*entity.Question
 	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
 	for _, table := range tables {
+		var isOptions []bool
 		var QuestionModel entity.Question
 		QN := ""
 		Question := ""
@@ -570,8 +574,17 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 								}
 								Question += content.QN
 							}
-						} else if x <= 6 {
-							if y != 0 {
+						} else {
+							if y == 0 {
+								matchReg, _ := regexp.MatchString("^\\W*\\w{1}\\W*$", content.QN)
+								isOptions = append(isOptions, matchReg)
+								if matchReg == true {
+									reString := regexp.MustCompile("\\W")
+									content.QN = reString.ReplaceAllString(content.QN, "")
+									option.Key = content.QN
+								}
+							}
+							if y != 0 && isOptions != nil && isOptions[x-1] {
 								if content.Br.Local != "" {
 									option.Content += "\n"
 								}
@@ -588,7 +601,7 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 					}
 				}
 			}
-			if x > 0 && x <= 6 {
+			if x > 0 && isOptions != nil && isOptions[x-1] {
 				option.Content = RemoveEndChar(option.Content)
 				option.Content = strings.TrimSpace(option.Content)
 				if option.Content != "" {
@@ -599,15 +612,21 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 			}
 		}
 		Question = RemoveEndChar(Question)
-		re, _ := regexp.Compile("(.*)=")
-		QN = re.ReplaceAllString(QN, "")
-		QuestionNumber, err := strconv.ParseInt(QN, 10, 64)
+		QNOfQuestions := ""
+		re, _ := regexp.Compile("\\d+")
+		arrayOfQN := re.FindAllString(QN, -1)
+		if len(arrayOfQN) == 0 {
+
+		} else {
+			QNOfQuestions = arrayOfQN[0]
+		}
+		QuestionNumber, err := strconv.ParseInt(QNOfQuestions, 10, 64)
 		if err != nil {
 			utility.FileLog.Println(err)
 			//return c.JSON(http.StatusInternalServerError, response.Message{
 			//	Message: ,
 			//})
-			return nil, utility.Error051ParseNumberOfQuestionError
+			continue
 		}
 		QuestionModel.Number = QuestionNumber
 		QuestionModel.Content = Question

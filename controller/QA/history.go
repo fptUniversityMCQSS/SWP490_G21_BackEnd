@@ -276,8 +276,8 @@ func formatDocxFileResult(exam entity.ExamTest) (string, error) {
 	}
 	tableContent := ""
 	key := []string{"optionAContent", "optionBContent", "optionCContent", "optionDContent", "optionEContent", "optionFContent"}
-	for num, question := range Questions {
-		newTable := strings.ReplaceAll(string(table), "{{numberOfQuestion}}", writeStringDocx(strconv.Itoa(num+1)))
+	for _, question := range Questions {
+		newTable := strings.ReplaceAll(string(table), "{{numberOfQuestion}}", writeStringDocx(strconv.FormatInt(question.Number, 10)))
 		newTable = strings.ReplaceAll(newTable, "{{QuestionContent}}", writeStringDocx(question.Content))
 		for i := 0; i < 6; i++ {
 			if i < len(question.Options) {
