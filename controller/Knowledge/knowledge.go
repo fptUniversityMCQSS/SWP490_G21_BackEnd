@@ -333,9 +333,9 @@ func DeleteKnowledge(c echo.Context) error {
 	err2 := os.RemoveAll(knowledge.Path)
 	if err2 != nil {
 		utility.FileLog.Println(err2)
-		return c.JSON(http.StatusInternalServerError, response.Message{
-			Message: utility.Error038RemoveFileError,
-		})
+		//return c.JSON(http.StatusInternalServerError, response.Message{
+		//	Message: utility.Error038RemoveFileError,
+		//})
 	}
 	err = utility.DeleteKnowledge(utility.ConfigData.AIServer+"/knowledge", "DELETE", knowledge.Name)
 	if err != nil {

@@ -202,6 +202,7 @@ func DeleteExam(c echo.Context) error {
 	if IntUserId == examTest.User.Id {
 		_, err = utility.DB.QueryTable("exam_test").Filter("id", intExamId).Delete()
 		if err != nil {
+			utility.FileLog.Println(err)
 			return c.JSON(http.StatusInternalServerError, response.Message{
 				Message: utility.Error062DeleteExamFailed,
 			})
@@ -212,9 +213,10 @@ func DeleteExam(c echo.Context) error {
 		}
 		err2 := os.RemoveAll(examTest.Path)
 		if err2 != nil {
-			return c.JSON(http.StatusInternalServerError, response.Message{
-				Message: utility.Error038RemoveFileError,
-			})
+			utility.FileLog.Println(err2)
+			//return c.JSON(http.StatusInternalServerError, response.Message{
+			//	Message: utility.Error038RemoveFileError,
+			//})
 		}
 		message := response.Message{
 			Message: "Delete exam successfully",

@@ -44,7 +44,7 @@ func LoginResponse(c echo.Context) error {
 	claims["username"] = user.Username
 	claims["userId"] = user.Id
 	claims["role"] = user.Role
-	claims["exp"] = time.Now().Add(120 * time.Minute).Unix() // payload
+	claims["exp"] = time.Now().Add(1440 * time.Minute).Unix() // payload
 
 	t, err := token.SignedString([]byte(JwtSignature))
 	if err != nil {
