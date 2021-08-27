@@ -270,22 +270,26 @@ func formatDocxFileResult(exam entity.ExamTest) (string, error) {
 	if err != nil {
 		return err.Error(), err
 	}
+	optionTable, err := ioutil.ReadFile("template/option.xml")
+	if err != nil {
+		return err.Error(), err
+	}
 	body, err := ioutil.ReadFile("template/body.xml")
 	if err != nil {
 		return err.Error(), err
 	}
 	tableContent := ""
-	key := []string{"optionAContent", "optionBContent", "optionCContent", "optionDContent", "optionEContent", "optionFContent"}
+
 	for _, question := range Questions {
 		newTable := strings.ReplaceAll(string(table), "{{numberOfQuestion}}", writeStringDocx(strconv.FormatInt(question.Number, 10)))
 		newTable = strings.ReplaceAll(newTable, "{{QuestionContent}}", writeStringDocx(question.Content))
-		for i := 0; i < 6; i++ {
-			if i < len(question.Options) {
-				newTable = strings.ReplaceAll(newTable, "{{"+key[i]+"}}", writeStringDocx(question.Options[i].Content))
-			} else {
-				newTable = strings.ReplaceAll(newTable, "{{"+key[i]+"}}", writeStringDocx(""))
-			}
+		optionContent := ""
+		for _, option := range question.Options {
+			newOption := strings.ReplaceAll(string(optionTable), "{{optionKey}}", writeStringDocx(option.Key))
+			newOption = strings.ReplaceAll(newOption, "{{optionContent}}", writeStringDocx(option.Content))
+			optionContent += newOption
 		}
+		newTable = strings.ReplaceAll(newTable, "{{option}}", optionContent)
 		newTable = strings.ReplaceAll(newTable, "{{answers}}", writeStringDocx(question.Answer))
 		tableContent += newTable
 	}

@@ -96,6 +96,13 @@ func UploadKnowledge(c echo.Context) error {
 		User:   user,
 		Status: "Processing",
 	}
+	KnowledgeExited := utility.DB.QueryTable("knowledge").Filter("name", know.Name).Exist()
+	if KnowledgeExited == true {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error071KnowledgeExists,
+		})
+	}
 	i, err := utility.DB.QueryTable("knowledge").PrepareInsert()
 	if err != nil {
 		utility.FileLog.Println(err)

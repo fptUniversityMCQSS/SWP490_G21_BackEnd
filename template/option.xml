@@ -1,0 +1,28 @@
+<w:tr w:rsidR="004902E4" w:rsidTr="007501FC">
+    <w:tc>
+        <w:tcPr>
+            <w:tcW w:w="2077" w:type="dxa"/>
+            <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
+            <w:r>
+             {{optionKey}}
+                <w:t>.</w:t>
+            </w:r>
+        </w:p>
+    </w:tc>
+    <w:tc>
+        <w:tcPr>
+            <w:tcW w:w="7323" w:type="dxa"/>
+            <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w:rsidR="004902E4" w:rsidRDefault="009A4756">
+            <w:r>
+                <w:rPr>
+                    <w:rStyle w:val="termtext"/>
+                </w:rPr>
+                {{optionContent}}
+            </w:r>
+        </w:p>
+    </w:tc>
+</w:tr>

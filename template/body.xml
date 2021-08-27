@@ -42,28 +42,6 @@
 
                {{table}}
 
-        <w:p w:rsidR="004F56DA" w:rsidRDefault="004F56DA">
-            <w:r w:rsidRPr="004F56DA">
-                <w:rPr>
-                    <w:u w:val="single"/>
-                </w:rPr>
-                <w:t>Note</w:t>
-            </w:r>
-            <w:r>
-                <w:t xml:space="preserve">: </w:t>
-            </w:r>
-            <w:r w:rsidR="00C82C05">
-                <w:t>image</w:t>
-            </w:r>
-            <w:r>
-                <w:t xml:space="preserve"> file should be saved in the same folder with the question file.</w:t>
-            </w:r>
-        </w:p>
-        <w:p w:rsidR="00F53437" w:rsidRDefault="00F53437" w:rsidP="00F53437">
-            <w:r>
-                <w:t>MIX CHOICES:  The choices will be mixed when displays to student.</w:t>
-            </w:r>
-        </w:p>
         <w:p w:rsidR="00F53437" w:rsidRDefault="00F53437"/>
         <w:sectPr w:rsidR="00F53437">
             <w:pgSz w:w="12240" w:h="15840"/>

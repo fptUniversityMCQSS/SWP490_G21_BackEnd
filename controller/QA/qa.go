@@ -553,7 +553,7 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 		return nil, utility.Error050ReadFileDocOrDocxError
 	}
 	var Questions []*entity.Question
-	keyIndex := []string{"", "A", "B", "C", "D", "E", "F"}
+
 	for _, table := range tables {
 		var isOptions []bool
 		var QuestionModel entity.Question
@@ -605,7 +605,6 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 				option.Content = RemoveEndChar(option.Content)
 				option.Content = strings.TrimSpace(option.Content)
 				if option.Content != "" {
-					option.Key = keyIndex[x]
 					option.QuestionId = &QuestionModel
 					QuestionModel.Options = append(QuestionModel.Options, &option)
 				}

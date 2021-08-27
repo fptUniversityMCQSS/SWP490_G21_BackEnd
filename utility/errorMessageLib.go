@@ -55,6 +55,7 @@ const (
 	Error036KnowIdInvalid                = "Knowledge id is invalid"
 	Error037DeleteKnowledgeFailed        = "Can't delete knowledge"
 	Error069UploadingCancel              = "Uploading has been canceled"
+	Error071KnowledgeExists              = "Knowledge has already existed"
 
 	//file error
 	Error020FileError              = "File not found please try again"
@@ -95,4 +96,4 @@ const (
 	Error051ParseNumberOfQuestionError  = "Error for parse question number"
 	Error058ParseNumberOfQuestionsError = "Error for parse number of questions"
 	Error059ReformatStringFalse         = "Missing ':' Subject or Number Of Question"
-) //Total messages: 69
+) //Total messages: 71
