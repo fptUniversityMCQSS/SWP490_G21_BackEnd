@@ -59,6 +59,8 @@ func main() {
 	user.GET("/user", (DebugHandler{User.GetUserInfo}).debug)
 	user.PATCH("/user", (DebugHandler{User.ChangeProfile}).debug)
 	user.GET("/knowledge/:id", (DebugHandler{Knowledge.DownloadKnowledge}).debug)
+    user.POST("/qa",  (DebugHandler{QA.QaGenerateDocx}).debug)
+
 
 	staff := signedIn.Group("", staffPermission.Header)
 	staff.PUT("/knowledge", (DebugHandler{Knowledge.UploadKnowledge}).debug)

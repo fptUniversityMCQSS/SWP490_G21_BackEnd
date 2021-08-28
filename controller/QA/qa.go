@@ -17,6 +17,7 @@ import (
 	_ "github.com/labstack/gommon/log"
 	"github.com/nguyenthenguyen/docx"
 	"io"
+	"io/ioutil"
 	_ "io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -641,4 +642,73 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 	}
 
 	return Questions, ""
+}
+
+func QaGenerateDocx(c echo.Context) error {
+
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	userName := claims["username"].(string)
+
+	var examTest entity.ExamTest
+	err := json.NewDecoder(c.Request().Body).Decode(&examTest)
+	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error070ParseJsonError,
+		})
+	}
+	fmt.Println(examTest.Questions[0].Content)
+	utility.FileLog.Println(userName + " create " + examTest.Name)
+	formatFile, err := formatFileDocxFromRequestBody(examTest)
+	if err != nil {
+		utility.FileLog.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.Message{
+			Message: utility.Error045CantGetResult,
+		})
+	}
+	return c.Attachment(formatFile, examTest.Name)
+}
+
+func formatFileDocxFromRequestBody(exam entity.ExamTest) (string, error) {
+	r, err := docx.ReadDocxFile("template/TestFormat.docx")
+
+	table, err := ioutil.ReadFile("template/table.xml")
+	if err != nil {
+		return err.Error(), err
+	}
+	optionTable, err := ioutil.ReadFile("template/option.xml")
+	if err != nil {
+		return err.Error(), err
+	}
+	body, err := ioutil.ReadFile("template/body.xml")
+	if err != nil {
+		return err.Error(), err
+	}
+	tableContent := ""
+
+	for num, question := range exam.Questions {
+		newTable := strings.ReplaceAll(string(table), "{{numberOfQuestion}}", writeStringDocx(strconv.Itoa(num+1)))
+		newTable = strings.ReplaceAll(newTable, "{{QuestionContent}}", writeStringDocx(question.Content))
+		optionContent := ""
+		for _, option := range question.Options {
+			newOption := strings.ReplaceAll(string(optionTable), "{{optionKey}}", writeStringDocx(option.Key))
+			newOption = strings.ReplaceAll(newOption, "{{optionContent}}", writeStringDocx(option.Content))
+			optionContent += newOption
+		}
+		newTable = strings.ReplaceAll(newTable, "{{option}}", optionContent)
+		newTable = strings.ReplaceAll(newTable, "{{answers}}", writeStringDocx(question.Answer))
+		tableContent += newTable
+	}
+	bodyContent := strings.ReplaceAll(string(body), "{{subject}}", writeStringDocx(exam.Subject))
+	bodyContent = strings.ReplaceAll(bodyContent, "{{numberOfQuestions}}", writeStringDocx(strconv.Itoa(int(exam.NumberOfQuestions))))
+	bodyContent = strings.ReplaceAll(bodyContent, "{{table}}", tableContent)
+	editFile := r.Editable()
+	editFile.SetContent(bodyContent)
+	pathToSave := "template/Temp.docx"
+	err = editFile.WriteToFile(pathToSave)
+	if err != nil {
+		return err.Error(), err
+	}
+	return pathToSave, nil
 }

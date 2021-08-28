@@ -97,4 +97,5 @@ const (
 	Error051ParseNumberOfQuestionError  = "Error for parse question number"
 	Error058ParseNumberOfQuestionsError = "Error for parse number of questions"
 	Error059ReformatStringFalse         = "Missing ':' Subject or Number Of Question"
-) //Total messages: 71
+	Error070ParseJsonError              = "Can't get result of exam test"
+) //Total messages: 70
