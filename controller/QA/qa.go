@@ -654,12 +654,11 @@ func QaGenerateDocx(c echo.Context) error {
 	err := json.NewDecoder(c.Request().Body).Decode(&examTest)
 	if err != nil {
 		utility.FileLog.Println(err)
-		return c.JSON(http.StatusInternalServerError, response.Message{
+		return c.JSON(http.StatusBadRequest, response.Message{
 			Message: utility.Error070ParseJsonError,
 		})
 	}
-	fmt.Println(examTest.Questions[0].Content)
-	utility.FileLog.Println(userName + " create " + examTest.Name)
+	utility.FileLog.Println(userName + " generated " + examTest.Name + ".docx")
 	formatFile, err := formatFileDocxFromRequestBody(examTest)
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -667,7 +666,7 @@ func QaGenerateDocx(c echo.Context) error {
 			Message: utility.Error045CantGetResult,
 		})
 	}
-	return c.Attachment(formatFile, examTest.Name)
+	return c.Attachment(formatFile, examTest.Name+".docx")
 }
 
 func formatFileDocxFromRequestBody(exam entity.ExamTest) (string, error) {
