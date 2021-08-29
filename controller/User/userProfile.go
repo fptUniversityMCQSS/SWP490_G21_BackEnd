@@ -51,13 +51,14 @@ func ChangeProfile(c echo.Context) error {
 	if changePassword == "true" {
 		user.Username = userName
 		user.Password = presentPassword
-		err := utility.DB.Read(user, "username", "password")
-		if err != nil {
-			utility.FileLog.Println(err)
+		userExited := utility.DB.QueryTable("user").Filter("username", userName).Filter("password", presentPassword).Exist()
+		if userExited == false {
+			utility.FileLog.Println(utility.Error060CurrentPasswordInvalid)
 			return c.JSON(http.StatusBadRequest, response.Message{
 				Message: utility.Error060CurrentPasswordInvalid,
 			})
 		}
+
 		if utility.CheckPassword(newPassword) {
 			user.Password = newPassword
 			_, err := utility.DB.Update(user, "email", "phone", "full_name", "password")
