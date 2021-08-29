@@ -9,7 +9,6 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
 	"github.com/golang-jwt/jwt"
@@ -162,6 +161,7 @@ func QaResponse(c echo.Context) error {
 			Message: resultError,
 		})
 	}
+
 	i2, err := utility.DB.QueryTable("question").PrepareInsert()
 	if err != nil {
 		utility.FileLog.Println(err)
@@ -469,7 +469,6 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
 	if len(array) >= 2 {
-		fmt.Println(len(array))
 		content := ""
 		for i := 0; i < len(array[0].XMLBodyPr); i++ {
 			content += array[0].XMLBodyPr[i].Subject
@@ -483,30 +482,8 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 			//return nil, utility.Error059ReformatStringFalse
 		}
 		exam.Subject = content
-		content = ""
-		for j := 0; j < len(array[1].XMLBodyPr); j++ {
-
-			content += array[1].XMLBodyPr[j].Subject
-		}
-		content, err = reFormatStringToAdd(content)
-		if err != nil {
-			utility.FileLog.Println(err)
-			//return c.JSON(http.StatusInternalServerError, response.Message{
-			//	Message: utility.Error059ReformatStringFalse,
-			//})
-			//return nil, utility.Error059ReformatStringFalse
-		}
-		numberOfQuestions, err := strconv.ParseInt(content, 10, 64)
-		if err != nil {
-			utility.FileLog.Println(err)
-			//return c.JSON(http.StatusInternalServerError, response.Message{
-			//	Message: utility.Error058ParseNumberOfQuestionsError,
-			//})
-			//return nil, utility.Error058ParseNumberOfQuestionsError
-		}
-		exam.NumberOfQuestions = numberOfQuestions
 	}
-	_, err = utility.DB.Update(exam)
+
 	tables := xmlDocument.XMLBody.XMLBodyTbls
 	if tables == nil {
 		err := src.Close()
@@ -554,8 +531,11 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 		//})
 		return nil, utility.Error050ReadFileDocOrDocxError
 	}
-	var Questions []*entity.Question
 
+	exam.NumberOfQuestions = int64(len(tables))
+	_, err = utility.DB.Update(exam)
+
+	var Questions []*entity.Question
 	for _, table := range tables {
 		var isOptions []bool
 		var QuestionModel entity.Question
@@ -658,7 +638,6 @@ func QaGenerateDocx(c echo.Context) error {
 			Message: utility.Error070ParseJsonError,
 		})
 	}
-	fmt.Println(examTest.Questions[0].Content)
 	utility.FileLog.Println(userName + " create " + examTest.Name)
 	formatFile, err := formatFileDocxFromRequestBody(examTest)
 	if err != nil {
@@ -692,7 +671,7 @@ func formatFileDocxFromRequestBody(exam entity.ExamTest) (string, error) {
 		newTable = strings.ReplaceAll(newTable, "{{QuestionContent}}", writeStringDocx(question.Content))
 		optionContent := ""
 		for _, option := range question.Options {
-			newOption := strings.ReplaceAll(string(optionTable), "{{optionKey}}", writeStringDocx(option.Key))
+			newOption := strings.ReplaceAll(string(optionTable), "{{optionKey}}", writeStringDocx(option.Key+"."))
 			newOption = strings.ReplaceAll(newOption, "{{optionContent}}", writeStringDocx(option.Content))
 			optionContent += newOption
 		}
