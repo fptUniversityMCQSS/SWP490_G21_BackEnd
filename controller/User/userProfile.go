@@ -90,6 +90,7 @@ func ChangeProfile(c echo.Context) error {
 
 func GetUserInfo(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
+
 	claims := token.Claims.(jwt.MapClaims)
 	userName := claims["username"].(string)
 	user := &entity.User{

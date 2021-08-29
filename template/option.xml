@@ -7,7 +7,6 @@
         <w:p w:rsidR="004902E4" w:rsidRDefault="004902E4">
             <w:r>
              {{optionKey}}
-                <w:t>.</w:t>
             </w:r>
         </w:p>
     </w:tc>
