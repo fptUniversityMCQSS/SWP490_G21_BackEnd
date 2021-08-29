@@ -9,7 +9,6 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
 	"github.com/golang-jwt/jwt"
@@ -468,7 +467,7 @@ func processQuestion(exam *entity.ExamTest, size int64, dst *os.File, src multip
 		return nil, utility.Error048ParseFileXmlError
 	}
 	array := xmlDocument.XMLBody.XMLBodyPs
-	if len(array) >= 2 {
+	if len(array) >= 1 {
 		content := ""
 		for i := 0; i < len(array[0].XMLBodyPr); i++ {
 			content += array[0].XMLBodyPr[i].Subject
